@@ -4,45 +4,40 @@ import FirebaseAppCheck
 
 class appDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
-                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+
         print("\n" + String(repeating: "=", count: 60))
         print("🚀 INICIANDO APP DELEGATE")
         print(String(repeating: "=", count: 60) + "\n")
-        
+
         // ✅ Fix App Check para Simulador
         #if DEBUG
         let providerFactory = AppCheckDebugProviderFactory()
         AppCheck.setAppCheckProviderFactory(providerFactory)
         #endif
-        
+
         // Configurar Firebase
         FirebaseApp.configure()
         print("✅ Firebase configurado correctamente\n")
-        
-        // Cargar productos después de 2 segundos
+
+        // ✅ Solo sube productos si Firebase está vacío (seed automático)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            print("🔍 VERIFICANDO PRODUCTOS EN FIREBASE...\n")
-            
             FirebaseProductManager.shared.checkIfProductsExist { exists in
-                print("📊 ¿Existen productos? \(exists)\n")
-                
-                if !exists {
-                    print("⏳ CARGANDO \(ProductData.products.count) PRODUCTOS...\n")
-                    
+                if exists {
+                    print("ℹ️  Firebase ya tiene productos, no se necesita seed.\n")
+                } else {
+                    print("📭 Firebase vacío — subiendo \(ProductData.products.count) productos...\n")
                     FirebaseProductManager.shared.uploadProductsToFirebase { success in
                         if success {
-                            print("\n✅ ✅ ✅ PRODUCTOS CARGADOS EXITOSAMENTE ✅ ✅ ✅\n")
+                            print("✅ Seed completado: \(ProductData.products.count) productos subidos.\n")
                         } else {
-                            print("\n❌ ERROR AL CARGAR PRODUCTOS\n")
+                            print("❌ Error durante el seed de productos.\n")
                         }
                     }
-                } else {
-                    print("✅ Productos ya existen en Firebase\n")
                 }
             }
         }
-        
+
         return true
     }
 }

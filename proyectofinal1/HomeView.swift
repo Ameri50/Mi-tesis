@@ -10,15 +10,17 @@ struct HomeView: View {
     @State private var selectedCategory: String = "Todos"
     @State private var searchText: String = ""
     @State private var showCart = false
+    @State private var showRepairCenter = false
     
     let products: [SeedProduct] = ProductData.products
-    let categories = ["Todos", "iPad", "iPhone", "Mac", "Apple Watch", "AirPods", "TV y Casa", "Accesorios", "Repuestos"]
+    let categories = ["Todos", "iPad", "iPhone", "Mac", "Apple Watch", "AirPods", "TV y Casa", "Accesorios"]
     
     var filteredProducts: [SeedProduct] {
         var filtered = products
         
         if selectedCategory != "Todos" {
-            filtered = filtered.filter { $0.category == selectedCategory }
+            let categoryKey = selectedCategory == "Repuestos y Reparaciones" ? "Repuestos" : selectedCategory
+            filtered = filtered.filter { $0.category == categoryKey }
         }
         
         if !searchText.isEmpty {
@@ -73,6 +75,7 @@ struct HomeView: View {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
                         searchBarSection
+                        repairCenterBanner
                         categoriesSection
                         
                         if filteredProducts.isEmpty {
@@ -90,6 +93,10 @@ struct HomeView: View {
                     .environmentObject(themeManager)
                     .environmentObject(localizationManager)
                     .environmentObject(cartManager)
+            }
+            .navigationDestination(isPresented: $showRepairCenter) {
+                RepairCenterView()
+                    .environmentObject(themeManager)
             }
         }
     }
@@ -118,6 +125,51 @@ struct HomeView: View {
             themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .secondarySystemBackground
         }))
         .cornerRadius(10)
+    }
+    
+    // MARK: - Banner destacado: Servicio Técnico Apple
+    private var repairCenterBanner: some View {
+        Button(action: { showRepairCenter = true }) {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.18))
+                        .frame(width: 46, height: 46)
+                    
+                    Image(systemName: "wrench.and.screwdriver.fill")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Servicio Técnico Apple")
+                        .font(.system(size: fontSize, weight: .bold))
+                        .foregroundColor(.white)
+                    
+                    Text("Repuestos originales y reparación profesional")
+                        .font(.system(size: fontSize - 4))
+                        .foregroundColor(.white.opacity(0.85))
+                        .lineLimit(1)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.85))
+            }
+            .padding(14)
+            .background(
+                LinearGradient(
+                    colors: [Color.black, Color(red: 0.25, green: 0.25, blue: 0.27)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.15), radius: 8, x: 0, y: 3)
+        }
+        .buttonStyle(.plain)
     }
     
     private var categoriesSection: some View {
