@@ -181,17 +181,19 @@ struct RepairPartCardView: View {
                     Text(String(format: "S/ %.2f", part.price))
                         .font(.system(size: fontSize - 2, weight: .bold))
                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
+                        .adaptiveOneLine()
 
                     HStack(spacing: 4) {
                         Image(systemName: "clock")
                             .font(.system(size: 10))
                         Text(part.repairTime)
                             .font(.system(size: fontSize - 5))
+                            .adaptiveOneLine()
                     }
                     .foregroundStyle(.gray)
                 }
 
-                stockBadge
+                StatusBadge(text: part.stock ? "Disponible" : "Agotado", isPositive: part.stock)
             }
 
             Spacer()
@@ -209,15 +211,6 @@ struct RepairPartCardView: View {
         .shadow(color: Color.black.opacity(themeManager.isDarkMode ? 0.2 : 0.04), radius: 6, x: 0, y: 2)
     }
 
-    private var stockBadge: some View {
-        Text(part.stock ? "Disponible" : "Agotado")
-            .font(.system(size: fontSize - 6, weight: .semibold))
-            .foregroundColor(.white)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 3)
-            .background(part.stock ? Color.green : Color.red)
-            .cornerRadius(6)
-    }
 }
 
 #Preview {

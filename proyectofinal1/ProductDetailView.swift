@@ -1,25 +1,33 @@
 import SwiftUI
 import Foundation
 
-// MARK: - Tarjeta de Producto con Imagen Estática
+// MARK: - Shape para redondear solo ciertas esquinas
+struct RoundedCorner: Shape {
+    var radius: CGFloat = 28
+    var corners: UIRectCorner = [.topLeft, .topRight]
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
+    }
+}
+
+// MARK: - Imagen de producto a pantalla completa (sin tarjeta gris)
 struct ProductImageCard: View {
     @EnvironmentObject var themeManager: ThemeManager
     let imageName: String
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Color(UIColor { _ in
-                    themeManager.isDarkMode
-                        ? UIColor(white: 0.1, alpha: 1)
-                        : UIColor(white: 0.96, alpha: 1)
-                }))
-
             if !imageName.isEmpty, UIImage(named: imageName) != nil {
                 Image(imageName)
                     .resizable()
                     .scaledToFit()
-                    .padding(24)
+                    .padding(36)
             } else {
                 VStack(spacing: 10) {
                     Image(systemName: "photo.badge.exclamationmark")
@@ -31,7 +39,7 @@ struct ProductImageCard: View {
                 }
             }
         }
-        .frame(width: 300, height: 300)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -39,6 +47,7 @@ struct ProductImageCard: View {
 struct ProductDetailView: View {
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @EnvironmentObject var themeManager: ThemeManager
+    @Environment(\.dismiss) private var dismiss
 
     let product: SeedProduct
     @EnvironmentObject var cartManager: CartManager
@@ -50,8 +59,16 @@ struct ProductDetailView: View {
     private var bg: Color {
         Color(UIColor { _ in
             themeManager.isDarkMode
-                ? UIColor(white: 0.07, alpha: 1)
+                ? UIColor(white: 0.05, alpha: 1)
                 : UIColor(white: 0.97, alpha: 1)
+        })
+    }
+
+    private var heroBg: Color {
+        Color(UIColor { _ in
+            themeManager.isDarkMode
+                ? UIColor(white: 0.11, alpha: 1)
+                : UIColor(white: 0.93, alpha: 1)
         })
     }
 
@@ -61,6 +78,10 @@ struct ProductDetailView: View {
                 ? UIColor(white: 0.12, alpha: 1)
                 : UIColor(white: 1.0, alpha: 1)
         })
+    }
+
+    private var cardStroke: Color {
+        themeManager.isDarkMode ? Color.white.opacity(0.07) : Color.black.opacity(0.05)
     }
 
     private var allProductImages: [String] {
@@ -76,141 +97,147 @@ struct ProductDetailView: View {
     }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             bg.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
 
-                    // MARK: - Image Carousel
-                    ZStack(alignment: .bottom) {
-                        TabView(selection: $currentImageIndex) {
-                            ForEach(allProductImages.indices, id: \.self) { index in
-                                ProductImageCard(imageName: allProductImages[index])
-                                    .environmentObject(themeManager)
-                                    .tag(index)
-                            }
-                        }
-                        .tabViewStyle(.page(indexDisplayMode: .never))
-                        .frame(height: 320)
+                    // MARK: - Hero: imagen a pantalla completa + botón atrás flotante
+                    ZStack(alignment: .top) {
+                        heroBg
+                            .ignoresSafeArea(edges: .top)
 
-                        if allProductImages.count > 1 {
-                            HStack(spacing: 6) {
-                                ForEach(allProductImages.indices, id: \.self) { i in
-                                    Circle()
-                                        .fill(i == currentImageIndex ? Color.orange : Color.gray.opacity(0.3))
-                                        .frame(width: i == currentImageIndex ? 8 : 6,
-                                               height: i == currentImageIndex ? 8 : 6)
-                                        .animation(.spring(response: 0.3), value: currentImageIndex)
+                        VStack(spacing: 0) {
+                            TabView(selection: $currentImageIndex) {
+                                ForEach(allProductImages.indices, id: \.self) { index in
+                                    ProductImageCard(imageName: allProductImages[index])
+                                        .environmentObject(themeManager)
+                                        .tag(index)
                                 }
                             }
-                            .padding(.bottom, 12)
-                        }
-                    }
-                    .padding(.bottom, 8)
+                            .tabViewStyle(.page(indexDisplayMode: .never))
+                            .frame(height: 380)
 
-                    VStack(spacing: 16) {
-
-                        // MARK: - Title & Price Card
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(product.name)
-                                .font(.system(size: fontSize + 10, weight: .bold))
-                                .foregroundStyle(themeManager.isDarkMode ? .white : .black)
-
-                            HStack(spacing: 6) {
-                                HStack(spacing: 2) {
-                                    ForEach(0..<5, id: \.self) { _ in
-                                        Image(systemName: "star.fill")
-                                            .font(.system(size: 11))
-                                            .foregroundStyle(.orange)
+                            if allProductImages.count > 1 {
+                                HStack(spacing: 6) {
+                                    ForEach(allProductImages.indices, id: \.self) { i in
+                                        Capsule()
+                                            .fill(i == currentImageIndex ? Color.orange : Color.gray.opacity(0.35))
+                                            .frame(width: i == currentImageIndex ? 16 : 6, height: 6)
+                                            .animation(.spring(response: 0.3), value: currentImageIndex)
                                     }
                                 }
-                                Text(String(format: "%.1f", product.rating))
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundStyle(.orange)
-                                Text("• \(product.reviewCount) reseñas")
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(.gray)
-                            }
-
-                            HStack(alignment: .firstTextBaseline, spacing: 10) {
-                                Text("S/ \(String(format: "%.2f", finalPrice))")
-                                    .font(.system(size: fontSize + 14, weight: .bold))
-                                    .foregroundStyle(.orange)
-
-                                if finalPrice != product.price {
-                                    Text("S/ \(String(format: "%.2f", product.price))")
-                                        .font(.system(size: fontSize + 2))
-                                        .foregroundStyle(.gray.opacity(0.6))
-                                        .strikethrough()
-                                }
-
-                                Spacer()
-
-                                Text(product.stockStatus)
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(product.inStock ? .green : .red)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 5)
-                                    .background((product.inStock ? Color.green : Color.red).opacity(0.12))
-                                    .clipShape(Capsule())
+                                .padding(.bottom, 16)
                             }
                         }
-                        .padding(20)
-                        .background(cardBg)
-                        .cornerRadius(20)
 
-                        // MARK: - Description Card
+                        HStack {
+                            Button {
+                                dismiss()
+                            } label: {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 15, weight: .bold))
+                                    .foregroundStyle(themeManager.isDarkMode ? .white : .black)
+                                    .frame(width: 38, height: 38)
+                                    .background(.ultraThinMaterial, in: Circle())
+                            }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
+                    }
+                    .frame(height: 380)
+
+                    // MARK: - Contenido superpuesto con esquinas redondeadas (efecto "sheet")
+                    VStack(spacing: 14) {
+
+                        Capsule()
+                            .fill(Color.gray.opacity(0.3))
+                            .frame(width: 36, height: 4)
+                            .padding(.top, 10)
+
+                        // MARK: - Título, rating, precio
                         VStack(alignment: .leading, spacing: 10) {
-                            Label("Descripción", systemImage: "text.alignleft")
-                                .font(.system(size: fontSize + 1, weight: .semibold))
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(product.name)
+                                        .font(.system(size: fontSize + 9, weight: .bold))
+                                        .foregroundStyle(themeManager.isDarkMode ? .white : .black)
+
+                                    RatingChip(rating: product.rating, reviewCount: product.reviewCount)
+                                }
+                                Spacer()
+                                StatusBadge(text: product.stockStatus, isPositive: product.inStock)
+                            }
+
+                            PriceTag(
+                                currentPrice: finalPrice,
+                                originalPrice: finalPrice != product.price ? product.price : nil,
+                                fontSize: fontSize
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 4)
+
+                        Divider()
+                            .padding(.horizontal, 20)
+                            .padding(.top, 4)
+
+                        // MARK: - Descripción
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Descripción")
+                                .font(.system(size: fontSize, weight: .semibold))
                                 .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
                             Text(product.productDescription)
                                 .font(.system(size: fontSize - 1))
-                                .foregroundStyle(themeManager.isDarkMode ? Color(white: 0.75) : .black.opacity(0.7))
+                                .foregroundStyle(themeManager.isDarkMode ? Color(white: 0.7) : .black.opacity(0.65))
                                 .lineSpacing(5)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
-                        .padding(20)
-                        .background(cardBg)
-                        .cornerRadius(20)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
 
-                        // MARK: - Color Selection (directo de product.colorOptions)
+                        // MARK: - Color
                         if !product.colorOptions.isEmpty {
-                            VStack(alignment: .leading, spacing: 14) {
+                            VStack(alignment: .leading, spacing: 12) {
                                 HStack {
-                                    Label("Color", systemImage: "paintpalette")
-                                        .font(.system(size: fontSize + 1, weight: .semibold))
+                                    Text("Color")
+                                        .font(.system(size: fontSize, weight: .semibold))
                                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                                     Spacer()
                                     if let color = selectedColor {
                                         Text(color.name)
                                             .font(.system(size: 13, weight: .medium))
                                             .foregroundStyle(.orange)
+                                            .adaptiveOneLine()
                                     }
                                 }
 
                                 ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 14) {
+                                    HStack(spacing: 16) {
                                         ForEach(product.colorOptions) { color in
                                             VStack(spacing: 6) {
-                                                Circle()
-                                                    .fill(hexToColor(color.hexColor))
-                                                    .frame(width: 44, height: 44)
-                                                    .overlay(
-                                                        Circle()
-                                                            .stroke(
-                                                                selectedColor == color ? Color.orange : Color.gray.opacity(0.2),
-                                                                lineWidth: selectedColor == color ? 3 : 1.5
-                                                            )
-                                                    )
-                                                    .scaleEffect(selectedColor == color ? 1.1 : 1.0)
-                                                    .animation(.spring(response: 0.3), value: selectedColor)
+                                                ZStack {
+                                                    Circle()
+                                                        .stroke(selectedColor == color ? Color.orange : Color.clear, lineWidth: 2)
+                                                        .frame(width: 50, height: 50)
+
+                                                    Circle()
+                                                        .fill(hexToColor(color.hexColor))
+                                                        .frame(width: 40, height: 40)
+                                                        .overlay(
+                                                            Circle().stroke(Color.gray.opacity(0.15), lineWidth: 1)
+                                                        )
+                                                }
+                                                .scaleEffect(selectedColor == color ? 1.06 : 1.0)
+                                                .animation(.spring(response: 0.3), value: selectedColor)
 
                                                 Text(color.name.components(separatedBy: " ").first ?? color.name)
                                                     .font(.system(size: 10, weight: .medium))
                                                     .foregroundStyle(.gray)
+                                                    .adaptiveOneLine()
                                             }
                                             .onTapGesture {
                                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -222,95 +249,106 @@ struct ProductDetailView: View {
                                     .padding(.horizontal, 2)
                                 }
                             }
-                            .padding(20)
-                            .background(cardBg)
-                            .cornerRadius(20)
+                            .padding(.horizontal, 20)
                         }
 
-                        // MARK: - Storage Selection (directo de product.storageOptions)
+                        // MARK: - Capacidad (segmented pill)
                         if !product.storageOptions.isEmpty {
-                            VStack(alignment: .leading, spacing: 14) {
-                                HStack {
-                                    Label("Capacidad", systemImage: "internaldrive")
-                                        .font(.system(size: fontSize + 1, weight: .semibold))
-                                        .foregroundStyle(themeManager.isDarkMode ? .white : .black)
-                                    Spacer()
-                                    if let storage = selectedStorage {
-                                        Text(storage.capacity)
-                                            .font(.system(size: 13, weight: .medium))
-                                            .foregroundStyle(.orange)
-                                    }
-                                }
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Capacidad")
+                                    .font(.system(size: fontSize, weight: .semibold))
+                                    .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
-                                HStack(spacing: 10) {
+                                HStack(spacing: 8) {
                                     ForEach(product.storageOptions) { storage in
+                                        let isSelected = selectedStorage == storage
                                         Button {
                                             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                                                 selectedStorage = storage
                                             }
                                         } label: {
                                             Text(storage.capacity)
-                                                .font(.system(size: fontSize - 1.5, weight: .semibold))
-                                                .foregroundStyle(selectedStorage == storage ? .white : (themeManager.isDarkMode ? .white : .black))
+                                                .font(.system(size: fontSize - 2, weight: .bold))
+                                                .foregroundStyle(isSelected ? (themeManager.isDarkMode ? .black : .white) : (themeManager.isDarkMode ? .white : .black))
+                                                .adaptiveOneLine(minScale: 0.7)
                                                 .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 11)
-                                                .background(selectedStorage == storage ? Color.orange : Color.gray.opacity(0.12))
-                                                .cornerRadius(12)
+                                                .padding(.vertical, 12)
+                                                .background(
+                                                    isSelected
+                                                        ? (themeManager.isDarkMode ? Color.white : Color.black)
+                                                        : Color.gray.opacity(0.1)
+                                                )
+                                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                         }
                                     }
                                 }
                             }
-                            .padding(20)
-                            .background(cardBg)
-                            .cornerRadius(20)
+                            .padding(.horizontal, 20)
                         }
 
                         // MARK: - Specs Row
-                        HStack(spacing: 12) {
+                        HStack(spacing: 10) {
                             SpecBadge(icon: "shippingbox",      label: "Envío gratis",       theme: themeManager)
                             SpecBadge(icon: "arrow.uturn.left", label: "30 días devolución", theme: themeManager)
                             SpecBadge(icon: "checkmark.shield", label: "Garantía oficial",   theme: themeManager)
                         }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 4)
 
-                        // MARK: - Add to Cart Button
-                        Button {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                cartManager.add(
-                                    product: product,
-                                    selectedColor: selectedColor?.name ?? "Estándar",
-                                    selectedStorage: selectedStorage?.capacity ?? "Estándar",
-                                    quantity: 1
-                                )
-                                isAddedToCart = true
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                                    withAnimation { isAddedToCart = false }
-                                }
-                            }
-                        } label: {
-                            HStack(spacing: 10) {
-                                Image(systemName: isAddedToCart ? "checkmark.circle.fill" : "cart.badge.plus")
-                                    .font(.system(size: 20, weight: .semibold))
-                                Text(isAddedToCart ? "Agregado al carrito" : "Agregar al carrito")
-                                    .font(.system(size: fontSize + 1, weight: .bold))
-                            }
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .background(isAddedToCart ? Color.green : Color.orange)
-                            .cornerRadius(16)
-                        }
-                        .disabled(isAddedToCart || !product.inStock)
+                        // Espacio para que el contenido no quede tapado por la barra fija
+                        Color.clear.frame(height: 90)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 40)
+                    .padding(.bottom, 4)
+                    .background(bg)
+                    .clipShape(RoundedCorner(radius: 28, corners: [.topLeft, .topRight]))
+                    .offset(y: -20)
                 }
             }
+
+            // MARK: - Barra de compra fija (sticky) abajo
+            VStack(spacing: 0) {
+                Divider().opacity(0.5)
+                Button {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        cartManager.add(
+                            product: product,
+                            selectedColor: selectedColor?.name ?? "Estándar",
+                            selectedStorage: selectedStorage?.capacity ?? "Estándar",
+                            quantity: 1
+                        )
+                        isAddedToCart = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                            withAnimation { isAddedToCart = false }
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: isAddedToCart ? "checkmark.circle.fill" : "cart.badge.plus")
+                            .font(.system(size: 19, weight: .semibold))
+                        Text(isAddedToCart ? "Agregado al carrito" : "Agregar al carrito")
+                            .font(.system(size: fontSize + 1, weight: .bold))
+                            .adaptiveOneLine(minScale: 0.7)
+                    }
+                    .foregroundStyle(isAddedToCart ? .white : (themeManager.isDarkMode ? .black : .white))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(isAddedToCart ? Color.green : (themeManager.isDarkMode ? Color.white : Color.black))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .disabled(isAddedToCart || !product.inStock)
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
+            }
+            .background(.ultraThinMaterial)
+            .ignoresSafeArea(edges: .bottom)
         }
         // ✅ .onAppear: inicializa selecciones con los primeros valores del propio producto
         .onAppear {
             selectedColor   = product.colorOptions.first
             selectedStorage = product.storageOptions.first
         }
+        .navigationBarHidden(true)
     }
 
     // MARK: - Helper: hex string → SwiftUI Color
@@ -334,7 +372,7 @@ struct SpecBadge: View {
     var body: some View {
         VStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 20))
+                .font(.system(size: 18))
                 .foregroundStyle(.orange)
             Text(label)
                 .font(.system(size: 10, weight: .medium))
@@ -348,6 +386,10 @@ struct SpecBadge: View {
                 ? UIColor(white: 0.12, alpha: 1)
                 : UIColor(white: 1.0, alpha: 1)
         }))
-        .cornerRadius(16)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .stroke(theme.isDarkMode ? Color.white.opacity(0.06) : Color.black.opacity(0.04), lineWidth: 1)
+        )
     }
 }

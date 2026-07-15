@@ -80,6 +80,7 @@ struct ProductRowView: View {
                 Text(String(format: "$%.2f", product.price))
                     .font(.system(size: fontSize - 1, weight: .regular))
                     .foregroundStyle(themeManager.isDarkMode ? .gray : .secondary)
+                    .adaptiveOneLine()
             }
             
             Spacer()
@@ -182,6 +183,7 @@ struct ProductRowViewLegacy: View {
                 Text(String(format: "$%.2f", product.price))
                     .font(.system(size: fontSize - 1, weight: .regular))
                     .foregroundColor(themeManager.isDarkMode ? .gray : .secondary)
+                    .adaptiveOneLine()
             }
             
             Spacer()

@@ -36,13 +36,7 @@ struct RepairDetailView: View {
                             .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                             .multilineTextAlignment(.center)
 
-                        Text(part.stock ? "Disponible" : "Agotado")
-                            .font(.system(size: fontSize - 4, weight: .semibold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 5)
-                            .background(part.stock ? Color.green : Color.red)
-                            .cornerRadius(8)
+                        StatusBadge(text: part.stock ? "Disponible" : "Agotado", isPositive: part.stock)
                     }
                     .padding(.horizontal, 16)
 
@@ -54,6 +48,7 @@ struct RepairDetailView: View {
                         Text(String(format: "S/ %.2f", part.price))
                             .font(.system(size: fontSize + 10, weight: .bold))
                             .foregroundStyle(themeManager.isDarkMode ? .white : .black)
+                            .adaptiveOneLine()
                     }
                     .frame(maxWidth: .infinity)
                     .padding(20)

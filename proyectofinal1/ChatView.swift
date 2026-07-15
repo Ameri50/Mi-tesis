@@ -111,10 +111,10 @@ struct ChatView: View {
             }
             
             VStack(spacing: 8) {
-                Text("Puedes chatear con Gemini")
+                Text("¿En qué te ayudo?")
                     .font(.system(size: fontSize + 2, weight: .bold))
                 
-                Text("No dudes en preguntar lo que necesites saber de tecnología o de cómo ayudarte en tu proceso profesional")
+                Text("Pregúntame sobre productos, precios, repuestos y reparaciones, o cualquier duda que tengas")
                     .font(.system(size: fontSize, weight: .regular))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -124,21 +124,21 @@ struct ChatView: View {
             VStack(spacing: 12) {
                 SuggestionBubble(
                     icon: "hand.wave.fill",
-                    text: "Hola, ¿cómo estás?",
+                    text: "Hola, ¿qué puedo hacer en esta app?",
                     action: sendSuggestion,
                     fontSize: fontSize
                 )
                 
                 SuggestionBubble(
-                    icon: "laptopcomputer",
-                    text: "¿Qué laptop me recomiendas?",
+                    icon: "iphone",
+                    text: "¿Qué iPhone me recomiendas?",
                     action: sendSuggestion,
                     fontSize: fontSize
                 )
                 
                 SuggestionBubble(
-                    icon: "externaldrive",
-                    text: "Explícame qué es un SSD",
+                    icon: "wrench.and.screwdriver",
+                    text: "¿Tienen repuestos y servicio técnico?",
                     action: sendSuggestion,
                     fontSize: fontSize
                 )

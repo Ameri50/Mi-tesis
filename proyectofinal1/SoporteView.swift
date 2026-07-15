@@ -13,7 +13,7 @@ struct ChatMessage: Identifiable, Codable {
     }
 }
 
-// MARK: - Banner de Error
+// MARK: - Banner de Errors
 struct ErrorBanner: View {
     @EnvironmentObject var themeManager: ThemeManager
     let message: String
@@ -141,12 +141,14 @@ struct SoporteView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
+    @StateObject private var gemini = GeminiManager.shared
     @State private var messageText = ""
     @State private var showClearAlert = false
     @FocusState private var isInputFocused: Bool
     @State private var supportHistory: [ChatMessage] = []
-    @State private var isLoading = false
-    @State private var errorMessage = ""
+    @FocusState private var isLoadingUnused: Bool // no-op, mantenido por compatibilidad de layout
+    
+    private var isLoading: Bool { gemini.isLoading }
     
     var body: some View {
         ZStack {
@@ -191,8 +193,8 @@ struct SoporteView: View {
                 
                 // Área de entrada de texto
                 VStack(spacing: 0) {
-                    if !errorMessage.isEmpty {
-                        ErrorBanner(message: errorMessage)
+                    if !gemini.errorMessage.isEmpty {
+                        ErrorBanner(message: gemini.errorMessage)
                             .environmentObject(themeManager)
                     }
                     supportInputView
@@ -242,6 +244,7 @@ struct SoporteView: View {
             Button(localizationManager.translate("support.cancel"), role: .cancel) {}
             Button(localizationManager.translate("support.clear"), role: .destructive) {
                 supportHistory.removeAll()
+                gemini.clearConversation()
                 saveSupportHistory()
             }
         } message: {
@@ -485,34 +488,24 @@ struct SoporteView: View {
         
         supportHistory.append(ChatMessage(role: "user", text: text))
         saveSupportHistory()
-        isLoading = true
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            let reply = generateResponse(for: text)
-            supportHistory.append(ChatMessage(role: "model", text: reply))
-            saveSupportHistory()
-            isLoading = false
+        Task {
+            await gemini.sendChatMessage(text)
+            
+            let replyText = gemini.errorMessage.isEmpty
+                ? gemini.lastResponse
+                : gemini.errorMessage
+            
+            if !replyText.isEmpty {
+                supportHistory.append(ChatMessage(role: "model", text: replyText))
+                saveSupportHistory()
+            }
         }
     }
     
     private func sendSuggestion(_ text: String) {
         messageText = "\(localizationManager.translate("support.issuePrefix")) \(text.lowercased())"
         sendMessage()
-    }
-    
-    private func generateResponse(for text: String) -> String {
-        let lower = text.lowercased()
-        if lower.contains("iphone") || lower.contains("configuración") {
-            return localizationManager.translate("support.response1")
-        } else if lower.contains("wifi") || lower.contains("conexión") {
-            return localizationManager.translate("support.response2")
-        } else if lower.contains("lento") || lower.contains("rendimiento") {
-            return localizationManager.translate("support.response3")
-        } else if lower.contains("almacenamiento") || lower.contains("espacio") {
-            return localizationManager.translate("support.response4")
-        } else {
-            return localizationManager.translate("support.response5")
-        }
     }
     
     private func scrollToBottom(proxy: ScrollViewProxy) {
