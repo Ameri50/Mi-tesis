@@ -480,6 +480,33 @@ struct SoporteView: View {
         !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isLoading
     }
     
+    // Palabras clave que definen el alcance permitido del chat (repuestos/servicio técnico Apple).
+    // Filtro rápido en el cliente: evita gastar una llamada al servidor si el mensaje
+    // claramente no tiene relación con el tema. No reemplaza al system prompt del servidor,
+    // solo añade una barrera adicional y una respuesta instantánea.
+    private let allowedKeywords: [String] = [
+        // Productos / marca
+        "iphone", "ipad", "mac", "macbook", "airpods", "apple watch", "watch", "apple",
+        // Repuestos / piezas
+        "repuesto", "repuestos", "pieza", "piezas", "pantalla", "pantallas", "bateria", "batería",
+        "camara", "cámara", "puerto de carga", "conector", "altavoz", "altavoces", "parlante",
+        "microfono", "micrófono", "boton", "botón", "tapa", "carcasa", "flex", "placa", "modem",
+        "antena", "vidrio", "tactil", "táctil", "cristal",
+        // Servicio
+        "reparacion", "reparación", "reparar", "garantia", "garantía", "instalacion", "instalación",
+        "diagnostico", "diagnóstico", "servicio tecnico", "servicio técnico", "precio", "precios",
+        "costo", "cotizacion", "cotización", "tiempo de entrega", "carrito", "comprar", "cuanto cuesta",
+        "cuánto cuesta",
+        // Saludos / conversación mínima permitida
+        "hola", "buenas", "buenos dias", "buenos días", "buenas tardes", "buenas noches",
+        "gracias", "ayuda", "necesito ayuda"
+    ]
+
+    private func isOnTopic(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        return allowedKeywords.contains { lower.contains($0) }
+    }
+
     private func sendMessage() {
         guard canSend else { return }
         let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -488,6 +515,15 @@ struct SoporteView: View {
         
         supportHistory.append(ChatMessage(role: "user", text: text))
         saveSupportHistory()
+        
+        // Filtro rápido: si claramente no es sobre repuestos/servicio técnico Apple,
+        // respondemos al instante sin llamar a Gemini.
+        guard isOnTopic(text) else {
+            let offTopicReply = "¡Hola! 👋 Solo puedo ayudarte con temas de repuestos y servicio técnico de productos Apple (pantallas, baterías, cámaras, etc.). ¿Tienes alguna consulta sobre eso?"
+            supportHistory.append(ChatMessage(role: "model", text: offTopicReply))
+            saveSupportHistory()
+            return
+        }
         
         Task {
             await gemini.sendChatMessage(text)
