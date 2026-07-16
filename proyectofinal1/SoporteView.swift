@@ -288,29 +288,35 @@ struct SoporteView: View {
             
             // Información de contacto
             HStack(spacing: 12) {
-                HStack(spacing: 8) {
-                    Image(systemName: "phone.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.blue)
-                    Text("+51 951012633")
-                        .font(.system(size: fontSize - 3, weight: .regular))
+                Button(action: callSupport) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "phone.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.blue)
+                        Text("+51 951012633")
+                            .font(.system(size: fontSize - 3, weight: .regular))
+                            .foregroundColor(themeManager.isDarkMode ? .white : .primary)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(8)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.blue.opacity(0.1))
-                .cornerRadius(8)
                 
-                HStack(spacing: 8) {
-                    Image(systemName: "envelope.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.purple)
-                    Text("soporte@tech.com")
-                        .font(.system(size: fontSize - 3, weight: .regular))
+                Button(action: emailSupport) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "envelope.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(.purple)
+                        Text("soporte@tech.com")
+                            .font(.system(size: fontSize - 3, weight: .regular))
+                            .foregroundColor(themeManager.isDarkMode ? .white : .primary)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.purple.opacity(0.1))
+                    .cornerRadius(8)
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.purple.opacity(0.1))
-                .cornerRadius(8)
                 
                 Spacer()
             }
@@ -497,6 +503,17 @@ struct SoporteView: View {
         "diagnostico", "diagnóstico", "servicio tecnico", "servicio técnico", "precio", "precios",
         "costo", "cotizacion", "cotización", "tiempo de entrega", "carrito", "comprar", "cuanto cuesta",
         "cuánto cuesta",
+        // Recomendaciones de compra / perfil de uso
+        "recomien", "recomendaci", "conviene", "elegir", "mejor opcion", "mejor opción",
+        "cual me", "cuál me", "que me", "qué me", "estudiante", "profesor", "universidad",
+        "colegio", "trabajo", "oficina", "diseño", "diseñador", "editar video", "edicion",
+        "edición", "gamer", "juegos", "videojuegos", "fotografia", "fotografía",
+        "presupuesto", "modelo", "diferencia", "comparar", "producto", "productos",
+        "catalogo", "catálogo", "quiero comprar", "nuevo", "nueva",
+        // Contacto directo con la tienda
+        "telefono", "teléfono", "numero", "número", "llamar", "llamada", "contacto",
+        "contactar", "correo", "email", "whatsapp", "hablar con alguien", "asesor",
+        "horario", "atencion", "atención",
         // Saludos / conversación mínima permitida
         "hola", "buenas", "buenos dias", "buenos días", "buenas tardes", "buenas noches",
         "gracias", "ayuda", "necesito ayuda"
@@ -568,6 +585,21 @@ struct SoporteView: View {
     }
     
     // MARK: - WhatsApp Method
+    // MARK: - Call & Email Methods
+    private func callSupport() {
+        guard let url = URL(string: "tel://51951012633") else { return }
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    private func emailSupport() {
+        guard let url = URL(string: "mailto:soporte@tech.com") else { return }
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        }
+    }
+    
     private func openWhatsApp() {
         let phoneNumber = "51951012633"
         let message = "¡Hola! 👋 Me gustaría obtener más información sobre sus productos."

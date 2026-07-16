@@ -614,45 +614,243 @@ class GeminiManager: ObservableObject {
     Almohadillas AirPods Max USB-C|S/450|AirPods Max USB-C|10-15 min|disponible
     """
 
-    // MARK: - System Prompt: técnico autorizado Apple
+    // MARK: - Catálogo real de productos de la tienda (124 productos, 7 categorías)
+    private let productCatalog = """
+    --- iPhone ---
+    iPhone 17e|S/2199|almacenamiento: 128GB/256GB|3 colores disponibles
+    iPhone 17 Pro Max|S/4999|almacenamiento: 256GB/512GB/1TB|4 colores disponibles
+    iPhone 17 Pro|S/4499|almacenamiento: 128GB/256GB/512GB/1TB|4 colores disponibles
+    iPhone Air|S/4199|almacenamiento: 256GB/512GB|4 colores disponibles
+    iPhone 17|S/3199|almacenamiento: 128GB/256GB/512GB|5 colores disponibles
+    iPhone 16 Pro Max|S/4700|almacenamiento: 256GB/512GB/1TB|4 colores disponibles
+    iPhone 16 Pro|S/4199|almacenamiento: 128GB/256GB/512GB/1TB|4 colores disponibles
+    iPhone 16 Plus|S/3899|almacenamiento: 128GB/256GB/512GB|5 colores disponibles
+    iPhone 16|S/2900|almacenamiento: 128GB/256GB/512GB|5 colores disponibles
+    iPhone 16e|S/2119|almacenamiento: 128GB/256GB/512GB|2 colores disponibles
+    iPhone 15 Pro Max|S/4283|almacenamiento: 256GB/512GB/1TB|4 colores disponibles
+    iPhone 15 Pro|S/3400|almacenamiento: 128GB/256GB/512GB/1TB|4 colores disponibles
+    iPhone 15 Plus|S/3200|almacenamiento: 128GB/256GB/512GB|5 colores disponibles
+    iPhone 15|S/2600|almacenamiento: 128GB/256GB/512GB|5 colores disponibles
+    iPhone 14 Pro Max|S/3300|almacenamiento: 128GB/256GB/512GB/1TB|4 colores disponibles
+    iPhone 14 Pro|S/2300|almacenamiento: 128GB/256GB/512GB/1TB|4 colores disponibles
+    iPhone 14 Plus|S/2500|almacenamiento: 128GB/256GB/512GB|6 colores disponibles
+    iPhone 14|S/2200|almacenamiento: 128GB/256GB/512GB|6 colores disponibles
+    iPhone 13 Pro Max|S/2900|almacenamiento: 128GB/256GB/512GB/1TB|5 colores disponibles
+    iPhone 13 Pro|S/2100|almacenamiento: 128GB/256GB/512GB/1TB|5 colores disponibles
+    iPhone 13|S/1750|almacenamiento: 128GB/256GB/512GB|6 colores disponibles
+    iPhone 13 Mini|S/1300|almacenamiento: 128GB/256GB/512GB|6 colores disponibles
+    iPhone SE (3ª Gen)|S/1400|almacenamiento: 64GB/128GB/256GB|3 colores disponibles
+    iPhone 12 Pro Max|S/2675|almacenamiento: 128GB/256GB/512GB|4 colores disponibles
+    iPhone 12 Pro|S/1900|almacenamiento: 128GB/256GB/512GB|4 colores disponibles
+    iPhone 12|S/1499|almacenamiento: 64GB/128GB/256GB|6 colores disponibles
+    
+    --- iPad ---
+    iPad Pro 13" M4|S/6963|almacenamiento: 256GB/512GB/1TB/2TB|2 colores disponibles
+    iPad Pro 11" M4|S/5355|almacenamiento: 256GB/512GB/1TB/2TB|2 colores disponibles
+    iPad Air 11" M2|S/3950|almacenamiento: 128GB/256GB/512GB/1TB|4 colores disponibles
+    iPad Air 13" M2|S/4150|almacenamiento: 128GB/256GB/512GB/1TB|3 colores disponibles
+    iPad mini 7|S/2675|almacenamiento: 128GB/256GB/512GB|4 colores disponibles
+    iPad Pro 12.9" M2|S/5087|almacenamiento: 128GB/256GB/512GB/1TB/2TB|2 colores disponibles
+    iPad Pro 11" M2|S/4699|almacenamiento: 128GB/256GB/512GB/1TB/2TB|2 colores disponibles
+    iPad 10ª Gen|S/1871|almacenamiento: 64GB/256GB|4 colores disponibles
+    iPad 9ª Gen|S/1495|almacenamiento: 64GB/256GB|2 colores disponibles
+    iPad mini 6|S/2407|almacenamiento: 64GB/256GB|4 colores disponibles
+    iPad Pro 12.9" M1|S/4283|almacenamiento: 128GB/256GB/512GB/1TB/2TB|2 colores disponibles
+    iPad Air 5ª Gen (M1)|S/3091|almacenamiento: 64GB/256GB|5 colores disponibles
+    iPad Air 4ª Gen|S/2451|almacenamiento: 64GB/256GB|5 colores disponibles
+    iPad mini 5ª Gen|S/1703|almacenamiento: 64GB/256GB|4 colores disponibles
+    iPad 8ª Gen|S/1275|almacenamiento: 32GB/128GB|3 colores disponibles
+    iPad 7ª Gen|S/1059|almacenamiento: 32GB/128GB|3 colores disponibles
+    iPad Air 3ª Gen|S/1811|almacenamiento: 64GB/256GB|5 colores disponibles
+    
+    --- Mac ---
+    MacBook Pro 16" M5|S/18755|almacenamiento: 512GB/1TB/2TB/4TB|2 colores disponibles
+    MacBook Pro 14" M5|S/13395|almacenamiento: 512GB/1TB/2TB|2 colores disponibles
+    MacBook Air 15" M4|S/7500|almacenamiento: 256GB/512GB/1TB/2TB|4 colores disponibles
+    MacBook Air 13" M4|S/6500|almacenamiento: 256GB/512GB/1TB/2TB|4 colores disponibles
+    MacBook Pro 16" M4 Pro|S/17500|almacenamiento: 512GB/1TB/2TB|2 colores disponibles
+    MacBook Pro 14" M4 Pro|S/10715|almacenamiento: 512GB/1TB/2TB|2 colores disponibles
+    Mac mini M4 Pro|S/4819|almacenamiento: 512GB/1TB/2TB|2 colores disponibles
+    Mac mini M4|S/3747|almacenamiento: 256GB/512GB|1 colores disponibles
+    Mac Studio M4 Max|S/21435|almacenamiento: 512GB/1TB/2TB|1 colores disponibles
+    Mac Pro M4 Ultra|S/42876|almacenamiento: 1TB/2TB/4TB/8TB|1 colores disponibles
+    iMac 24" M3|S/6963|almacenamiento: 256GB/512GB/1TB/2TB|7 colores disponibles
+    MacBook Pro 16" M3 Max|S/16075|almacenamiento: 512GB/1TB/2TB|2 colores disponibles
+    MacBook Pro 14" M3 Pro|S/9500|almacenamiento: 512GB/1TB/2TB|2 colores disponibles
+    MacBook Air 15" M3|S/6963|almacenamiento: 256GB/512GB/1TB/2TB|4 colores disponibles
+    MacBook Air 13" M3|S/5891|almacenamiento: 256GB/512GB/1TB/2TB|4 colores disponibles
+    MacBook Air 13" M2|S/5355|almacenamiento: 256GB/512GB/1TB/2TB|4 colores disponibles
+    MacBook Pro 14" M1 Pro|S/8571|almacenamiento: 512GB/1TB/2TB|2 colores disponibles
+    MacBook Pro 16" M1 Max|S/13395|almacenamiento: 1TB/2TB/4TB|2 colores disponibles
+    Mac mini M2|S/3211|almacenamiento: 256GB/512GB/1TB/2TB|1 colores disponibles
+    Mac mini M1|S/2900|almacenamiento: 256GB/512GB/1TB/2TB|1 colores disponibles
+    
+    --- Apple Watch ---
+    Apple Watch Series 11|S/2350|almacenamiento: N/A|4 colores disponibles
+    Apple Watch Ultra 3|S/4600|almacenamiento: N/A|1 colores disponibles
+    Apple Watch SE 3|S/1450|almacenamiento: N/A|3 colores disponibles
+    Apple Watch Series 10|S/2139|almacenamiento: N/A|3 colores disponibles
+    Apple Watch Ultra 2|S/4283|almacenamiento: N/A|1 colores disponibles
+    Apple Watch Series 9|S/1950|almacenamiento: N/A|5 colores disponibles
+    Apple Watch SE 2|S/1335|almacenamiento: N/A|3 colores disponibles
+    Apple Watch Series 8|S/1800|almacenamiento: N/A|4 colores disponibles
+    Apple Watch Series 7|S/1650|almacenamiento: N/A|5 colores disponibles
+    Apple Watch SE 1|S/1200|almacenamiento: N/A|3 colores disponibles
+    Apple Watch Series 6|S/1500|almacenamiento: N/A|5 colores disponibles
+    Apple Watch Hermès Series 9|S/4819|almacenamiento: N/A|1 colores disponibles
+    Apple Watch Nike Series 9|S/2040|almacenamiento: N/A|2 colores disponibles
+    Apple Watch Nike Series 8|S/1875|almacenamiento: N/A|2 colores disponibles
+    Apple Watch Hermès Series 8|S/4283|almacenamiento: N/A|1 colores disponibles
+    
+    --- AirPods ---
+    AirPods Pro 3|S/1335|almacenamiento: N/A|1 colores disponibles
+    AirPods Pro 2 USB-C|S/1227|almacenamiento: N/A|1 colores disponibles
+    AirPods Pro 2 Lightning|S/1335|almacenamiento: N/A|1 colores disponibles
+    AirPods Max USB-C|S/2943|almacenamiento: N/A|5 colores disponibles
+    AirPods Max (Lightning)|S/2675|almacenamiento: N/A|5 colores disponibles
+    AirPods 4 con ANC|S/959|almacenamiento: N/A|1 colores disponibles
+    AirPods 4|S/691|almacenamiento: N/A|1 colores disponibles
+    AirPods 3ª Gen|S/691|almacenamiento: N/A|1 colores disponibles
+    AirPods 2ª Gen|S/531|almacenamiento: N/A|1 colores disponibles
+    AirPods Pro 1ª Gen|S/959|almacenamiento: N/A|1 colores disponibles
+    
+    --- TV y Casa ---
+    Apple TV 4K (2024) WiFi|S/531|almacenamiento: N/A|0 colores disponibles
+    Apple TV 4K (2024) Wi-Fi + Ethernet|S/638|almacenamiento: N/A|0 colores disponibles
+    Apple TV HD|S/316|almacenamiento: N/A|0 colores disponibles
+    Apple TV 4K (2022)|S/531|almacenamiento: N/A|0 colores disponibles
+    HomePod 2ª Gen|S/1603|almacenamiento: N/A|0 colores disponibles
+    HomePod mini Blanco|S/531|almacenamiento: N/A|0 colores disponibles
+    HomePod mini Medianoche|S/531|almacenamiento: N/A|0 colores disponibles
+    HomePod mini Naranja|S/531|almacenamiento: N/A|0 colores disponibles
+    HomePod mini Amarillo|S/531|almacenamiento: N/A|0 colores disponibles
+    HomePod mini Azul|S/531|almacenamiento: N/A|0 colores disponibles
+    HomePod mini Rojo|S/531|almacenamiento: N/A|0 colores disponibles
+    
+    --- Accesorios ---
+    Magic Keyboard con Touch ID USB-C|S/1067|almacenamiento: N/A|2 colores disponibles
+    Magic Keyboard Numérico USB-C|S/1335|almacenamiento: N/A|2 colores disponibles
+    Magic Mouse USB-C|S/531|almacenamiento: N/A|2 colores disponibles
+    Magic Trackpad USB-C|S/691|almacenamiento: N/A|2 colores disponibles
+    Apple Pencil Pro|S/691|almacenamiento: N/A|1 colores disponibles
+    Apple Pencil 2ª Gen|S/691|almacenamiento: N/A|1 colores disponibles
+    Apple Pencil USB-C|S/423|almacenamiento: N/A|1 colores disponibles
+    Apple Pencil 1ª Gen|S/531|almacenamiento: N/A|1 colores disponibles
+    Magic Keyboard para iPad Pro M4 13"|S/1871|almacenamiento: N/A|2 colores disponibles
+    Magic Keyboard para iPad Pro M4 11"|S/1603|almacenamiento: N/A|2 colores disponibles
+    Magic Keyboard Folio iPad 10ª Gen|S/1067|almacenamiento: N/A|1 colores disponibles
+    Smart Keyboard para iPad 9ª Gen|S/638|almacenamiento: N/A|1 colores disponibles
+    AirTag|S/155|almacenamiento: N/A|0 colores disponibles
+    AirTag 4 Pack|S/531|almacenamiento: N/A|0 colores disponibles
+    Cable USB-C a USB-C 1m|S/102|almacenamiento: N/A|0 colores disponibles
+    Cable USB-C a Lightning 1m|S/102|almacenamiento: N/A|0 colores disponibles
+    Cable Thunderbolt 4 Pro 1m|S/263|almacenamiento: N/A|0 colores disponibles
+    Adaptador Lightning a 3.5mm|S/48|almacenamiento: N/A|0 colores disponibles
+    Adaptador USB-C Multipuerto|S/423|almacenamiento: N/A|0 colores disponibles
+    Cargador USB-C 20W|S/155|almacenamiento: N/A|0 colores disponibles
+    Cargador USB-C 30W|S/263|almacenamiento: N/A|0 colores disponibles
+    Cargador USB-C 67W|S/531|almacenamiento: N/A|0 colores disponibles
+    Base MagSafe Duo|S/852|almacenamiento: N/A|0 colores disponibles
+    Funda FineWoven iPhone 17 Pro Max|S/316|almacenamiento: N/A|4 colores disponibles
+    Funda Silicona iPhone 17|S/263|almacenamiento: N/A|5 colores disponibles
+    """
+
+    // MARK: - System Prompt: asistente unificado (soporte técnico + asesor de compra)
     private var systemPrompt: String {
         """
-        Eres un técnico certificado del Servicio Técnico Apple de la tienda. Hablas con
-        clientes que necesitan ayuda con reparaciones y repuestos de sus dispositivos Apple
-        (iPhone, iPad, Mac, Apple Watch, AirPods). Tu tono es el de un técnico profesional,
-        cercano y con experiencia real reparando estos equipos — nunca menciones que eres
-        una IA, un modelo de lenguaje, un chatbot, ni que este es un proyecto académico o de
-        tesis. Preséntate únicamente como parte del equipo de soporte técnico de la tienda.
+        Eres el asistente virtual de la tienda: cumples dos roles en una sola conversación,
+        sin que el cliente tenga que elegir uno. Por un lado eres técnico certificado del
+        Servicio Técnico Apple (reparaciones y repuestos). Por otro, eres asesor de ventas
+        que recomienda productos Apple reales del catálogo de la tienda según lo que el
+        cliente necesita. Tu tono es profesional, cercano y con experiencia real — nunca
+        menciones que eres una IA, un modelo de lenguaje, un chatbot, ni que este es un
+        proyecto académico o de tesis. Preséntate únicamente como parte del equipo de la
+        tienda.
 
-        CATÁLOGO REAL DE REPUESTOS (tu única fuente de verdad para precios, modelos
-        compatibles, tiempos de reparación y disponibilidad — NUNCA inventes datos que no
-        estén aquí; si no encuentras el repuesto exacto, dilo con honestidad y ofrece
-        contactar al equipo por WhatsApp o teléfono para confirmar):
+        DATOS DE CONTACTO REALES DE LA TIENDA (usa estos exactos si el cliente pide hablar
+        con una persona, llamar, o si tú mismo ofreces una vía alterna de contacto — nunca
+        inventes otro número ni correo):
+        - Teléfono / WhatsApp: +51 951 012 633
+        - Correo: soporte@tech.com
+        - Horario de atención: Lunes a Viernes, 9:00 a 18:00
+
+        ============================================================
+        CATÁLOGO REAL DE REPUESTOS (única fuente de verdad para reparaciones — precios,
+        modelos compatibles, tiempos y disponibilidad). NUNCA inventes un repuesto que no
+        esté aquí; si no lo encuentras, dilo con honestidad y ofrece contactar al equipo por
+        WhatsApp o teléfono al número de arriba para confirmar:
 
         \(repairCatalog)
+
+        ============================================================
+        CATÁLOGO REAL DE PRODUCTOS EN VENTA (única fuente de verdad para recomendaciones de
+        compra — nombre, precio base, almacenamiento y colores disponibles). NUNCA inventes
+        un producto, precio o especificación que no esté aquí:
+
+        \(productCatalog)
+
+        ============================================================
+        CÓMO RECOMENDAR PRODUCTOS SEGÚN EL PERFIL DEL CLIENTE:
+        Cuando el cliente pida una recomendación de compra (ej. "qué iPhone me recomiendas",
+        "quiero una laptop", "qué me conviene"), identifica o pregunta brevemente para qué lo
+        va a usar, y adapta la sugerencia a un perfil típico:
+        - Estudiante: prioriza buena relación precio-rendimiento, almacenamiento medio
+          (128-256GB), evita el tope de gama salvo que lo pida explícitamente.
+        - Profesor / oficina / uso básico: prioriza simplicidad, batería y precio accesible;
+          no recomiendas gama Pro salvo que el uso lo justifique.
+        - Profesional creativo / diseñador / editor de video: prioriza pantalla grande,
+          más almacenamiento (512GB+) y los modelos Pro/Pro Max o Mac con más rendimiento.
+        - Gamer / uso intensivo: prioriza el chip más potente disponible, buena pantalla
+          (ProMotion si aplica) y almacenamiento amplio.
+        - Si el cliente no da pistas de uso, pregúntale en una sola frase corta antes de
+          recomendar (ej. "¿Lo usarás más para trabajo, estudio, diseño o algo casual?").
+        No asumas un perfil sin evidencia ni lo inventes si el cliente ya lo dijo explícito.
+        Siempre menciona precio y, si aplica, opciones de almacenamiento/color reales del
+        catálogo de arriba — nunca cifras aproximadas ni modelos que no existan en él.
 
         SOBRE QUÉ SÍ PUEDES HABLAR:
         - Diagnóstico básico según los síntomas que describa el cliente (ej. "se apaga solo"
           puede ser batería; "no reconoce mi rostro" puede ser el módulo Face ID).
         - Repuestos, precios (en soles S/), modelos compatibles, tiempos de reparación y
-          disponibilidad — SIEMPRE basado en el catálogo de arriba.
+          disponibilidad — SIEMPRE basado en el catálogo de repuestos.
+        - Recomendaciones de compra de productos Apple reales del catálogo de productos,
+          adaptadas al uso que el cliente le dará.
+        - Comparaciones entre modelos del catálogo (precio, almacenamiento, gama).
         - Garantía del servicio técnico y proceso de reparación.
-        - Cómo agregar un repuesto al carrito y pagar dentro de la app.
+        - Cómo agregar un producto o repuesto al carrito y pagar dentro de la app.
         - Saludos y conversación mínima de bienvenida.
 
         SOBRE QUÉ NO DEBES HABLAR:
-        - Cualquier tema que no sea repuestos o servicio técnico Apple (clima, cultura
-          general, otras marcas, temas personales, etc.). Si preguntan algo así, redirige
-          con amabilidad hacia temas de reparación y repuestos Apple.
+        - Cualquier tema que no sea productos, compras o servicio técnico Apple de la tienda
+          (clima, cultura general, otras marcas, temas personales, etc.). Si preguntan algo
+          así, redirige con amabilidad hacia productos, compras o reparaciones Apple.
 
         ESTILO DE RESPUESTA:
-        - Como un técnico real: directo, seguro, con lenguaje técnico pero explicado simple.
+        - Texto plano, SIN markdown: nunca uses asteriscos para negrita (**texto**), guiones
+          para listas, numerales (#) ni ningún otro símbolo de formato. La app muestra tu
+          respuesta como texto normal, así que cualquier símbolo de markdown aparece literal
+          en pantalla. Si quieres resaltar algo (precio, nombre de producto), simplemente
+          escríbelo tal cual, sin asteriscos ni comillas especiales.
+        - Directo, seguro, con lenguaje técnico pero explicado simple.
         - Breve (máximo 3-4 párrafos cortos, o menos si es un saludo).
         - Sin listas largas ni tono de manual; conversacional, como cara a cara en el mostrador.
-        - Menciona precios y tiempos exactos del catálogo cuando el cliente pregunte por un
-          repuesto o modelo específico.
+        - Menciona precios y datos exactos del catálogo correspondiente cuando el cliente
+          pregunte por un repuesto o producto específico.
         - Español latino, profesional pero cercano.
         """
+    }
+
+    // MARK: - Limpieza de markdown (la burbuja de chat solo muestra texto plano)
+    static func stripMarkdown(_ text: String) -> String {
+        var result = text
+        // Negrita/cursiva: **texto** o *texto* -> texto
+        result = result.replacingOccurrences(of: #"\*\*(.*?)\*\*"#, with: "$1", options: .regularExpression)
+        result = result.replacingOccurrences(of: #"\*(.*?)\*"#, with: "$1", options: .regularExpression)
+        // Encabezados markdown al inicio de línea: "# ", "## ", etc.
+        result = result.replacingOccurrences(of: #"(?m)^#{1,6}\s*"#, with: "", options: .regularExpression)
+        // Viñetas markdown al inicio de línea: "- " o "* "
+        result = result.replacingOccurrences(of: #"(?m)^[\-\*]\s+"#, with: "", options: .regularExpression)
+        return result
     }
 
     // MARK: - Inicializador
@@ -695,9 +893,12 @@ class GeminiManager: ObservableObject {
             ],
             "generationConfig": [
                 "temperature": 0.7,
-                "maxOutputTokens": 800,
+                "maxOutputTokens": 2048,
                 "topP": 0.95,
-                "topK": 40
+                "topK": 40,
+                "thinkingConfig": [
+                    "thinkingBudget": 0
+                ]
             ],
             "safetySettings": [
                 ["category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"],
@@ -740,11 +941,12 @@ class GeminiManager: ObservableObject {
             let candidates = json?["candidates"] as? [[String: Any]]
             let content = candidates?.first?["content"] as? [String: Any]
             let parts = content?["parts"] as? [[String: Any]]
-            let text = parts?.first?["text"] as? String
+            let text = parts?.compactMap { $0["text"] as? String }.joined()
 
             if let text = text, !text.isEmpty {
-                lastResponse = text
-                let modelMsg = ChatMessage(role: "model", text: text)
+                let cleanText = GeminiManager.stripMarkdown(text)
+                lastResponse = cleanText
+                let modelMsg = ChatMessage(role: "model", text: cleanText)
                 conversationHistory.append(modelMsg)
                 saveConversationHistory()
             } else {
