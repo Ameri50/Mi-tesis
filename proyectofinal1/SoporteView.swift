@@ -150,95 +150,70 @@ struct SoporteView: View {
     
     private var isLoading: Bool { gemini.isLoading }
     
+    // El bloque de contacto/horario solo se muestra antes de iniciar la conversación
+    private var showHeader: Bool { supportHistory.isEmpty }
+    
     var body: some View {
-        ZStack {
-            Color(UIColor { _ in
-                themeManager.isDarkMode ? UIColor(white: 0.11, alpha: 1) : .systemGroupedBackground
-            })
-            .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // MARK: - Header Superior
-                headerSection
+        GeometryReader { geo in
+            ZStack {
+                Color(UIColor { _ in
+                    themeManager.isDarkMode ? UIColor(white: 0.11, alpha: 1) : .systemGroupedBackground
+                })
+                .ignoresSafeArea()
                 
-                // Chat principal
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(spacing: 8) {
-                            if supportHistory.isEmpty {
-                                emptySupportStateView
-                            } else {
-                                ForEach(supportHistory) { message in
-                                    MessageBubble(message: message)
+                VStack(spacing: 0) {
+                    // MARK: - Barra superior (SIEMPRE visible: título, estado, WhatsApp, menú de vaciar chat)
+                    topBar
+                        .padding(.top, geo.safeAreaInsets.top)
+                    
+                    // MARK: - Bloque de contacto/horario (desaparece al iniciar el chat)
+                    if showHeader {
+                        contactInfoSection
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                    }
+                    
+                    // Chat principal
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: 8) {
+                                if supportHistory.isEmpty {
+                                    emptySupportStateView
+                                } else {
+                                    ForEach(supportHistory) { message in
+                                        MessageBubble(message: message)
+                                            .environmentObject(themeManager)
+                                    }
+                                }
+                                
+                                if isLoading {
+                                    LoadingBubble()
                                         .environmentObject(themeManager)
                                 }
                             }
-                            
-                            if isLoading {
-                                LoadingBubble()
-                                    .environmentObject(themeManager)
-                            }
+                            .padding(.horizontal, 8)
+                            .padding(.top, 8)
+                            .padding(.bottom, 80)
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.top, 8)
-                        .padding(.bottom, 80)
-                    }
-                    .onChange(of: supportHistory.count) {
-                        scrollToBottom(proxy: proxy)
-                    }
-                    .onChange(of: isLoading) {
-                        scrollToBottom(proxy: proxy)
-                    }
-                }
-                
-                // Área de entrada de texto
-                VStack(spacing: 0) {
-                    if !gemini.errorMessage.isEmpty {
-                        ErrorBanner(message: gemini.errorMessage)
-                            .environmentObject(themeManager)
-                    }
-                    supportInputView
-                }
-            }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                VStack(spacing: 2) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "wrench.and.screwdriver.fill")
-                            .font(.caption)
-                        Text(localizationManager.translate("support.title"))
-                            .font(.system(size: fontSize, weight: .semibold))
-                    }
-                    .foregroundColor(themeManager.isDarkMode ? .orange : .primary)
-                    
-                    Text(isLoading
-                         ? localizationManager.translate("support.typing")
-                         : localizationManager.translate("support.available"))
-                        .font(.system(size: fontSize - 4, weight: .regular))
-                        .foregroundColor(isLoading ? .green : .secondary)
-                }
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                HStack(spacing: 16) {
-                    Button(action: openWhatsApp) {
-                        Image(systemName: "bubble.right.fill")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(.green)
+                        .onChange(of: supportHistory.count) {
+                            scrollToBottom(proxy: proxy)
+                        }
+                        .onChange(of: isLoading) {
+                            scrollToBottom(proxy: proxy)
+                        }
                     }
                     
-                    Menu {
-                        Button(role: .destructive, action: { showClearAlert = true }) {
-                            Label(localizationManager.translate("support.clearChat"), systemImage: "trash")
+                    // Área de entrada de texto
+                    VStack(spacing: 0) {
+                        if !gemini.errorMessage.isEmpty {
+                            ErrorBanner(message: gemini.errorMessage)
+                                .environmentObject(themeManager)
                         }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .foregroundColor(themeManager.isDarkMode ? .orange : .primary)
+                        supportInputView
                     }
                 }
+                .animation(.easeInOut(duration: 0.25), value: showHeader)
             }
+            .ignoresSafeArea(.container, edges: .top)
         }
         .alert(localizationManager.translate("support.clearChat"), isPresented: $showClearAlert) {
             Button(localizationManager.translate("support.cancel"), role: .cancel) {}
@@ -255,37 +230,61 @@ struct SoporteView: View {
         }
     }
     
-    // MARK: - Header Section
-    @ViewBuilder
-    private var headerSection: some View {
-        VStack(spacing: 12) {
-            // Logo y nombre de empresa
-            HStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(Color.orange.opacity(0.15))
-                        .frame(width: 50, height: 50)
-                    
-                    Image(systemName: "headphones.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundColor(.orange)
-                }
+    // MARK: - Barra superior propia (reemplaza al .toolbar, que no se renderiza sin NavigationView)
+    private var topBar: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(Color.orange.opacity(0.15))
+                    .frame(width: 38, height: 38)
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Tech Support")
-                        .font(.system(size: fontSize, weight: .semibold))
-                        .foregroundColor(themeManager.isDarkMode ? .white : .primary)
-                    
-                    Text("Centro de Asistencia")
-                        .font(.system(size: fontSize - 3, weight: .regular))
-                        .foregroundColor(.secondary)
-                }
-                
-                Spacer()
+                Image(systemName: "wrench.and.screwdriver.fill")
+                    .font(.system(size: 16))
+                    .foregroundColor(.orange)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
             
+            VStack(alignment: .leading, spacing: 1) {
+                Text(localizationManager.translate("support.title"))
+                    .font(.system(size: fontSize, weight: .semibold))
+                    .foregroundColor(themeManager.isDarkMode ? .white : .primary)
+                
+                Text(isLoading
+                     ? localizationManager.translate("support.typing")
+                     : localizationManager.translate("support.available"))
+                    .font(.system(size: fontSize - 5, weight: .regular))
+                    .foregroundColor(isLoading ? .green : .secondary)
+            }
+            
+            Spacer()
+            
+            Button(action: openWhatsApp) {
+                Image(systemName: "bubble.right.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.green)
+            }
+            
+            Menu {
+                Button(role: .destructive, action: { showClearAlert = true }) {
+                    Label(localizationManager.translate("support.clearChat"), systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.system(size: 20))
+                    .foregroundColor(themeManager.isDarkMode ? .orange : .primary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 10)
+        .padding(.bottom, 10)
+        .background(Color(UIColor { _ in
+            themeManager.isDarkMode ? UIColor(white: 0.11, alpha: 1) : .systemGroupedBackground
+        }))
+    }
+    
+    // MARK: - Bloque de contacto/horario (antes parte de headerSection)
+    @ViewBuilder
+    private var contactInfoSection: some View {
+        VStack(spacing: 12) {
             // Información de contacto
             HStack(spacing: 12) {
                 Button(action: callSupport) {

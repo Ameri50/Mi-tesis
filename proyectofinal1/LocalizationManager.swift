@@ -147,6 +147,14 @@ class LocalizationManager: ObservableObject {
             "support.cancel": ["es": "Cancelar"],
             "support.clear": ["es": "Limpiar"],
             "support.issuePrefix": ["es": "Tengo un problema con:"],
+            "support.category1.title": ["es": "Pantallas y reparaciones"],
+            "support.category1.subtitle": ["es": "Roturas, fallas táctiles, cambio de pantalla"],
+            "support.category2.title": ["es": "Conectividad"],
+            "support.category2.subtitle": ["es": "WiFi, Bluetooth, señal y redes"],
+            "support.category3.title": ["es": "Batería y carga"],
+            "support.category3.subtitle": ["es": "Duración, carga lenta, puerto dañado"],
+            "support.category4.title": ["es": "Almacenamiento y software"],
+            "support.category4.subtitle": ["es": "Espacio, actualizaciones, rendimiento"],
 
             // MARK: - Orders
             "orders.title": ["es": "Mis Órdenes"],
