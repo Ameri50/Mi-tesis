@@ -16,6 +16,10 @@ struct SettingsView: View {
     @State private var uploadMessage = ""
     @State private var showLogoutConfirmation = false
 
+    // MARK: - Estado para el borrado masivo de productos
+    @State private var showDeleteProductsConfirmation = false
+    @State private var isDeletingProducts = false
+
     var body: some View {
         ZStack {
             Color(.systemGroupedBackground)
@@ -58,6 +62,14 @@ struct SettingsView: View {
             }
         } message: {
             Text(localizationManager.translate("settings.logoutConfirmation"))
+        }
+        .alert("Borrar todos los productos", isPresented: $showDeleteProductsConfirmation) {
+            Button("Cancelar", role: .cancel) {}
+            Button("Borrar todo", role: .destructive) {
+                deleteAllProducts()
+            }
+        } message: {
+            Text("Esto elimina TODOS los productos de Firestore de forma permanente. Esta acción no se puede deshacer.")
         }
     }
 
@@ -224,6 +236,31 @@ struct SettingsView: View {
                 }) {
                     settingRow(icon: "square.stack.3d.up.fill", title: localizationManager.translate("settings.syncProducts"))
                 }
+
+                // ⚠️ Botón temporal de mantenimiento — quitar antes de entregar/publicar la app
+                Button(action: { showDeleteProductsConfirmation = true }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "trash.fill")
+                            .foregroundColor(.red)
+                            .frame(width: 24)
+
+                        if isDeletingProducts {
+                            Text("Eliminando productos...")
+                                .font(.system(size: appFontSize))
+                                .foregroundColor(.red)
+                            Spacer()
+                            ProgressView()
+                        } else {
+                            Text("Borrar TODOS los productos")
+                                .font(.system(size: appFontSize))
+                                .foregroundColor(.red)
+                            Spacer()
+                        }
+                    }
+                    .padding()
+                    .background(Color(.secondarySystemGroupedBackground))
+                }
+                .disabled(isDeletingProducts)
             }
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
@@ -276,6 +313,20 @@ struct SettingsView: View {
             .padding()
             .background(Color(.secondarySystemGroupedBackground))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+    }
+
+    // MARK: - Acción: borrar todos los productos
+    private func deleteAllProducts() {
+        isDeletingProducts = true
+        FirebaseProductManager.shared.deleteAllProducts { success in
+            DispatchQueue.main.async {
+                isDeletingProducts = false
+                uploadMessage = success
+                    ? "✅ Todos los productos fueron eliminados de Firestore."
+                    : "❌ Ocurrió un error al eliminar los productos. Revisa la consola."
+                showUploadAlert = true
+            }
         }
     }
 

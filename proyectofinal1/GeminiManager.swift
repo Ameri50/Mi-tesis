@@ -36,7 +36,7 @@ class GeminiManager: ObservableObject {
     // 🔑 La API key vive en Secrets.swift (archivo que NO se sube a git).
     private let apiKey = Secrets.geminiAPIKey
 
-    private let model = "gemini-flash-latest"
+    private let model = "gemini-3.5-flash"
 
     // MARK: - Catálogo real de repuestos (extraído de RepairData.swift)
     // Formato por línea: Nombre|Precio|Modelo(s) compatibles|Tiempo de reparación|Disponibilidad

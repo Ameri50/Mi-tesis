@@ -12,6 +12,7 @@ struct CategoryView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
+    @ObservedObject private var store = ProductStore.shared
 
     @State private var categories: [CategoryModel] = []
     @State private var searchText: String = ""
@@ -113,7 +114,10 @@ struct CategoryView: View {
             }
         }
         .onAppear {
-            categories = Self.buildCategories(from: ProductData.products)
+            categories = Self.buildCategories(from: store.products)
+        }
+        .onChange(of: store.products) { _, newProducts in
+            categories = Self.buildCategories(from: newProducts)
         }
     }
     

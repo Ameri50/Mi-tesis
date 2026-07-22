@@ -11,7 +11,8 @@ struct HomeView: View {
     @State private var searchText: String = ""
     @State private var showCart = false
     
-    let products: [SeedProduct] = ProductData.products
+    @ObservedObject private var store = ProductStore.shared
+    var products: [SeedProduct] { store.products }
     let categories = ["Todos", "iPad", "iPhone", "Mac", "Apple Watch", "AirPods", "TV y Casa"]
     
     var filteredProducts: [SeedProduct] {
@@ -165,7 +166,7 @@ struct HomeView: View {
     }
     
     private var productsSection: some View {
-        VStack(spacing: 12) {
+        LazyVStack(spacing: 12) {
             ForEach(filteredProducts) { product in
                 NavigationLink(destination: ProductDetailView(product: product)
                     .environmentObject(themeManager)

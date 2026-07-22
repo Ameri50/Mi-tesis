@@ -23,10 +23,8 @@ struct ProductImageCard: View {
 
     var body: some View {
         ZStack {
-            if !imageName.isEmpty, UIImage(named: imageName) != nil {
-                Image(imageName)
-                    .resizable()
-                    .scaledToFit()
+            if !imageName.isEmpty {
+                RemoteOrLocalImage(source: imageName, contentMode: .fit)
                     .padding(36)
             } else {
                 VStack(spacing: 10) {
@@ -49,7 +47,7 @@ struct ProductDetailView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @Environment(\.dismiss) private var dismiss
 
-    let product: SeedProduct
+    let product: Product  // ✅ Ahora usa Product (que era SeedProduct)
     @EnvironmentObject var cartManager: CartManager
     @State private var isAddedToCart = false
     @State private var selectedColor: ColorOption? = nil
@@ -90,7 +88,7 @@ struct ProductDetailView: View {
         return Array(images.prefix(5))
     }
 
-    // Precio final usando storageOptions del propio SeedProduct
+    // Precio final usando storageOptions del propio Product
     private var finalPrice: Double {
         let multiplier = selectedStorage?.priceMultiplier ?? 1.0
         return product.price * multiplier
@@ -190,7 +188,7 @@ struct ProductDetailView: View {
                                 .font(.system(size: fontSize, weight: .semibold))
                                 .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
-                            Text(product.productDescription)
+                            Text(product.description)  // ✅ Cambio: productDescription → description
                                 .font(.system(size: fontSize - 1))
                                 .foregroundStyle(themeManager.isDarkMode ? Color(white: 0.7) : .black.opacity(0.65))
                                 .lineSpacing(5)

@@ -20,7 +20,9 @@ class appDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp.configure()
         print("✅ Firebase configurado correctamente\n")
 
-        // ✅ Solo sube productos si Firebase está vacío (seed automático)
+        // ⚠️ Desactivado: ya no sembramos datos falsos de Apple.
+        // Firestore (alimentado por tu panel web) es ahora la única fuente de productos.
+        /*
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             FirebaseProductManager.shared.checkIfProductsExist { exists in
                 if exists {
@@ -37,7 +39,8 @@ class appDelegate: NSObject, UIApplicationDelegate {
                 }
             }
         }
+        */
 
         return true
     }
-}
+};

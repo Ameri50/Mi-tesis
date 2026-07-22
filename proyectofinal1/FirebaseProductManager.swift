@@ -74,15 +74,33 @@ class FirebaseProductManager {
             for document in documents {
                 let data = document.data()
 
-                guard let name = data["name"] as? String,
-                      let price = data["price"] as? Double,
-                      let category = data["category"] as? String,
-                      let imageName = data["imageName"] as? String,
-                      let additionalImages = data["additionalImages"] as? [String],
-                      let productDescription = data["productDescription"] as? String else {
-                    print("⚠️ Producto incompleto, saltando...")
+                // ✅ Solo el nombre es obligatorio. El resto tiene fallback,
+                // así no se descartan productos creados desde el panel web
+                // (que usa nombres de campo distintos a los del seed automático).
+                guard let name = data["name"] as? String, !name.isEmpty else {
+                    print("⚠️ Producto sin nombre, saltando...")
                     continue
                 }
+
+                let price: Double = (data["price"] as? Double)
+                    ?? Double(data["price"] as? Int ?? 0)
+
+                let category = (data["category"] as? String) ?? "Otros"
+
+                // 🖼️ Imagen — acepta el formato del panel web (image_url/imageURL)
+                // y el formato del seed automático (imageName)
+                let imageName = (data["image_url"] as? String)
+                    ?? (data["imageURL"] as? String)
+                    ?? (data["imageName"] as? String)
+                    ?? ""
+
+                let additionalImages = (data["additionalImages"] as? [String]) ?? []
+
+                // 📝 Descripción — acepta el formato del panel web (description)
+                // y el formato del seed automático (productDescription)
+                let productDescription = (data["description"] as? String)
+                    ?? (data["productDescription"] as? String)
+                    ?? ""
 
                 // ✅ Parsear colores — fallback: array vacío (no allColors)
                 var colorOptions: [ColorOption] = []
@@ -98,8 +116,9 @@ class FirebaseProductManager {
                 var storageOptions: [StorageOption] = []
                 if let storagesData = data["storageOptions"] as? [[String: Any]] {
                     storageOptions = storagesData.compactMap { dict in
-                        guard let capacity = dict["capacity"] as? String,
-                              let priceMultiplier = dict["priceMultiplier"] as? Double else { return nil }
+                        guard let capacity = dict["capacity"] as? String else { return nil }
+                        let priceMultiplier = (dict["priceMultiplier"] as? Double)
+                            ?? Double(dict["priceMultiplier"] as? Int ?? 1)
                         return StorageOption(capacity: capacity, priceMultiplier: priceMultiplier)
                     }
                 }
@@ -143,15 +162,25 @@ class FirebaseProductManager {
         }
     }
 
-    // MARK: - Eliminar todos los productos
+    // MARK: - Eliminar todos los productos (en lotes, seguro para colecciones grandes)
     func deleteAllProducts(completion: @escaping (Bool) -> Void) {
-        db.collection("products").getDocuments { snapshot, error in
+        deleteBatch(completion: completion)
+    }
+
+    private func deleteBatch(completion: @escaping (Bool) -> Void) {
+        // Trae como máximo 400 documentos por pasada (debajo del límite de 500 por batch de Firestore)
+        db.collection("products").limit(to: 400).getDocuments { snapshot, error in
             if let error = error {
-                print("❌ Error eliminando productos: \(error.localizedDescription)")
+                print("❌ Error obteniendo productos para eliminar: \(error.localizedDescription)")
                 completion(false)
                 return
             }
-            guard let documents = snapshot?.documents else { completion(true); return }
+
+            guard let documents = snapshot?.documents, !documents.isEmpty else {
+                print("✅ No quedan más productos por eliminar")
+                completion(true)
+                return
+            }
 
             let batch = self.db.batch()
             documents.forEach { batch.deleteDocument($0.reference) }
@@ -160,10 +189,11 @@ class FirebaseProductManager {
                 if let error = error {
                     print("❌ Error en batch delete: \(error.localizedDescription)")
                     completion(false)
-                } else {
-                    print("✅ Todos los productos eliminados")
-                    completion(true)
+                    return
                 }
+                print("🗑️ Eliminados \(documents.count) productos en este lote...")
+                // Sigue borrando hasta que no queden documentos
+                self.deleteBatch(completion: completion)
             }
         }
     }

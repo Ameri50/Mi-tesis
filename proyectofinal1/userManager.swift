@@ -4,6 +4,7 @@ import FirebaseFirestore
 import FirebaseStorage
 import FirebaseAuth
 import UIKit
+import CryptoKit
 
 class UserManager: ObservableObject {
     @Published var isAuthenticated: Bool = false
@@ -13,7 +14,7 @@ class UserManager: ObservableObject {
 
     // Emails que tienen acceso admin — edita esta lista
     private let adminEmails: Set<String> = [
-        "flutter@gmail.com",
+        "fluttercodigo@gmail.com",
     ]
 
     @AppStorage("userEmail") private var storedEmail: String = ""
@@ -312,9 +313,17 @@ class UserManager: ObservableObject {
         }
     }
 
+    /// Genera una contraseña determinística a partir del correo usando SHA256.
+    /// A diferencia de `String.hashValue` (que Swift aleatoriza en cada
+    /// ejecución del proceso por seguridad), SHA256 siempre da el mismo
+    /// resultado para el mismo texto de entrada — así la contraseña es
+    /// estable entre reinicios de la app, dispositivos, etc.
     private func generatePassword(for email: String) -> String {
-        let hash = abs(email.hashValue)
-        return "Px\(hash)!Z"
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let inputData = Data((normalizedEmail + "MiTesisSalt2026").utf8)
+        let hashed = SHA256.hash(data: inputData)
+        let hashString = hashed.compactMap { String(format: "%02x", $0) }.joined()
+        return "Px" + String(hashString.prefix(20)) + "!Z"
     }
 }
 
