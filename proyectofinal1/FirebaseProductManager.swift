@@ -18,7 +18,7 @@ class FirebaseProductManager {
             group.enter()
 
             let productData: [String: Any] = [
-                "id": product.id.uuidString,
+                "id": product.id,
                 "name": product.name,
                 "price": product.price,
                 "category": product.category,
@@ -37,7 +37,7 @@ class FirebaseProductManager {
                 "updatedAt": Timestamp(date: Date())
             ]
 
-            self.db.collection("products").document(product.id.uuidString).setData(productData) { error in
+            self.db.collection("products").document(product.id).setData(productData) { error in
                 if let error = error {
                     print("❌ Error guardando \(product.name): \(error.localizedDescription)")
                 } else {

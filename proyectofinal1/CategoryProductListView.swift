@@ -14,9 +14,7 @@ struct CategoryProductListView: View {
             Section(header: Text(category.title)) {
                 ForEach(filteredProducts) { product in
                     HStack {
-                        Image(product.imageName)
-                            .resizable()
-                            .scaledToFit()
+                        RemoteOrLocalImage(source: product.finalImageURL, contentMode: .fit)
                             .frame(width: 44, height: 44)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
 

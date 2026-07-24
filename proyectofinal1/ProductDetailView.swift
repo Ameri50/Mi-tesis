@@ -50,9 +50,8 @@ struct ProductDetailView: View {
     let product: Product  // ✅ Ahora usa Product (que era SeedProduct)
     @EnvironmentObject var cartManager: CartManager
     @State private var isAddedToCart = false
-    @State private var selectedColor: ColorOption? = nil
-    @State private var selectedStorage: StorageOption? = nil
-    @State private var currentImageIndex = 0
+    @State private var selectedColorIndex: Int? = nil
+    @State private var selectedStorageIndex: Int? = nil
 
     private var bg: Color {
         Color(UIColor { _ in
@@ -82,16 +81,39 @@ struct ProductDetailView: View {
         themeManager.isDarkMode ? Color.white.opacity(0.07) : Color.black.opacity(0.05)
     }
 
-    private var allProductImages: [String] {
-        var images = [product.imageName]
-        images.append(contentsOf: product.additionalImages)
-        return Array(images.prefix(5))
+    private var mainImageSource: String {
+        if !product.finalImageURL.isEmpty {
+            return product.finalImageURL
+        }
+        return product.imageName
     }
 
     // Precio final usando storageOptions del propio Product
     private var finalPrice: Double {
-        let multiplier = selectedStorage?.priceMultiplier ?? 1.0
-        return product.price * multiplier
+        guard let selectedStorageIndex,
+              product.storageOptions.indices.contains(selectedStorageIndex) else {
+            return product.price
+        }
+
+        return product.price * product.storageOptions[selectedStorageIndex].priceMultiplier
+    }
+
+    private var selectedColorName: String {
+        guard let selectedColorIndex,
+              product.colorOptions.indices.contains(selectedColorIndex) else {
+            return "Estándar"
+        }
+
+        return product.colorOptions[selectedColorIndex].name
+    }
+
+    private var selectedStorageCapacity: String {
+        guard let selectedStorageIndex,
+              product.storageOptions.indices.contains(selectedStorageIndex) else {
+            return "Estándar"
+        }
+
+        return product.storageOptions[selectedStorageIndex].capacity
     }
 
     var body: some View {
@@ -106,29 +128,9 @@ struct ProductDetailView: View {
                         heroBg
                             .ignoresSafeArea(edges: .top)
 
-                        VStack(spacing: 0) {
-                            TabView(selection: $currentImageIndex) {
-                                ForEach(allProductImages.indices, id: \.self) { index in
-                                    ProductImageCard(imageName: allProductImages[index])
-                                        .environmentObject(themeManager)
-                                        .tag(index)
-                                }
-                            }
-                            .tabViewStyle(.page(indexDisplayMode: .never))
+                        ProductImageCard(imageName: mainImageSource)
+                            .environmentObject(themeManager)
                             .frame(height: 380)
-
-                            if allProductImages.count > 1 {
-                                HStack(spacing: 6) {
-                                    ForEach(allProductImages.indices, id: \.self) { i in
-                                        Capsule()
-                                            .fill(i == currentImageIndex ? Color.orange : Color.gray.opacity(0.35))
-                                            .frame(width: i == currentImageIndex ? 16 : 6, height: 6)
-                                            .animation(.spring(response: 0.3), value: currentImageIndex)
-                                    }
-                                }
-                                .padding(.bottom, 16)
-                            }
-                        }
 
                         HStack {
                             Button {
@@ -205,8 +207,9 @@ struct ProductDetailView: View {
                                         .font(.system(size: fontSize, weight: .semibold))
                                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                                     Spacer()
-                                    if let color = selectedColor {
-                                        Text(color.name)
+                                    if let selectedColorIndex,
+                                       product.colorOptions.indices.contains(selectedColorIndex) {
+                                        Text(product.colorOptions[selectedColorIndex].name)
                                             .font(.system(size: 13, weight: .medium))
                                             .foregroundStyle(.orange)
                                             .adaptiveOneLine()
@@ -215,11 +218,13 @@ struct ProductDetailView: View {
 
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 16) {
-                                        ForEach(product.colorOptions) { color in
+                                        ForEach(product.colorOptions.indices, id: \.self) { index in
+                                            let color = product.colorOptions[index]
+
                                             VStack(spacing: 6) {
                                                 ZStack {
                                                     Circle()
-                                                        .stroke(selectedColor == color ? Color.orange : Color.clear, lineWidth: 2)
+                                                        .stroke(selectedColorIndex == index ? Color.orange : Color.clear, lineWidth: 2)
                                                         .frame(width: 50, height: 50)
 
                                                     Circle()
@@ -229,8 +234,8 @@ struct ProductDetailView: View {
                                                             Circle().stroke(Color.gray.opacity(0.15), lineWidth: 1)
                                                         )
                                                 }
-                                                .scaleEffect(selectedColor == color ? 1.06 : 1.0)
-                                                .animation(.spring(response: 0.3), value: selectedColor)
+                                                .scaleEffect(selectedColorIndex == index ? 1.06 : 1.0)
+                                                .animation(.spring(response: 0.3), value: selectedColorIndex)
 
                                                 Text(color.name.components(separatedBy: " ").first ?? color.name)
                                                     .font(.system(size: 10, weight: .medium))
@@ -239,7 +244,7 @@ struct ProductDetailView: View {
                                             }
                                             .onTapGesture {
                                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                                    selectedColor = color
+                                                    selectedColorIndex = index
                                                 }
                                             }
                                         }
@@ -258,11 +263,12 @@ struct ProductDetailView: View {
                                     .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
                                 HStack(spacing: 8) {
-                                    ForEach(product.storageOptions) { storage in
-                                        let isSelected = selectedStorage == storage
+                                    ForEach(product.storageOptions.indices, id: \.self) { index in
+                                        let storage = product.storageOptions[index]
+                                        let isSelected = selectedStorageIndex == index
                                         Button {
                                             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                                selectedStorage = storage
+                                                selectedStorageIndex = index
                                             }
                                         } label: {
                                             Text(storage.capacity)
@@ -310,8 +316,8 @@ struct ProductDetailView: View {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         cartManager.add(
                             product: product,
-                            selectedColor: selectedColor?.name ?? "Estándar",
-                            selectedStorage: selectedStorage?.capacity ?? "Estándar",
+                            selectedColor: selectedColorName,
+                            selectedStorage: selectedStorageCapacity,
                             quantity: 1
                         )
                         isAddedToCart = true
@@ -343,8 +349,8 @@ struct ProductDetailView: View {
         }
         // ✅ .onAppear: inicializa selecciones con los primeros valores del propio producto
         .onAppear {
-            selectedColor   = product.colorOptions.first
-            selectedStorage = product.storageOptions.first
+            selectedColorIndex = product.colorOptions.isEmpty ? nil : 0
+            selectedStorageIndex = product.storageOptions.isEmpty ? nil : 0
         }
         .navigationBarHidden(true)
     }

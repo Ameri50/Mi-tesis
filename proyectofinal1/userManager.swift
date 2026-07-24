@@ -26,6 +26,7 @@ class UserManager: ObservableObject {
     @AppStorage("userPhone") private var storedPhone: String = ""
     @AppStorage("userBirthdate") private var storedBirthdate: Double = 0
     @AppStorage("userProfileImage") private var storedProfileImage: String = ""
+    @AppStorage("firebaseUID") private var storedFirebaseUID: String = ""
 
     private var authStateHandle: AuthStateDidChangeListenerHandle?
 
@@ -79,7 +80,15 @@ class UserManager: ObservableObject {
                 self?.storedEmail = email
                 self?.storedName = name
                 self?.storedIsLoggedIn = true
+                self?.storedFirebaseUID = "guest"
             }
+            self.syncUserSessionToWeb(
+                uid: "guest",
+                email: email,
+                name: name,
+                isGuest: true,
+                isAdmin: false
+            )
             return
         }
 
@@ -98,6 +107,13 @@ class UserManager: ObservableObject {
                 print("✅ Login exitoso: \(user.email ?? "") | UID: \(user.uid)")
                 self.updateDisplayName(user: user, name: name)
                 self.saveLocalSession(email: email, name: name)
+                self.syncUserSessionToWeb(
+                    uid: user.uid,
+                    email: email,
+                    name: name,
+                    isGuest: false,
+                    isAdmin: self.isAdmin(email: email)
+                )
                 DispatchQueue.main.async { self.isLoading = false }
 
             } else {
@@ -120,7 +136,13 @@ class UserManager: ObservableObject {
                         print("🎉 Cuenta creada: \(user.email ?? "") | UID: \(user.uid)")
                         self.updateDisplayName(user: user, name: name)
                         self.saveLocalSession(email: email, name: name)
-                        self.saveUserToFirestore(uid: user.uid, email: email, name: name)
+                        self.syncUserSessionToWeb(
+                            uid: user.uid,
+                            email: email,
+                            name: name,
+                            isGuest: false,
+                            isAdmin: self.isAdmin(email: email)
+                        )
                     }
                 }
             }
@@ -129,6 +151,11 @@ class UserManager: ObservableObject {
 
     // MARK: - Logout
     func logout() {
+        let uidToSync = storedFirebaseUID.isEmpty ? Auth.auth().currentUser?.uid : storedFirebaseUID
+        if let uidToSync {
+            syncUserLogoutToWeb(uid: uidToSync)
+        }
+
         do {
             try Auth.auth().signOut()
         } catch {
@@ -147,8 +174,8 @@ class UserManager: ObservableObject {
             self?.storedPhone = ""
             self?.storedBirthdate = 0
             self?.storedProfileImage = ""
+            self?.storedFirebaseUID = ""
         }
-
         print("👋 Usuario cerró sesión")
     }
 
@@ -201,21 +228,13 @@ class UserManager: ObservableObject {
             self.storedPhone    = telefono
             self.storedBirthdate = fechaNacimiento.timeIntervalSince1970
             if !profileImageURL.isEmpty { self.storedProfileImage = profileImageURL }
-        }
-
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            guard let self = self,
-                  let uid = Auth.auth().currentUser?.uid else { return }
-            let db = Firestore.firestore()
-            do {
-                if let user = self.currentUser {
-                    try db.collection("usuarios").document(uid).setData(from: user)
-                    print("✅ Datos guardados en Firestore")
-                }
-            } catch {
-                print("❌ Error guardando en Firestore: \(error)")
+            if let authUID = Auth.auth().currentUser?.uid {
+                self.storedFirebaseUID = authUID
             }
         }
+
+        guard let uid = Auth.auth().currentUser?.uid ?? (storedFirebaseUID.isEmpty ? nil : storedFirebaseUID) else { return }
+        syncFullProfileToWeb(uid: uid)
     }
 
     // MARK: - Subir imagen de perfil
@@ -277,7 +296,15 @@ class UserManager: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             self?.currentUser    = user
             self?.isAuthenticated = true
+            self?.storedFirebaseUID = uid
         }
+        syncUserSessionToWeb(
+            uid: uid,
+            email: email,
+            name: name,
+            isGuest: email == "guest@email.com",
+            isAdmin: isAdmin(email: email)
+        )
         print("🔄 Sesión activa: \(name) | Admin: \(isAdmin(email: email))")
     }
 
@@ -299,17 +326,78 @@ class UserManager: ObservableObject {
         }
     }
 
-    private func saveUserToFirestore(uid: String, email: String, name: String) {
+    private func syncUserSessionToWeb(uid: String, email: String, name: String, isGuest: Bool, isAdmin: Bool) {
         let db = Firestore.firestore()
-        db.collection("usuarios").document(uid).setData([
+        let payload: [String: Any] = [
+            "uid": uid,
             "nombre": name,
             "email": email,
-            "isGuest": false,
-            "isAdmin": isAdmin(email: email),
-            "creadoEn": FieldValue.serverTimestamp()
-        ], merge: true) { error in
-            if let error = error { print("❌ Error guardando en Firestore: \(error)") }
-            else { print("✅ Usuario guardado en Firestore con UID: \(uid)") }
+            "isGuest": isGuest,
+            "isAdmin": isAdmin,
+            "online": true,
+            "lastLoginAt": FieldValue.serverTimestamp(),
+            "updatedAt": FieldValue.serverTimestamp(),
+            "platform": "iOS"
+        ]
+
+        for collectionName in ["usuarios", "users"] {
+            db.collection(collectionName).document(uid).setData(payload, merge: true) { error in
+                if let error = error {
+                    print("❌ Error guardando usuario en \(collectionName): \(error)")
+                } else {
+                    print("✅ Usuario sincronizado en \(collectionName) con UID: \(uid)")
+                }
+            }
+        }
+    }
+
+    private func syncFullProfileToWeb(uid: String) {
+        guard let user = currentUser else { return }
+        let db = Firestore.firestore()
+
+        let payload: [String: Any] = [
+            "uid": uid,
+            "nombre": user.name,
+            "apellido": user.apellido,
+            "email": user.email,
+            "direccion": user.direccion,
+            "edad": user.edad,
+            "telefono": user.telefono,
+            "fechaNacimiento": user.fechaNacimiento?.timeIntervalSince1970 ?? 0,
+            "profileImageURL": user.profileImageURL,
+            "isGuest": user.isGuest,
+            "isAdmin": user.isAdmin,
+            "online": true,
+            "updatedAt": FieldValue.serverTimestamp()
+        ]
+
+        for collectionName in ["usuarios", "users"] {
+            db.collection(collectionName).document(uid).setData(payload, merge: true) { error in
+                if let error = error {
+                    print("❌ Error actualizando perfil en \(collectionName): \(error)")
+                } else {
+                    print("✅ Perfil sincronizado en \(collectionName)")
+                }
+            }
+        }
+    }
+
+    private func syncUserLogoutToWeb(uid: String) {
+        guard !uid.isEmpty else { return }
+
+        let db = Firestore.firestore()
+        let payload: [String: Any] = [
+            "online": false,
+            "lastLogoutAt": FieldValue.serverTimestamp(),
+            "updatedAt": FieldValue.serverTimestamp()
+        ]
+
+        for collectionName in ["usuarios", "users"] {
+            db.collection(collectionName).document(uid).setData(payload, merge: true) { error in
+                if let error = error {
+                    print("❌ Error marcando logout en \(collectionName): \(error)")
+                }
+            }
         }
     }
 

@@ -238,9 +238,7 @@ struct CartItemRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(item.product.imageName)
-                .resizable()
-                .scaledToFit()
+            RemoteOrLocalImage(source: item.product.finalImageURL, contentMode: .fit)
                 .frame(width: 60, height: 60)
                 .background(
                     RoundedRectangle(cornerRadius: 8)

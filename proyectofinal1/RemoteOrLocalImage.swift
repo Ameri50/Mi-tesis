@@ -9,9 +9,20 @@ struct RemoteOrLocalImage: View {
         source.lowercased().hasPrefix("http://") || source.lowercased().hasPrefix("https://")
     }
 
+    private var systemSymbolName: String? {
+        guard source.lowercased().hasPrefix("sf:") else { return nil }
+        let symbol = String(source.dropFirst(3))
+        return symbol.isEmpty ? nil : symbol
+    }
+
     var body: some View {
         Group {
-            if isRemoteURL, let url = URL(string: source) {
+            if let systemSymbolName {
+                Image(systemName: systemSymbolName)
+                    .resizable()
+                    .aspectRatio(contentMode: contentMode)
+                    .padding(8)
+            } else if isRemoteURL, let url = URL(string: source) {
                 AsyncImage(url: url) { phase in
                     switch phase {
                     case .success(let image):
