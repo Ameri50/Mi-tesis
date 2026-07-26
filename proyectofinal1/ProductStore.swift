@@ -42,14 +42,18 @@ class ProductStore: ObservableObject {
 
             if let error = error {
                 print("❌ Error escuchando productos: \(error.localizedDescription)")
-                self.products = self.localProducts
-                self.isLoading = false
+                Task { @MainActor in
+                    self.products = self.localProducts
+                    self.isLoading = false
+                }
                 return
             }
 
             guard let documents = snapshot?.documents else {
-                self.products = self.localProducts
-                self.isLoading = false
+                Task { @MainActor in
+                    self.products = self.localProducts
+                    self.isLoading = false
+                }
                 return
             }
 

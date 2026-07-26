@@ -19,6 +19,7 @@ struct RoundedCorner: Shape {
 // MARK: - Imagen de producto a pantalla completa (sin tarjeta gris)
 struct ProductImageCard: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     let imageName: String
 
     var body: some View {
@@ -31,7 +32,7 @@ struct ProductImageCard: View {
                     Image(systemName: "photo.badge.exclamationmark")
                         .font(.system(size: 44))
                         .foregroundStyle(.orange.opacity(0.35))
-                    Text("Sin imagen")
+                    Text(localizationManager.translate("product.noImage"))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.gray.opacity(0.7))
                 }
@@ -45,6 +46,7 @@ struct ProductImageCard: View {
 struct ProductDetailView: View {
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     @Environment(\.dismiss) private var dismiss
 
     let product: Product  // ✅ Ahora usa Product (que era SeedProduct)
@@ -130,6 +132,7 @@ struct ProductDetailView: View {
 
                         ProductImageCard(imageName: mainImageSource)
                             .environmentObject(themeManager)
+                            .environmentObject(localizationManager)
                             .frame(height: 380)
 
                         HStack {
@@ -186,11 +189,11 @@ struct ProductDetailView: View {
 
                         // MARK: - Descripción
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Descripción")
+                            Text(localizationManager.translate("product.description"))
                                 .font(.system(size: fontSize, weight: .semibold))
                                 .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
-                            Text(product.description)  // ✅ Cambio: productDescription → description
+                            Text(product.displayDescription)
                                 .font(.system(size: fontSize - 1))
                                 .foregroundStyle(themeManager.isDarkMode ? Color(white: 0.7) : .black.opacity(0.65))
                                 .lineSpacing(5)
@@ -203,7 +206,7 @@ struct ProductDetailView: View {
                         if !product.colorOptions.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack {
-                                    Text("Color")
+                                    Text(localizationManager.translate("product.color"))
                                         .font(.system(size: fontSize, weight: .semibold))
                                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                                     Spacer()
@@ -258,7 +261,7 @@ struct ProductDetailView: View {
                         // MARK: - Capacidad (segmented pill)
                         if !product.storageOptions.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Capacidad")
+                                Text(localizationManager.translate("product.capacity"))
                                     .font(.system(size: fontSize, weight: .semibold))
                                     .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
@@ -292,9 +295,9 @@ struct ProductDetailView: View {
 
                         // MARK: - Specs Row
                         HStack(spacing: 10) {
-                            SpecBadge(icon: "shippingbox",      label: "Envío gratis",       theme: themeManager)
-                            SpecBadge(icon: "arrow.uturn.left", label: "30 días devolución", theme: themeManager)
-                            SpecBadge(icon: "checkmark.shield", label: "Garantía oficial",   theme: themeManager)
+                            SpecBadge(icon: "shippingbox",      label: localizationManager.translate("product.freeShipping"),       theme: themeManager)
+                            SpecBadge(icon: "arrow.uturn.left", label: localizationManager.translate("product.returnDays"), theme: themeManager)
+                            SpecBadge(icon: "checkmark.shield", label: localizationManager.translate("product.officialWarranty"),   theme: themeManager)
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 4)
@@ -329,7 +332,7 @@ struct ProductDetailView: View {
                     HStack(spacing: 10) {
                         Image(systemName: isAddedToCart ? "checkmark.circle.fill" : "cart.badge.plus")
                             .font(.system(size: 19, weight: .semibold))
-                        Text(isAddedToCart ? "Agregado al carrito" : "Agregar al carrito")
+                        Text(isAddedToCart ? localizationManager.translate("product.addedToCart") : localizationManager.translate("product.addToCart"))
                             .font(.system(size: fontSize + 1, weight: .bold))
                             .adaptiveOneLine(minScale: 0.7)
                     }

@@ -69,7 +69,8 @@ class StoreViewModel: ObservableObject {
         guard !query.isEmpty else { return products }
         return products.filter { product in
             product.name.lowercased().contains(query.lowercased()) ||
-            product.description.lowercased().contains(query.lowercased())
+            product.description.lowercased().contains(query.lowercased()) ||
+            product.displayDescription.lowercased().contains(query.lowercased())
         }
     }
     

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ChatView: View {
     @AppStorage("appFontSize") private var fontSize: Double = 16
+    @EnvironmentObject var localizationManager: LocalizationManager
     @EnvironmentObject var geminiManager: GeminiManager
     @State private var messageText = ""
     @State private var showClearAlert = false
@@ -60,14 +61,14 @@ struct ChatView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 VStack(spacing: 2) {
-                    Text("Gemini AI")
+                    Text(localizationManager.translate("chat.title"))
                         .font(.system(size: fontSize + 2, weight: .semibold))
                     if geminiManager.isLoading {
-                        Text("escribiendo...")
+                        Text(localizationManager.translate("chat.typing"))
                             .font(.system(size: fontSize - 4, weight: .regular))
                             .foregroundColor(.green)
                     } else {
-                        Text("en línea")
+                        Text(localizationManager.translate("chat.online"))
                             .font(.system(size: fontSize - 4, weight: .regular))
                             .foregroundColor(.secondary)
                     }
@@ -77,20 +78,20 @@ struct ChatView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Menu {
                     Button(role: .destructive, action: { showClearAlert = true }) {
-                        Label("Limpiar Chat", systemImage: "trash")
+                        Label(localizationManager.translate("chat.clearChat"), systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
             }
         }
-        .alert("Limpiar Chat", isPresented: $showClearAlert) {
-            Button("Cancelar", role: .cancel) {}
-            Button("Limpiar", role: .destructive) {
+        .alert(localizationManager.translate("chat.clearChat"), isPresented: $showClearAlert) {
+            Button(localizationManager.translate("cancel"), role: .cancel) {}
+            Button(localizationManager.translate("delete"), role: .destructive) {
                 geminiManager.clearConversation()
             }
         } message: {
-            Text("¿Para confirmar, deseas eliminar todo el historial de conversación?")
+            Text(localizationManager.translate("chat.clearConfirm"))
         }
     }
     
@@ -111,10 +112,10 @@ struct ChatView: View {
             }
             
             VStack(spacing: 8) {
-                Text("¿En qué te ayudo?")
+                Text(localizationManager.translate("chat.emptyTitle"))
                     .font(.system(size: fontSize + 2, weight: .bold))
                 
-                Text("Pregúntame sobre productos, precios, repuestos y reparaciones, o cualquier duda que tengas")
+                Text(localizationManager.translate("chat.emptySubtitle"))
                     .font(.system(size: fontSize, weight: .regular))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -124,28 +125,28 @@ struct ChatView: View {
             VStack(spacing: 12) {
                 SuggestionBubble(
                     icon: "hand.wave.fill",
-                    text: "Hola, ¿qué puedo hacer en esta app?",
+                    text: localizationManager.translate("chat.suggestion1"),
                     action: sendSuggestion,
                     fontSize: fontSize
                 )
                 
                 SuggestionBubble(
                     icon: "iphone",
-                    text: "¿Qué iPhone me recomiendas?",
+                    text: localizationManager.translate("chat.suggestion2"),
                     action: sendSuggestion,
                     fontSize: fontSize
                 )
                 
                 SuggestionBubble(
                     icon: "wrench.and.screwdriver",
-                    text: "¿Tienen repuestos y servicio técnico?",
+                    text: localizationManager.translate("chat.suggestion3"),
                     action: sendSuggestion,
                     fontSize: fontSize
                 )
                 
                 SuggestionBubble(
                     icon: "sparkles",
-                    text: "Cuéntame algo interesante",
+                    text: localizationManager.translate("chat.suggestion4"),
                     action: sendSuggestion,
                     fontSize: fontSize
                 )
@@ -161,7 +162,7 @@ struct ChatView: View {
         HStack(alignment: .bottom, spacing: 8) {
             // Text field
             HStack {
-                TextField("Mensaje", text: $messageText, axis: .vertical)
+                TextField(localizationManager.translate("chat.messagePlaceholder"), text: $messageText, axis: .vertical)
                     .textFieldStyle(.plain)
                     .font(.system(size: fontSize, weight: .regular))
                     .lineLimit(1...6)

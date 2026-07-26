@@ -42,6 +42,14 @@ class FirebaseProductSync: NSObject, ObservableObject {
         let totalProducts = allProducts.count
         
         print("📊 Total de productos a sincronizar: \(totalProducts)")
+
+        guard totalProducts > 0 else {
+            isSyncing = false
+            syncProgress = 100
+            syncMessage = "No hay productos para sincronizar"
+            completion(true)
+            return
+        }
         
         var uploadedCount = 0
         
@@ -51,7 +59,9 @@ class FirebaseProductSync: NSObject, ObservableObject {
                 
                 if success {
                     uploadedCount += 1
-                    self.syncProgress = Int((Double(uploadedCount) / Double(totalProducts)) * 100)
+                    let progress = (Double(uploadedCount) / Double(totalProducts)) * 100
+                    let safeProgress = min(max(progress, 0), 100)
+                    self.syncProgress = Int(safeProgress.rounded())
                     self.syncMessage = "Sincronizando: \(uploadedCount)/\(totalProducts) productos"
                     print("✅ Producto \(uploadedCount)/\(totalProducts) sincronizado")
                 }

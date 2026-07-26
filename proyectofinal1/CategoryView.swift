@@ -16,7 +16,7 @@ struct CategoryView: View {
 
     @State private var categories: [CategoryModel] = []
     @State private var searchText: String = ""
-    @State private var selectedCategoryFilter: String = "Todos"
+    @State private var selectedCategoryFilter: String = ""
     @State private var showCart = false
     
     var localizedCategoryNames: [String] {
@@ -115,9 +115,13 @@ struct CategoryView: View {
         }
         .onAppear {
             categories = Self.buildCategories(from: store.products)
+            syncSelectedFilterWithLanguage()
         }
         .onChange(of: store.products) { _, newProducts in
             categories = Self.buildCategories(from: newProducts)
+        }
+        .onChange(of: localizationManager.currentLanguage) { _, _ in
+            syncSelectedFilterWithLanguage()
         }
     }
     
@@ -230,6 +234,12 @@ struct CategoryView: View {
             return localizationManager.translate("category.accessories")
         default:
             return category
+        }
+    }
+
+    private func syncSelectedFilterWithLanguage() {
+        if selectedCategoryFilter.isEmpty || selectedCategoryFilter == "Todos" || selectedCategoryFilter == "All" {
+            selectedCategoryFilter = localizationManager.translate("category.all")
         }
     }
 }

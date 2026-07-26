@@ -21,11 +21,11 @@ struct SobreNosotrosView: View {
             VStack(spacing: 0) {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Sobre Nosotros")
+                        Text(localizationManager.translate("about.title"))
                             .font(.system(size: fontSize + 2, weight: .bold))
                             .foregroundColor(themeManager.isDarkMode ? .white : .black)
                         
-                        Text("Nuestra historia & valores")
+                        Text(localizationManager.translate("about.subtitle"))
                             .font(.system(size: fontSize - 2, weight: .regular))
                             .foregroundColor(.gray)
                     }
@@ -77,11 +77,11 @@ struct SobreNosotrosView: View {
             }
             
             VStack(spacing: 8) {
-                Text("Innovación & Excelencia")
+                Text(localizationManager.translate("about.heroTitle"))
                     .font(.system(size: fontSize + 4, weight: .bold))
                     .foregroundColor(themeManager.isDarkMode ? .white : .primary)
                 
-                Text("Transformando el futuro con tecnología de punta")
+                Text(localizationManager.translate("about.heroSubtitle"))
                     .font(.system(size: fontSize - 1, weight: .regular))
                     .multilineTextAlignment(.center)
                     .foregroundColor(.gray)
@@ -104,7 +104,7 @@ struct SobreNosotrosView: View {
                         .frame(width: 2, height: 40)
                 }
                 
-                Text("Nuestro Comienzo")
+                Text(localizationManager.translate("about.startTitle"))
                     .font(.system(size: fontSize + 2, weight: .bold))
                     .foregroundColor(themeManager.isDarkMode ? .white : .primary)
             }
@@ -129,44 +129,44 @@ struct SobreNosotrosView: View {
     
     private var statsSection: some View {
         HStack(spacing: 12) {
-            StatCard(numero: "5+", titulo: "Años", color: .orange, isDarkMode: themeManager.isDarkMode)
-            StatCard(numero: "10K+", titulo: "Usuarios", color: .blue, isDarkMode: themeManager.isDarkMode)
-            StatCard(numero: "99%", titulo: "Satisfacción", color: .green, isDarkMode: themeManager.isDarkMode)
+            StatCard(numero: "5+", titulo: localizationManager.translate("about.years"), color: .orange, isDarkMode: themeManager.isDarkMode)
+            StatCard(numero: "10K+", titulo: localizationManager.translate("about.users"), color: .blue, isDarkMode: themeManager.isDarkMode)
+            StatCard(numero: "99%", titulo: localizationManager.translate("about.satisfaction"), color: .green, isDarkMode: themeManager.isDarkMode)
         }
         .padding(.horizontal, 16)
     }
     
     private var misionVisionSection: some View {
         VStack(spacing: 12) {
-            MisionVisionCard(icon: "target", titulo: "Misión", descripcion: "Proporcionar herramientas innovadoras que permitan a nuestros clientes alcanzar sus objetivos", color: .blue, isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
+            MisionVisionCard(icon: "target", titulo: localizationManager.translate("about.mission"), descripcion: localizationManager.translate("about.missionDesc"), color: .blue, isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
             
-            MisionVisionCard(icon: "eye.fill", titulo: "Visión", descripcion: "Ser líderes reconocidos por excelencia, innovación y dedicación en la industria", color: .purple, isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
+            MisionVisionCard(icon: "eye.fill", titulo: localizationManager.translate("about.vision"), descripcion: localizationManager.translate("about.visionDesc"), color: .purple, isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
         }
         .padding(.horizontal, 16)
     }
     
     private var valoresModernoSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Nuestros Valores")
+            Text(localizationManager.translate("about.values"))
                 .font(.system(size: fontSize + 2, weight: .bold))
                 .foregroundColor(themeManager.isDarkMode ? .white : .primary)
                 .padding(.horizontal, 16)
             
             VStack(spacing: 12) {
-                Button(action: { selectedValor = "Pasión" }) {
-                    ValorModerno(icon: "heart.fill", titulo: "Pasión", color: .red, isDarkMode: themeManager.isDarkMode)
+                Button(action: { selectedValor = localizationManager.translate("about.passion") }) {
+                    ValorModerno(icon: "heart.fill", titulo: localizationManager.translate("about.passion"), color: .red, isDarkMode: themeManager.isDarkMode)
                 }
                 
-                Button(action: { selectedValor = "Innovación" }) {
-                    ValorModerno(icon: "sparkles", titulo: "Innovación", color: .orange, isDarkMode: themeManager.isDarkMode)
+                Button(action: { selectedValor = localizationManager.translate("about.innovation") }) {
+                    ValorModerno(icon: "sparkles", titulo: localizationManager.translate("about.innovation"), color: .orange, isDarkMode: themeManager.isDarkMode)
                 }
                 
-                Button(action: { selectedValor = "Colaboración" }) {
-                    ValorModerno(icon: "person.2.fill", titulo: "Colaboración", color: .blue, isDarkMode: themeManager.isDarkMode)
+                Button(action: { selectedValor = localizationManager.translate("about.collaboration") }) {
+                    ValorModerno(icon: "person.2.fill", titulo: localizationManager.translate("about.collaboration"), color: .blue, isDarkMode: themeManager.isDarkMode)
                 }
                 
-                Button(action: { selectedValor = "Integridad" }) {
-                    ValorModerno(icon: "checkmark.circle.fill", titulo: "Integridad", color: .green, isDarkMode: themeManager.isDarkMode)
+                Button(action: { selectedValor = localizationManager.translate("about.integrity") }) {
+                    ValorModerno(icon: "checkmark.circle.fill", titulo: localizationManager.translate("about.integrity"), color: .green, isDarkMode: themeManager.isDarkMode)
                 }
             }
             .padding(.horizontal, 16)
@@ -175,16 +175,16 @@ struct SobreNosotrosView: View {
     
     private var timelineSection: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Nuestro Recorrido")
+            Text(localizationManager.translate("about.timeline"))
                 .font(.system(size: fontSize + 2, weight: .bold))
                 .foregroundColor(themeManager.isDarkMode ? .white : .primary)
                 .padding(.horizontal, 16)
             
             VStack(spacing: 16) {
-                TimelineItem(year: "2019", evento: "Inicio del proyecto", isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
-                TimelineItem(year: "2021", evento: "Primer lanzamiento oficial", isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
-                TimelineItem(year: "2023", evento: "Alcanzamos 10K usuarios", isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
-                TimelineItem(year: "2024", evento: "Expansión regional", isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
+                TimelineItem(year: "2019", evento: localizationManager.translate("about.timeline2019"), isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
+                TimelineItem(year: "2021", evento: localizationManager.translate("about.timeline2021"), isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
+                TimelineItem(year: "2023", evento: localizationManager.translate("about.timeline2023"), isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
+                TimelineItem(year: "2024", evento: localizationManager.translate("about.timeline2024"), isDarkMode: themeManager.isDarkMode, fontSize: fontSize)
             }
             .padding(.horizontal, 16)
         }
@@ -198,14 +198,14 @@ struct SobreNosotrosView: View {
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.orange)
                     
-                    Text("Lunes a Viernes: 9:00 - 18:00")
+                    Text(localizationManager.translate("about.hours"))
                         .font(.system(size: fontSize - 1, weight: .semibold))
                         .foregroundColor(themeManager.isDarkMode ? .white : .primary)
                     
                     Spacer()
                 }
                 
-                Text("Estamos disponibles para ayudarte")
+                Text(localizationManager.translate("about.available"))
                     .font(.system(size: fontSize - 2, weight: .regular))
                     .foregroundColor(.gray)
             }
@@ -213,7 +213,7 @@ struct SobreNosotrosView: View {
             .background(LinearGradient(gradient: Gradient(colors: [Color.orange.opacity(0.1), Color.orange.opacity(0.05)]), startPoint: .topLeading, endPoint: .bottomTrailing))
             .cornerRadius(14)
             
-            Text("¿Preguntas o sugerencias? Contáctanos desde la sección de Soporte")
+            Text(localizationManager.translate("about.contactSupport"))
                 .font(.system(size: fontSize - 2, weight: .regular))
                 .multilineTextAlignment(.center)
                 .foregroundColor(.gray)

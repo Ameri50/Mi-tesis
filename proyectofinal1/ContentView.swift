@@ -34,7 +34,7 @@ struct ContentView: View {
                                     .environmentObject(fontSizeManager)
                             }
                             .tabItem {
-                                Label("Inicio", systemImage: "house.fill")
+                                Label(localizationManager.translate("common.home"), systemImage: "house.fill")
                             }
                             .tag(0)
 
@@ -46,7 +46,7 @@ struct ContentView: View {
                                     .environmentObject(fontSizeManager)
                             }
                             .tabItem {
-                                Label("Tienda", systemImage: "bag.fill")
+                                Label(localizationManager.translate("common.shop"), systemImage: "bag.fill")
                             }
                             .tag(1)
 
@@ -57,7 +57,7 @@ struct ContentView: View {
                                     .environmentObject(localizationManager)
                             }
                             .tabItem {
-                                Label("Soporte", systemImage: "sparkles")
+                                Label(localizationManager.translate("support.title"), systemImage: "sparkles")
                             }
                             .tag(2)
 
@@ -67,7 +67,7 @@ struct ContentView: View {
                                     .environmentObject(themeManager)
                             }
                             .tabItem {
-                                Label("Nosotros", systemImage: "info.circle.fill")
+                                Label(localizationManager.translate("common.about"), systemImage: "info.circle.fill")
                             }
                             .tag(3)
 
@@ -78,7 +78,7 @@ struct ContentView: View {
                                     .environmentObject(themeManager)
                             }
                             .tabItem {
-                                Label("Perfil", systemImage: "person.fill")
+                                Label(localizationManager.translate("common.profile"), systemImage: "person.fill")
                             }
                             .tag(4)
                         }
@@ -95,6 +95,7 @@ struct ContentView: View {
                 }
             }
         }
+        .environment(\.locale, Locale(identifier: localizationManager.currentLanguage))
         .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
     }
 }

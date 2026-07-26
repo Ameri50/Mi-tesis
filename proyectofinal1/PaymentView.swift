@@ -22,6 +22,7 @@ struct PaymentConfig {
 struct PaymentView: View {
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedMethod: PaymentMethod? = nil
@@ -54,7 +55,7 @@ struct PaymentView: View {
 
                     // MARK: Resumen
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Resumen del pedido")
+                        Text(localizationManager.translate("payment.summary"))
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(.secondary)
                             .textCase(.uppercase)
@@ -65,6 +66,10 @@ struct PaymentView: View {
                                     Text(item.product.name)
                                         .font(.system(size: 15, weight: .medium))
                                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
+                                    Text(item.product.displayDescription)
+                                        .font(.system(size: 11))
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
                                     Text("\(item.selectedColor) · \(item.selectedStorage) · x\(item.quantity)")
                                         .font(.system(size: 12))
                                         .foregroundStyle(.secondary)
@@ -92,7 +97,7 @@ struct PaymentView: View {
                     .cornerRadius(18)
 
                     // MARK: Métodos de pago
-                    Text("Elige cómo pagar")
+                    Text(localizationManager.translate("payment.chooseMethod"))
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.secondary)
                         .textCase(.uppercase)
@@ -100,8 +105,8 @@ struct PaymentView: View {
                         .padding(.horizontal, 4)
 
                     PaymentMethodButton(
-                        label: "Pagar con Yape",
-                        subtitle: "Rápido y sin comisión",
+                        label: localizationManager.translate("payment.yape"),
+                        subtitle: localizationManager.translate("payment.yapeSubtitle"),
                         color: Color(red: 0.42, green: 0.13, blue: 0.66),
                         icon: "Y"
                     ) {
@@ -109,8 +114,8 @@ struct PaymentView: View {
                     }
 
                     PaymentMethodButton(
-                        label: "Transferencia Interbank",
-                        subtitle: "Cuenta o CCI",
+                        label: localizationManager.translate("payment.interbank"),
+                        subtitle: localizationManager.translate("payment.interbankSubtitle"),
                         color: Color(red: 0.0, green: 0.24, blue: 0.65),
                         icon: "IB"
                     ) {
@@ -118,8 +123,8 @@ struct PaymentView: View {
                     }
 
                     PaymentMethodButton(
-                        label: "Tarjeta de crédito/débito",
-                        subtitle: "Visa, Mastercard · vía Culqi",
+                        label: localizationManager.translate("payment.card"),
+                        subtitle: localizationManager.translate("payment.cardSubtitle"),
                         color: Color(red: 0.11, green: 0.11, blue: 0.12),
                         icon: "💳"
                     ) {
@@ -133,11 +138,11 @@ struct PaymentView: View {
             if selectedMethod == .yape {
                 PaymentSheet(color: Color(red: 0.42, green: 0.13, blue: 0.66)) {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Pagar con Yape")
+                        Text(localizationManager.translate("payment.yape"))
                             .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                             .padding(.bottom, 4)
-                        Text("Yapea S/ \(String(format: "%.2f", cartManager.totalPrice)) a este número")
+                        Text(localizationManager.translate("payment.yapeAmount") + " S/ " + String(format: "%.2f", cartManager.totalPrice))
                             .font(.system(size: 14))
                             .foregroundStyle(.secondary)
                             .padding(.bottom, 16)
@@ -168,7 +173,7 @@ struct PaymentView: View {
                         .padding(.top, 14)
 
                         Button { withAnimation { selectedMethod = nil } } label: {
-                            Text("Cancelar")
+                            Text(localizationManager.translate("cancel"))
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundStyle(.secondary)
                                 .frame(maxWidth: .infinity)
@@ -185,7 +190,7 @@ struct PaymentView: View {
             if selectedMethod == .interbank {
                 PaymentSheet(color: Color(red: 0.0, green: 0.24, blue: 0.65)) {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Transferencia Interbank")
+                        Text(localizationManager.translate("payment.interbank"))
                             .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                             .padding(.bottom, 4)
@@ -221,7 +226,7 @@ struct PaymentView: View {
                         .padding(.top, 14)
 
                         Button { withAnimation { selectedMethod = nil } } label: {
-                            Text("Cancelar")
+                            Text(localizationManager.translate("cancel"))
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundStyle(.secondary)
                                 .frame(maxWidth: .infinity)
@@ -257,7 +262,7 @@ struct PaymentView: View {
                 }
             }
         }
-        .navigationTitle("Checkout")
+        .navigationTitle(localizationManager.translate("payment.checkout"))
         .navigationBarTitleDisplayMode(.inline)
     }
 

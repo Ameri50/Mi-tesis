@@ -35,6 +35,13 @@ class FirebaseImageUploader: ObservableObject {
         
         print("🟡 Iniciando carga de imágenes a Firebase Storage...")
         print("📊 Total de imágenes: \(imageNames.count)")
+
+        guard !imageNames.isEmpty else {
+            isUploading = false
+            uploadProgress = 1.0
+            completion(true)
+            return
+        }
         
         let group = DispatchGroup()
         var successCount = 0
@@ -53,7 +60,8 @@ class FirebaseImageUploader: ObservableObject {
                 }
                 
                 DispatchQueue.main.async {
-                    self.uploadProgress = Double(index + 1) / Double(self.imageNames.count)
+                    let progress = Double(index + 1) / Double(self.imageNames.count)
+                    self.uploadProgress = min(max(progress, 0), 1)
                     self.currentImageName = imageName
                 }
                 

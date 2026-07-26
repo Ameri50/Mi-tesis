@@ -32,6 +32,7 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         profileSection
                         themeSection
+                        languageSection
                         fontSizeSection
                         notificationsSection
 
@@ -63,13 +64,13 @@ struct SettingsView: View {
         } message: {
             Text(localizationManager.translate("settings.logoutConfirmation"))
         }
-        .alert("Borrar todos los productos", isPresented: $showDeleteProductsConfirmation) {
-            Button("Cancelar", role: .cancel) {}
-            Button("Borrar todo", role: .destructive) {
+        .alert(localizationManager.translate("settings.deleteAllProducts"), isPresented: $showDeleteProductsConfirmation) {
+            Button(localizationManager.translate("settings.deleteAllProductsCancel"), role: .cancel) {}
+            Button(localizationManager.translate("settings.deleteAllProductsButton"), role: .destructive) {
                 deleteAllProducts()
             }
         } message: {
-            Text("Esto elimina TODOS los productos de Firestore de forma permanente. Esta acción no se puede deshacer.")
+            Text(localizationManager.translate("settings.deleteAllProductsMessage"))
         }
     }
 
@@ -150,6 +151,22 @@ struct SettingsView: View {
                 .environmentObject(themeManager)
                 .environmentObject(localizationManager)
                 .presentationDetents([.medium, .large])
+        }
+    }
+
+    // MARK: - Idioma
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionTitle(localizationManager.translate("settings.language"))
+
+            Picker("", selection: languageBinding) {
+                Text(localizationManager.translate("lang.es")).tag("es")
+                Text(localizationManager.translate("lang.en")).tag("en")
+            }
+            .pickerStyle(.segmented)
+            .padding()
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
     }
 
@@ -323,8 +340,8 @@ struct SettingsView: View {
             DispatchQueue.main.async {
                 isDeletingProducts = false
                 uploadMessage = success
-                    ? "✅ Todos los productos fueron eliminados de Firestore."
-                    : "❌ Ocurrió un error al eliminar los productos. Revisa la consola."
+                    ? localizationManager.translate("settings.deleteAllProductsSuccess")
+                    : localizationManager.translate("settings.deleteAllProductsError")
                 showUploadAlert = true
             }
         }
@@ -363,6 +380,13 @@ struct SettingsView: View {
         }
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
+    }
+
+    private var languageBinding: Binding<String> {
+        Binding(
+            get: { localizationManager.currentLanguage },
+            set: { localizationManager.setLanguage($0) }
+        )
     }
 }
 

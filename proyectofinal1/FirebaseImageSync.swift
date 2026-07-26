@@ -30,6 +30,14 @@ class FirebaseImageSync: NSObject, ObservableObject {
         let totalImages = imageNames.count
         
         print("📊 Total de imágenes a sincronizar: \(totalImages)")
+
+        guard totalImages > 0 else {
+            isSyncing = false
+            syncProgress = 100
+            syncMessage = "No hay imágenes para sincronizar"
+            completion(true)
+            return
+        }
         
         var uploadedCount = 0
         
@@ -39,7 +47,9 @@ class FirebaseImageSync: NSObject, ObservableObject {
                 
                 if success {
                     uploadedCount += 1
-                    self.syncProgress = Int((Double(uploadedCount) / Double(totalImages)) * 100)
+                    let progress = (Double(uploadedCount) / Double(totalImages)) * 100
+                    let safeProgress = min(max(progress, 0), 100)
+                    self.syncProgress = Int(safeProgress.rounded())
                     self.syncMessage = "Sincronizando: \(uploadedCount)/\(totalImages) imágenes"
                     print("✅ Imagen \(uploadedCount)/\(totalImages) sincronizada: \(imageName)")
                 }
