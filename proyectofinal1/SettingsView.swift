@@ -19,6 +19,7 @@ struct SettingsView: View {
     // MARK: - Estado para el borrado masivo de productos
     @State private var showDeleteProductsConfirmation = false
     @State private var isDeletingProducts = false
+    @State private var showNotificationPermissionAlert = false
 
     var body: some View {
         ZStack {
@@ -71,6 +72,11 @@ struct SettingsView: View {
             }
         } message: {
             Text(localizationManager.translate("settings.deleteAllProductsMessage"))
+        }
+        .alert(localizationManager.translate("settings.notifications"), isPresented: $showNotificationPermissionAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(localizationManager.translate("settings.notificationPermissionDenied"))
         }
     }
 
@@ -213,9 +219,31 @@ struct SettingsView: View {
                         .foregroundColor(themeManager.isDarkMode ? .white : .black)
                         .frame(width: 24)
 
-                    Text(localizationManager.translate("settings.enableNotifications"))
-                        .font(.system(size: appFontSize))
-                        .foregroundColor(themeManager.isDarkMode ? .white : .black)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(localizationManager.translate("settings.enableNotifications"))
+                            .font(.system(size: appFontSize))
+                            .foregroundColor(themeManager.isDarkMode ? .white : .black)
+
+                        Text(localizationManager.translate("settings.updateNotificationsDesc"))
+                            .font(.system(size: appFontSize - 3))
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .onChange(of: notificationsEnabled) { _, newValue in
+                if newValue {
+                    Task {
+                        let granted = await AppUpdateNotificationManager.shared.enableNotifications()
+                        if !granted {
+                            await MainActor.run {
+                                notificationsEnabled = false
+                                showNotificationPermissionAlert = true
+                            }
+                        }
+                    }
+                } else {
+                    AppUpdateNotificationManager.shared.disableNotifications()
                 }
             }
             .tint(themeManager.isDarkMode ? .white : .black)
