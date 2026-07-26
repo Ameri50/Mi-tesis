@@ -560,6 +560,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = proyectofinal1/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TechSupport;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "La app necesita acceso a tus fotos para establecer tu foto de perfil";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -591,6 +592,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = proyectofinal1/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TechSupport;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "La app necesita acceso a tus fotos para establecer tu foto de perfil";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
