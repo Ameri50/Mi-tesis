@@ -16,6 +16,11 @@ struct SettingsView: View {
     @State private var uploadMessage = ""
     @State private var showLogoutConfirmation = false
 
+    // MARK: - Estado para el borrado masivo de productos
+    @State private var showDeleteProductsConfirmation = false
+    @State private var isDeletingProducts = false
+    @State private var showNotificationPermissionAlert = false
+
     var body: some View {
         ZStack {
             Color(.systemGroupedBackground)
@@ -28,6 +33,7 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         profileSection
                         themeSection
+                        languageSection
                         fontSizeSection
                         notificationsSection
 
@@ -58,6 +64,19 @@ struct SettingsView: View {
             }
         } message: {
             Text(localizationManager.translate("settings.logoutConfirmation"))
+        }
+        .alert(localizationManager.translate("settings.deleteAllProducts"), isPresented: $showDeleteProductsConfirmation) {
+            Button(localizationManager.translate("settings.deleteAllProductsCancel"), role: .cancel) {}
+            Button(localizationManager.translate("settings.deleteAllProductsButton"), role: .destructive) {
+                deleteAllProducts()
+            }
+        } message: {
+            Text(localizationManager.translate("settings.deleteAllProductsMessage"))
+        }
+        .alert(localizationManager.translate("settings.notifications"), isPresented: $showNotificationPermissionAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(localizationManager.translate("settings.notificationPermissionDenied"))
         }
     }
 
@@ -141,6 +160,22 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Idioma
+    private var languageSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionTitle(localizationManager.translate("settings.language"))
+
+            Picker("", selection: languageBinding) {
+                Text(localizationManager.translate("lang.es")).tag("es")
+                Text(localizationManager.translate("lang.en")).tag("en")
+            }
+            .pickerStyle(.segmented)
+            .padding()
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+    }
+
     // MARK: - Tamaño de fuente
     private var fontSizeSection: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -184,9 +219,31 @@ struct SettingsView: View {
                         .foregroundColor(themeManager.isDarkMode ? .white : .black)
                         .frame(width: 24)
 
-                    Text(localizationManager.translate("settings.enableNotifications"))
-                        .font(.system(size: appFontSize))
-                        .foregroundColor(themeManager.isDarkMode ? .white : .black)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(localizationManager.translate("settings.enableNotifications"))
+                            .font(.system(size: appFontSize))
+                            .foregroundColor(themeManager.isDarkMode ? .white : .black)
+
+                        Text(localizationManager.translate("settings.updateNotificationsDesc"))
+                            .font(.system(size: appFontSize - 3))
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .onChange(of: notificationsEnabled) { _, newValue in
+                if newValue {
+                    Task {
+                        let granted = await AppUpdateNotificationManager.shared.enableNotifications()
+                        if !granted {
+                            await MainActor.run {
+                                notificationsEnabled = false
+                                showNotificationPermissionAlert = true
+                            }
+                        }
+                    }
+                } else {
+                    AppUpdateNotificationManager.shared.disableNotifications()
                 }
             }
             .tint(themeManager.isDarkMode ? .white : .black)
@@ -224,6 +281,31 @@ struct SettingsView: View {
                 }) {
                     settingRow(icon: "square.stack.3d.up.fill", title: localizationManager.translate("settings.syncProducts"))
                 }
+
+                // ⚠️ Botón temporal de mantenimiento — quitar antes de entregar/publicar la app
+                Button(action: { showDeleteProductsConfirmation = true }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "trash.fill")
+                            .foregroundColor(.red)
+                            .frame(width: 24)
+
+                        if isDeletingProducts {
+                            Text("Eliminando productos...")
+                                .font(.system(size: appFontSize))
+                                .foregroundColor(.red)
+                            Spacer()
+                            ProgressView()
+                        } else {
+                            Text("Borrar TODOS los productos")
+                                .font(.system(size: appFontSize))
+                                .foregroundColor(.red)
+                            Spacer()
+                        }
+                    }
+                    .padding()
+                    .background(Color(.secondarySystemGroupedBackground))
+                }
+                .disabled(isDeletingProducts)
             }
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
@@ -279,6 +361,20 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Acción: borrar todos los productos
+    private func deleteAllProducts() {
+        isDeletingProducts = true
+        FirebaseProductManager.shared.deleteAllProducts { success in
+            DispatchQueue.main.async {
+                isDeletingProducts = false
+                uploadMessage = success
+                    ? localizationManager.translate("settings.deleteAllProductsSuccess")
+                    : localizationManager.translate("settings.deleteAllProductsError")
+                showUploadAlert = true
+            }
+        }
+    }
+
     // MARK: - Componentes auxiliares
     private func sectionTitle(_ text: String) -> some View {
         Text(text)
@@ -312,6 +408,13 @@ struct SettingsView: View {
         }
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
+    }
+
+    private var languageBinding: Binding<String> {
+        Binding(
+            get: { localizationManager.currentLanguage },
+            set: { localizationManager.setLanguage($0) }
+        )
     }
 }
 

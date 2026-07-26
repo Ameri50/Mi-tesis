@@ -5,6 +5,7 @@ import PhotosUI
 struct CrearPerfilView: View {
     @EnvironmentObject var userManager: UserManager
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @Environment(\.dismiss) var dismiss
     
@@ -24,7 +25,7 @@ struct CrearPerfilView: View {
 
                 // MARK: - Header
                 HStack {
-                    Text("Mi Perfil")
+                    Text(localizationManager.translate("profile.title"))
                         .font(.system(size: fontSize + 12, weight: .bold, design: .rounded))
                     Spacer()
                     NavigationLink(destination: SettingsView()
@@ -86,7 +87,7 @@ struct CrearPerfilView: View {
                         }
                     }
 
-                    Text("Editar foto")
+                    Text(localizationManager.translate("profile.editPhoto"))
                         .font(.system(size: fontSize - 4))
                         .foregroundColor(.blue)
                 }
@@ -94,13 +95,13 @@ struct CrearPerfilView: View {
 
                 // MARK: - Campos
                 VStack(spacing: 0) {
-                    fieldRow(icon: "person.fill", placeholder: "Nombre", text: $nombre)
+                    fieldRow(icon: "person.fill", placeholder: localizationManager.translate("profile.firstNamePlaceholder"), text: $nombre)
                     Divider().padding(.leading, 52)
-                    fieldRow(icon: "person.fill", placeholder: "Apellido", text: $apellido)
+                    fieldRow(icon: "person.fill", placeholder: localizationManager.translate("profile.lastNamePlaceholder"), text: $apellido)
                     Divider().padding(.leading, 52)
-                    fieldRow(icon: "envelope.fill", placeholder: "Correo", text: $correo, keyboard: .emailAddress)
+                    fieldRow(icon: "envelope.fill", placeholder: localizationManager.translate("profile.emailPlaceholder"), text: $correo, keyboard: .emailAddress)
                     Divider().padding(.leading, 52)
-                    fieldRow(icon: "phone.fill", placeholder: "Teléfono", text: $telefono, keyboard: .phonePad)
+                    fieldRow(icon: "phone.fill", placeholder: localizationManager.translate("profile.phonePlaceholder"), text: $telefono, keyboard: .phonePad)
                 }
                 .background(Color(.secondarySystemGroupedBackground))
                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -109,7 +110,7 @@ struct CrearPerfilView: View {
                 // MARK: - Botones
                 VStack(spacing: 12) {
                     Button(action: guardarPerfil) {
-                        Text("Guardar cambios")
+                        Text(localizationManager.translate("profile.saveChanges"))
                             .font(.system(size: fontSize, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
@@ -119,7 +120,7 @@ struct CrearPerfilView: View {
                     }
 
                     Button(action: { showLogoutConfirmation = true }) {
-                        Text("Cerrar sesión")
+                        Text(localizationManager.translate("profile.signOut"))
                             .font(.system(size: fontSize, weight: .semibold))
                             .foregroundColor(.red)
                             .frame(maxWidth: .infinity)
@@ -133,13 +134,13 @@ struct CrearPerfilView: View {
             }
         }
         .background(Color(.systemGroupedBackground))
-        .alert("Cerrar sesión", isPresented: $showLogoutConfirmation) {
-            Button("Cancelar", role: .cancel) {}
-            Button("Cerrar sesión", role: .destructive) {
+        .alert(localizationManager.translate("profile.signOutTitle"), isPresented: $showLogoutConfirmation) {
+            Button(localizationManager.translate("profile.cancel"), role: .cancel) {}
+            Button(localizationManager.translate("profile.signOut"), role: .destructive) {
                 userManager.logout()
             }
         } message: {
-            Text("¿Estás seguro que quieres cerrar sesión?")
+            Text(localizationManager.translate("profile.signOutConfirm"))
         }
         .onAppear {
             if let usuario = userManager.currentUser {

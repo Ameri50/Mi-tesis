@@ -24,6 +24,7 @@ struct CartView: View {
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @EnvironmentObject var cartManager: CartManager
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     @Environment(\.dismiss) private var dismiss
     @State private var showAlert = false
     @State private var alertMessage = ""
@@ -45,7 +46,7 @@ struct CartView: View {
                     cartContentView(sizes: sizes)
                 }
             }
-            .navigationTitle("Carrito")
+            .navigationTitle(localizationManager.translate("cart.title"))
             .navigationBarTitleDisplayMode(.large)
             .navigationDestination(isPresented: $navigateToPayment) {
                 PaymentView()
@@ -55,7 +56,7 @@ struct CartView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if !cartManager.isEmpty {
-                        Button("Limpiar") {
+                        Button(localizationManager.translate("delete")) {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 cartManager.clearCart()
                             }
@@ -65,13 +66,13 @@ struct CartView: View {
                 }
 
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cerrar") {
+                    Button(localizationManager.translate("login.close")) {
                         dismiss()
                     }
                 }
             }
-            .alert("Información", isPresented: $showAlert) {
-                Button("Aceptar") { }
+            .alert(localizationManager.translate("settings.info"), isPresented: $showAlert) {
+                Button("OK") { }
             } message: {
                 Text(alertMessage)
             }
@@ -84,17 +85,17 @@ struct CartView: View {
                 .font(.system(size: 80))
                 .foregroundColor(.secondary)
 
-            Text("Tu carrito está vacío")
+            Text(localizationManager.translate("cart.empty"))
                 .font(.system(size: sizes.headline, weight: .medium))
                 .foregroundColor(themeManager.isDarkMode ? .white : .primary)
 
-            Text("Agrega algunos productos para comenzar")
+            Text(localizationManager.translate("cart.emptyDescription"))
                 .font(.system(size: sizes.body, weight: .regular))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
             Button(action: { dismiss() }) {
-                Text("Continuar comprando")
+                Text(localizationManager.translate("cart.continueShopping"))
                     .font(.system(size: sizes.body, weight: .medium))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -133,7 +134,7 @@ struct CartView: View {
 
             VStack(spacing: 8) {
                 HStack {
-                    Text("Total de productos:")
+                    Text(localizationManager.translate("cart.itemsTotal"))
                         .font(.system(size: sizes.body, weight: .regular))
                         .foregroundColor(.secondary)
                     Spacer()
@@ -143,7 +144,7 @@ struct CartView: View {
                 }
 
                 HStack {
-                    Text("Total:")
+                    Text(localizationManager.translate("cart.total"))
                         .font(.system(size: sizes.headline, weight: .bold))
                         .foregroundColor(themeManager.isDarkMode ? .white : .primary)
                     Spacer()
@@ -160,7 +161,7 @@ struct CartView: View {
                 }) {
                     HStack {
                         Image(systemName: "creditcard")
-                        Text("Completar Compra")
+                        Text(localizationManager.translate("cart.completePurchase"))
                             .font(.system(size: sizes.body, weight: .semibold))
                     }
                     .foregroundColor(.white)
@@ -174,7 +175,7 @@ struct CartView: View {
                 Button(action: { sendWhatsAppMessage() }) {
                     HStack {
                         Image(systemName: "bubble.right.fill")
-                        Text("Enviar por WhatsApp")
+                        Text(localizationManager.translate("cart.sendWhatsApp"))
                             .font(.system(size: sizes.body, weight: .semibold))
                     }
                     .foregroundColor(.white)
@@ -195,16 +196,16 @@ struct CartView: View {
 
     private func sendWhatsAppMessage() {
         let phoneNumber = "51951012633"
-        var message = "🛒 *NUEVA COMPRA - TIENDA APPLE*\n\n📝 *DETALLES DEL PEDIDO:*\n═══════════════════════════\n\n"
+        var message = "🛒 *\(localizationManager.translate("cart.newOrder"))*\n\n📝 *\(localizationManager.translate("cart.orderDetails"))*\n═══════════════════════════\n\n"
         for (index, item) in cartManager.cartItems.enumerated() {
-            message += "📦 *Producto \(index + 1):*\n"
-            message += "   • Nombre: \(item.product.name)\n"
-            message += "   • Color: \(item.selectedColor)\n"
-            message += "   • Capacidad: \(item.selectedStorage)\n"
-            message += "   • Cantidad: \(item.quantity) x $\(String(format: "%.2f", item.finalPrice))\n"
-            message += "   • Subtotal: $\(String(format: "%.2f", item.totalPrice))\n\n"
+            message += "📦 *\(localizationManager.translate("cart.product")) \(index + 1):*\n"
+            message += "   • \(localizationManager.translate("profile.name")): \(item.product.name)\n"
+            message += "   • \(localizationManager.translate("product.color")): \(item.selectedColor)\n"
+            message += "   • \(localizationManager.translate("product.capacity")): \(item.selectedStorage)\n"
+            message += "   • \(localizationManager.translate("product.quantity")): \(item.quantity) x $\(String(format: "%.2f", item.finalPrice))\n"
+            message += "   • \(localizationManager.translate("cart.subtotal")): $\(String(format: "%.2f", item.totalPrice))\n\n"
         }
-        message += "═══════════════════════════\n💰 Total: $\(String(format: "%.2f", cartManager.totalPrice))\n📅 Fecha: \(getCurrentDateTime())\nGracias por tu compra! 🙏"
+        message += "═══════════════════════════\n💰 \(localizationManager.translate("cart.total")): $\(String(format: "%.2f", cartManager.totalPrice))\n📅 \(localizationManager.translate("cart.date")): \(getCurrentDateTime())\n\(localizationManager.translate("cart.thanks")) 🙏"
 
         guard let encoded = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://wa.me/\(phoneNumber)?text=\(encoded)") else { return }
@@ -212,14 +213,14 @@ struct CartView: View {
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         } else {
-            alertMessage = "WhatsApp no está instalado."
+            alertMessage = localizationManager.translate("cart.whatsappMissing")
             showAlert = true
         }
     }
 
     private func getCurrentDateTime() -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "es_ES")
+        formatter.locale = Locale(identifier: localizationManager.currentLanguage == "en" ? "en_US" : "es_ES")
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: Date())
@@ -238,9 +239,7 @@ struct CartItemRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(item.product.imageName)
-                .resizable()
-                .scaledToFit()
+            RemoteOrLocalImage(source: item.product.finalImageURL, contentMode: .fit)
                 .frame(width: 60, height: 60)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
@@ -254,6 +253,11 @@ struct CartItemRow: View {
                 Text(item.product.name)
                     .font(.system(size: sizes.headline, weight: .medium))
                     .foregroundColor(themeManager.isDarkMode ? .white : .primary)
+                    .lineLimit(2)
+
+                Text(item.product.displayDescription)
+                    .font(.system(size: sizes.caption, weight: .regular))
+                    .foregroundColor(.secondary)
                     .lineLimit(2)
 
                 VStack(alignment: .leading, spacing: 2) {

@@ -39,7 +39,7 @@ class FirebaseOrderManager: NSObject, ObservableObject {
         // Convertir CartItem a diccionario
         let orderItems = cartItems.map { item in
             [
-                "product_id": item.product.id.uuidString,
+                "product_id": item.product.id,
                 "product_name": item.product.name,
                 "quantity": item.quantity,
                 "price": item.product.price

@@ -49,7 +49,11 @@ struct PriceTag: View {
         }
 
         if hasDiscount, let originalPrice {
-            let percent = Int(((originalPrice - currentPrice) / originalPrice) * 100)
+            let savingsPercent = originalPrice > 0
+                ? ((originalPrice - currentPrice) / originalPrice) * 100
+                : 0
+            let percent = Int(savingsPercent.rounded().clamped(to: 0...100))
+
             Text("Ahorras \(percent)%")
                 .font(.system(size: fontSize - 6, weight: .bold))
                 .foregroundStyle(.white)
@@ -58,6 +62,12 @@ struct PriceTag: View {
                 .background(Color.orange)
                 .clipShape(Capsule())
         }
+    }
+}
+
+private extension FloatingPoint {
+    func clamped(to range: ClosedRange<Self>) -> Self {
+        min(max(self, range.lowerBound), range.upperBound)
     }
 }
 

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RepairCenterView: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
 
     @State private var selectedCategory: String = "iPhone"
@@ -33,7 +34,7 @@ struct RepairCenterView: View {
                 .padding(.vertical, 12)
             }
         }
-        .navigationTitle("Servicio Técnico Apple")
+        .navigationTitle(localizationManager.translate("repair.title"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -41,11 +42,11 @@ struct RepairCenterView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Repuestos y Reparaciones")
+            Text(localizationManager.translate("repair.header"))
                 .font(.system(size: fontSize + 4, weight: .bold))
                 .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
-            Text("Repuestos originales con garantía e instalación profesional.")
+            Text(localizationManager.translate("repair.subtitle"))
                 .font(.system(size: fontSize - 2))
                 .foregroundStyle(.gray)
         }
@@ -57,7 +58,7 @@ struct RepairCenterView: View {
 
     private var categorySelectorSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Categoría")
+            Text(localizationManager.translate("repair.category"))
                 .font(.system(size: fontSize - 1, weight: .semibold))
                 .foregroundColor(themeManager.isDarkMode ? .white : .black)
                 .padding(.horizontal, 4)
@@ -88,7 +89,7 @@ struct RepairCenterView: View {
 
     private var modelSelectorSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Modelo")
+            Text(localizationManager.translate("repair.model"))
                 .font(.system(size: fontSize - 1, weight: .semibold))
                 .foregroundColor(themeManager.isDarkMode ? .white : .black)
                 .padding(.horizontal, 4)
@@ -123,7 +124,7 @@ struct RepairCenterView: View {
                     Image(systemName: "wrench.and.screwdriver")
                         .font(.system(size: 40))
                         .foregroundColor(.gray.opacity(0.4))
-                    Text("Sin repuestos disponibles para este modelo.")
+                    Text(localizationManager.translate("repair.noParts"))
                         .font(.system(size: fontSize - 2))
                         .foregroundStyle(.gray)
                 }
@@ -133,9 +134,11 @@ struct RepairCenterView: View {
                     NavigationLink(destination:
                         RepairDetailView(part: part)
                             .environmentObject(themeManager)
+                            .environmentObject(localizationManager)
                     ) {
                         RepairPartCardView(part: part)
                             .environmentObject(themeManager)
+                            .environmentObject(localizationManager)
                     }
                     .buttonStyle(.plain)
                 }
@@ -150,6 +153,7 @@ struct RepairCenterView: View {
 struct RepairPartCardView: View {
     let part: RepairPart
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
 
     var body: some View {
@@ -193,7 +197,7 @@ struct RepairPartCardView: View {
                     .foregroundStyle(.gray)
                 }
 
-                StatusBadge(text: part.stock ? "Disponible" : "Agotado", isPositive: part.stock)
+                StatusBadge(text: part.stock ? localizationManager.translate("support.available") : localizationManager.translate("product.outOfStock"), isPositive: part.stock)
             }
 
             Spacer()
@@ -217,5 +221,6 @@ struct RepairPartCardView: View {
     NavigationStack {
         RepairCenterView()
             .environmentObject(ThemeManager())
+            .environmentObject(LocalizationManager())
     }
 }

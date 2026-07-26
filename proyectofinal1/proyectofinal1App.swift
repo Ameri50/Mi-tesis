@@ -44,6 +44,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         #endif
 
         FirebaseApp.configure()
+        AppUpdateNotificationManager.shared.configure()
         return true
     }
 }

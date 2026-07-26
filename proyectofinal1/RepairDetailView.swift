@@ -3,6 +3,7 @@ import SwiftUI
 struct RepairDetailView: View {
     let part: RepairPart
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
 
     var body: some View {
@@ -36,13 +37,13 @@ struct RepairDetailView: View {
                             .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                             .multilineTextAlignment(.center)
 
-                        StatusBadge(text: part.stock ? "Disponible" : "Agotado", isPositive: part.stock)
+                        StatusBadge(text: part.stock ? localizationManager.translate("support.available") : localizationManager.translate("product.outOfStock"), isPositive: part.stock)
                     }
                     .padding(.horizontal, 16)
 
                     // MARK: - Precio destacado
                     VStack(spacing: 4) {
-                        Text("Precio de reparación")
+                        Text(localizationManager.translate("repair.price"))
                             .font(.system(size: fontSize - 3))
                             .foregroundStyle(.gray)
                         Text(String(format: "S/ %.2f", part.price))
@@ -68,28 +69,28 @@ struct RepairDetailView: View {
 
                         infoRow(
                             icon: "clock.fill",
-                            title: "Tiempo estimado",
+                            title: localizationManager.translate("repair.estimatedTime"),
                             value: part.repairTime,
                             color: .blue
                         )
 
                         infoRow(
                             icon: "checkmark.shield.fill",
-                            title: "Garantía",
-                            value: "90 días en mano de obra",
+                            title: localizationManager.translate("repair.warranty"),
+                            value: localizationManager.translate("repair.warrantyValue"),
                             color: .green
                         )
 
                         infoRow(
                             icon: "bolt.fill",
-                            title: "Repuesto",
-                            value: "Original Apple",
+                            title: localizationManager.translate("repair.part"),
+                            value: localizationManager.translate("repair.original"),
                             color: .orange
                         )
 
                         infoRow(
                             icon: "iphone.gen3",
-                            title: "Compatible con",
+                            title: localizationManager.translate("repair.compatibleWith"),
                             value: part.compatibleModels.joined(separator: ", "),
                             color: .purple
                         )
@@ -98,7 +99,7 @@ struct RepairDetailView: View {
 
                     // MARK: - Descripción
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Descripción")
+                        Text(localizationManager.translate("product.description"))
                             .font(.system(size: fontSize, weight: .semibold))
                             .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
@@ -123,7 +124,7 @@ struct RepairDetailView: View {
                     // MARK: - Botón de contacto
                     Button(action: {
                         let phoneNumber = "51951012633" // +51 951 012 633
-                        let message = "Hola, me interesa el servicio de reparación: \(part.name)"
+                        let message = "\(localizationManager.translate("repair.whatsappPrefix")): \(part.name)"
                         let encodedMessage = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? message
                         if let url = URL(string: "https://wa.me/\(phoneNumber)?text=\(encodedMessage)") {
                             UIApplication.shared.open(url)
@@ -132,7 +133,7 @@ struct RepairDetailView: View {
                         HStack(spacing: 10) {
                             Image(systemName: "message.fill")
                                 .font(.system(size: 16, weight: .semibold))
-                            Text("Solicitar reparación")
+                            Text(localizationManager.translate("repair.request"))
                                 .font(.system(size: fontSize, weight: .semibold))
                         }
                         .foregroundColor(.white)

@@ -4,15 +4,16 @@ struct ProductListView: View {
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var cartManager: CartManager
-    
+    @ObservedObject private var store = ProductStore.shared
+
     let category: String
     @State private var searchText: String = ""
 
     var filteredProducts: [SeedProduct] {
         if searchText.isEmpty {
-            return ProductData.products.filter { $0.category == category }
+            return store.products.filter { $0.category == category }
         } else {
-            return ProductData.products.filter {
+            return store.products.filter {
                 $0.category == category &&
                 $0.name.localizedCaseInsensitiveContains(searchText)
             }
@@ -58,10 +59,7 @@ struct ProductRowView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            // Para imágenes locales
-            Image(product.imageName)
-                .resizable()
-                .scaledToFit()
+            RemoteOrLocalImage(source: product.imageName, contentMode: .fit)
                 .frame(width: 80, height: 80)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .background(
@@ -105,15 +103,16 @@ struct ProductListViewLegacy: View {
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var cartManager: CartManager
-    
+    @ObservedObject private var store = ProductStore.shared
+
     let category: String
     @State private var searchText: String = ""
 
     var filteredProducts: [SeedProduct] {
         if searchText.isEmpty {
-            return ProductData.products.filter { $0.category == category }
+            return store.products.filter { $0.category == category }
         } else {
-            return ProductData.products.filter {
+            return store.products.filter {
                 $0.category == category &&
                 $0.name.localizedCaseInsensitiveContains(searchText)
             }
@@ -162,9 +161,7 @@ struct ProductRowViewLegacy: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            Image(product.imageName)
-                .resizable()
-                .scaledToFit()
+            RemoteOrLocalImage(source: product.imageName, contentMode: .fit)
                 .frame(width: 80, height: 80)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .background(

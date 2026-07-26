@@ -19,21 +19,20 @@ struct RoundedCorner: Shape {
 // MARK: - Imagen de producto a pantalla completa (sin tarjeta gris)
 struct ProductImageCard: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     let imageName: String
 
     var body: some View {
         ZStack {
-            if !imageName.isEmpty, UIImage(named: imageName) != nil {
-                Image(imageName)
-                    .resizable()
-                    .scaledToFit()
+            if !imageName.isEmpty {
+                RemoteOrLocalImage(source: imageName, contentMode: .fit)
                     .padding(36)
             } else {
                 VStack(spacing: 10) {
                     Image(systemName: "photo.badge.exclamationmark")
                         .font(.system(size: 44))
                         .foregroundStyle(.orange.opacity(0.35))
-                    Text("Sin imagen")
+                    Text(localizationManager.translate("product.noImage"))
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.gray.opacity(0.7))
                 }
@@ -47,14 +46,14 @@ struct ProductImageCard: View {
 struct ProductDetailView: View {
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     @Environment(\.dismiss) private var dismiss
 
-    let product: SeedProduct
+    let product: Product  // ✅ Ahora usa Product (que era SeedProduct)
     @EnvironmentObject var cartManager: CartManager
     @State private var isAddedToCart = false
-    @State private var selectedColor: ColorOption? = nil
-    @State private var selectedStorage: StorageOption? = nil
-    @State private var currentImageIndex = 0
+    @State private var selectedColorIndex: Int? = nil
+    @State private var selectedStorageIndex: Int? = nil
 
     private var bg: Color {
         Color(UIColor { _ in
@@ -84,16 +83,39 @@ struct ProductDetailView: View {
         themeManager.isDarkMode ? Color.white.opacity(0.07) : Color.black.opacity(0.05)
     }
 
-    private var allProductImages: [String] {
-        var images = [product.imageName]
-        images.append(contentsOf: product.additionalImages)
-        return Array(images.prefix(5))
+    private var mainImageSource: String {
+        if !product.finalImageURL.isEmpty {
+            return product.finalImageURL
+        }
+        return product.imageName
     }
 
-    // Precio final usando storageOptions del propio SeedProduct
+    // Precio final usando storageOptions del propio Product
     private var finalPrice: Double {
-        let multiplier = selectedStorage?.priceMultiplier ?? 1.0
-        return product.price * multiplier
+        guard let selectedStorageIndex,
+              product.storageOptions.indices.contains(selectedStorageIndex) else {
+            return product.price
+        }
+
+        return product.price * product.storageOptions[selectedStorageIndex].priceMultiplier
+    }
+
+    private var selectedColorName: String {
+        guard let selectedColorIndex,
+              product.colorOptions.indices.contains(selectedColorIndex) else {
+            return "Estándar"
+        }
+
+        return product.colorOptions[selectedColorIndex].name
+    }
+
+    private var selectedStorageCapacity: String {
+        guard let selectedStorageIndex,
+              product.storageOptions.indices.contains(selectedStorageIndex) else {
+            return "Estándar"
+        }
+
+        return product.storageOptions[selectedStorageIndex].capacity
     }
 
     var body: some View {
@@ -108,29 +130,10 @@ struct ProductDetailView: View {
                         heroBg
                             .ignoresSafeArea(edges: .top)
 
-                        VStack(spacing: 0) {
-                            TabView(selection: $currentImageIndex) {
-                                ForEach(allProductImages.indices, id: \.self) { index in
-                                    ProductImageCard(imageName: allProductImages[index])
-                                        .environmentObject(themeManager)
-                                        .tag(index)
-                                }
-                            }
-                            .tabViewStyle(.page(indexDisplayMode: .never))
+                        ProductImageCard(imageName: mainImageSource)
+                            .environmentObject(themeManager)
+                            .environmentObject(localizationManager)
                             .frame(height: 380)
-
-                            if allProductImages.count > 1 {
-                                HStack(spacing: 6) {
-                                    ForEach(allProductImages.indices, id: \.self) { i in
-                                        Capsule()
-                                            .fill(i == currentImageIndex ? Color.orange : Color.gray.opacity(0.35))
-                                            .frame(width: i == currentImageIndex ? 16 : 6, height: 6)
-                                            .animation(.spring(response: 0.3), value: currentImageIndex)
-                                    }
-                                }
-                                .padding(.bottom, 16)
-                            }
-                        }
 
                         HStack {
                             Button {
@@ -186,11 +189,11 @@ struct ProductDetailView: View {
 
                         // MARK: - Descripción
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Descripción")
+                            Text(localizationManager.translate("product.description"))
                                 .font(.system(size: fontSize, weight: .semibold))
                                 .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
-                            Text(product.productDescription)
+                            Text(product.displayDescription)
                                 .font(.system(size: fontSize - 1))
                                 .foregroundStyle(themeManager.isDarkMode ? Color(white: 0.7) : .black.opacity(0.65))
                                 .lineSpacing(5)
@@ -203,12 +206,13 @@ struct ProductDetailView: View {
                         if !product.colorOptions.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack {
-                                    Text("Color")
+                                    Text(localizationManager.translate("product.color"))
                                         .font(.system(size: fontSize, weight: .semibold))
                                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                                     Spacer()
-                                    if let color = selectedColor {
-                                        Text(color.name)
+                                    if let selectedColorIndex,
+                                       product.colorOptions.indices.contains(selectedColorIndex) {
+                                        Text(product.colorOptions[selectedColorIndex].name)
                                             .font(.system(size: 13, weight: .medium))
                                             .foregroundStyle(.orange)
                                             .adaptiveOneLine()
@@ -217,11 +221,13 @@ struct ProductDetailView: View {
 
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 16) {
-                                        ForEach(product.colorOptions) { color in
+                                        ForEach(product.colorOptions.indices, id: \.self) { index in
+                                            let color = product.colorOptions[index]
+
                                             VStack(spacing: 6) {
                                                 ZStack {
                                                     Circle()
-                                                        .stroke(selectedColor == color ? Color.orange : Color.clear, lineWidth: 2)
+                                                        .stroke(selectedColorIndex == index ? Color.orange : Color.clear, lineWidth: 2)
                                                         .frame(width: 50, height: 50)
 
                                                     Circle()
@@ -231,8 +237,8 @@ struct ProductDetailView: View {
                                                             Circle().stroke(Color.gray.opacity(0.15), lineWidth: 1)
                                                         )
                                                 }
-                                                .scaleEffect(selectedColor == color ? 1.06 : 1.0)
-                                                .animation(.spring(response: 0.3), value: selectedColor)
+                                                .scaleEffect(selectedColorIndex == index ? 1.06 : 1.0)
+                                                .animation(.spring(response: 0.3), value: selectedColorIndex)
 
                                                 Text(color.name.components(separatedBy: " ").first ?? color.name)
                                                     .font(.system(size: 10, weight: .medium))
@@ -241,7 +247,7 @@ struct ProductDetailView: View {
                                             }
                                             .onTapGesture {
                                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                                    selectedColor = color
+                                                    selectedColorIndex = index
                                                 }
                                             }
                                         }
@@ -255,16 +261,17 @@ struct ProductDetailView: View {
                         // MARK: - Capacidad (segmented pill)
                         if !product.storageOptions.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
-                                Text("Capacidad")
+                                Text(localizationManager.translate("product.capacity"))
                                     .font(.system(size: fontSize, weight: .semibold))
                                     .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
                                 HStack(spacing: 8) {
-                                    ForEach(product.storageOptions) { storage in
-                                        let isSelected = selectedStorage == storage
+                                    ForEach(product.storageOptions.indices, id: \.self) { index in
+                                        let storage = product.storageOptions[index]
+                                        let isSelected = selectedStorageIndex == index
                                         Button {
                                             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                                                selectedStorage = storage
+                                                selectedStorageIndex = index
                                             }
                                         } label: {
                                             Text(storage.capacity)
@@ -288,9 +295,9 @@ struct ProductDetailView: View {
 
                         // MARK: - Specs Row
                         HStack(spacing: 10) {
-                            SpecBadge(icon: "shippingbox",      label: "Envío gratis",       theme: themeManager)
-                            SpecBadge(icon: "arrow.uturn.left", label: "30 días devolución", theme: themeManager)
-                            SpecBadge(icon: "checkmark.shield", label: "Garantía oficial",   theme: themeManager)
+                            SpecBadge(icon: "shippingbox",      label: localizationManager.translate("product.freeShipping"),       theme: themeManager)
+                            SpecBadge(icon: "arrow.uturn.left", label: localizationManager.translate("product.returnDays"), theme: themeManager)
+                            SpecBadge(icon: "checkmark.shield", label: localizationManager.translate("product.officialWarranty"),   theme: themeManager)
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 4)
@@ -312,8 +319,8 @@ struct ProductDetailView: View {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         cartManager.add(
                             product: product,
-                            selectedColor: selectedColor?.name ?? "Estándar",
-                            selectedStorage: selectedStorage?.capacity ?? "Estándar",
+                            selectedColor: selectedColorName,
+                            selectedStorage: selectedStorageCapacity,
                             quantity: 1
                         )
                         isAddedToCart = true
@@ -325,7 +332,7 @@ struct ProductDetailView: View {
                     HStack(spacing: 10) {
                         Image(systemName: isAddedToCart ? "checkmark.circle.fill" : "cart.badge.plus")
                             .font(.system(size: 19, weight: .semibold))
-                        Text(isAddedToCart ? "Agregado al carrito" : "Agregar al carrito")
+                        Text(isAddedToCart ? localizationManager.translate("product.addedToCart") : localizationManager.translate("product.addToCart"))
                             .font(.system(size: fontSize + 1, weight: .bold))
                             .adaptiveOneLine(minScale: 0.7)
                     }
@@ -345,8 +352,8 @@ struct ProductDetailView: View {
         }
         // ✅ .onAppear: inicializa selecciones con los primeros valores del propio producto
         .onAppear {
-            selectedColor   = product.colorOptions.first
-            selectedStorage = product.storageOptions.first
+            selectedColorIndex = product.colorOptions.isEmpty ? nil : 0
+            selectedStorageIndex = product.storageOptions.isEmpty ? nil : 0
         }
         .navigationBarHidden(true)
     }

@@ -3,9 +3,10 @@ import SwiftUI
 struct CategoryProductListView: View {
     let category: ProductCategory
     let selectedFilter: String
+    @EnvironmentObject var localizationManager: LocalizationManager
 
     var filteredProducts: [Product] {
-        guard selectedFilter != "Todos" else { return category.products }
+        guard selectedFilter != localizationManager.translate("category.all") else { return category.products }
         return category.products.filter { $0.name.localizedCaseInsensitiveContains(selectedFilter) }
     }
 
@@ -14,9 +15,7 @@ struct CategoryProductListView: View {
             Section(header: Text(category.title)) {
                 ForEach(filteredProducts) { product in
                     HStack {
-                        Image(product.imageName)
-                            .resizable()
-                            .scaledToFit()
+                        RemoteOrLocalImage(source: product.finalImageURL, contentMode: .fit)
                             .frame(width: 44, height: 44)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
 
