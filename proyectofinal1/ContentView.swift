@@ -52,9 +52,10 @@ struct ContentView: View {
 
                             // Support
                             NavigationStack {
-                                SoporteView()
+                                SupportHubView()
                                     .environmentObject(themeManager)
                                     .environmentObject(localizationManager)
+                                    .environmentObject(cartManager)
                             }
                             .tabItem {
                                 Label(localizationManager.translate("support.title"), systemImage: "sparkles")

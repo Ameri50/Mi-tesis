@@ -8,6 +8,7 @@ struct SettingsView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
     @EnvironmentObject var fontSizeManager: AppFontSizeManager
+    @EnvironmentObject var cartManager: CartManager
 
     @StateObject private var imageUploader = FirebaseImageUploader.shared
 
@@ -317,8 +318,23 @@ struct SettingsView: View {
             sectionTitle(localizationManager.translate("settings.privacy"))
 
             VStack(spacing: 1) {
-                settingRow(icon: "lock.fill", title: localizationManager.translate("settings.privacyPolicy"))
-                settingRow(icon: "doc.text.fill", title: localizationManager.translate("settings.termsOfService"))
+                NavigationLink {
+                    PrivacyPolicyView()
+                        .environmentObject(themeManager)
+                        .environmentObject(localizationManager)
+                } label: {
+                    settingRow(icon: "lock.fill", title: localizationManager.translate("settings.privacyPolicy"))
+                }
+                .buttonStyle(.plain)
+
+                NavigationLink {
+                    TermsOfServiceView()
+                        .environmentObject(themeManager)
+                        .environmentObject(localizationManager)
+                } label: {
+                    settingRow(icon: "doc.text.fill", title: localizationManager.translate("settings.termsOfService"))
+                }
+                .buttonStyle(.plain)
             }
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
@@ -331,7 +347,15 @@ struct SettingsView: View {
 
             VStack(spacing: 1) {
                 settingRow(icon: "info.circle.fill", title: localizationManager.translate("settings.about"), value: "v1.0.0")
-                settingRow(icon: "envelope.fill", title: localizationManager.translate("settings.support"))
+                NavigationLink {
+                    SupportHubView()
+                        .environmentObject(themeManager)
+                        .environmentObject(localizationManager)
+                        .environmentObject(cartManager)
+                } label: {
+                    settingRow(icon: "envelope.fill", title: localizationManager.translate("settings.support"))
+                }
+                .buttonStyle(.plain)
             }
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
