@@ -67,9 +67,11 @@ struct HomeView: View {
                 }
                 .frame(height: 56)
                 .padding(.horizontal, 16)
-                .background(Color(UIColor { _ in
-                    themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .systemBackground
-                }))
+                .appLiquidGlassSurface(
+                    enabled: themeManager.isLiquidGlassEnabled,
+                    darkMode: themeManager.isDarkMode,
+                    cornerRadius: 18
+                )
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
@@ -118,10 +120,11 @@ struct HomeView: View {
             }
         }
         .padding(12)
-        .background(Color(UIColor { _ in
-            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .secondarySystemBackground
-        }))
-        .cornerRadius(10)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 14
+        )
     }
     
     private var categoriesSection: some View {
@@ -150,6 +153,13 @@ struct HomeView: View {
                 .padding(.horizontal, 4)
             }
         }
+        .padding(.vertical, 12)
+        .padding(.horizontal, 12)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 18
+        )
     }
     
     private var emptyStateSection: some View {
@@ -220,10 +230,11 @@ struct HomeProductCardView: View {
         }
         .padding(14)
         .frame(minHeight: 95)
-        .background(Color(UIColor { _ in
-            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .white
-        }))
-        .cornerRadius(12)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 14
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.gray.opacity(themeManager.isDarkMode ? 0.2 : 0.06), lineWidth: 1)

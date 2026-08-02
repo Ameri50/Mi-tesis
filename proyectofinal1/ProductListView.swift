@@ -88,13 +88,12 @@ struct ProductRowView: View {
                 .foregroundStyle(.gray.opacity(0.5))
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor { _ in
-                    themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .systemGray6
-                }))
-                .shadow(color: .black.opacity(themeManager.isDarkMode ? 0.2 : 0.05), radius: 2, x: 0, y: 1)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 14
         )
+        .shadow(color: .black.opacity(themeManager.isDarkMode ? 0.2 : 0.05), radius: 2, x: 0, y: 1)
     }
 }
 
@@ -190,13 +189,12 @@ struct ProductRowViewLegacy: View {
                 .foregroundColor(.gray.opacity(0.5))
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor { _ in
-                    themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .systemGray6
-                }))
-                .shadow(color: .black.opacity(themeManager.isDarkMode ? 0.2 : 0.05), radius: 2, x: 0, y: 1)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 14
         )
+        .shadow(color: .black.opacity(themeManager.isDarkMode ? 0.2 : 0.05), radius: 2, x: 0, y: 1)
     }
 }
 

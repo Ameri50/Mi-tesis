@@ -306,7 +306,11 @@ struct ProductDetailView: View {
                         Color.clear.frame(height: 90)
                     }
                     .padding(.bottom, 4)
-                    .background(bg)
+                    .appLiquidGlassSurface(
+                        enabled: themeManager.isLiquidGlassEnabled,
+                        darkMode: themeManager.isDarkMode,
+                        cornerRadius: 28
+                    )
                     .clipShape(RoundedCorner(radius: 28, corners: [.topLeft, .topRight]))
                     .offset(y: -20)
                 }
@@ -347,7 +351,11 @@ struct ProductDetailView: View {
                 .padding(.top, 12)
                 .padding(.bottom, 8)
             }
-            .background(.ultraThinMaterial)
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 22
+            )
             .ignoresSafeArea(edges: .bottom)
         }
         // ✅ .onAppear: inicializa selecciones con los primeros valores del propio producto
@@ -388,12 +396,11 @@ struct SpecBadge: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .background(Color(UIColor { _ in
-            theme.isDarkMode
-                ? UIColor(white: 0.12, alpha: 1)
-                : UIColor(white: 1.0, alpha: 1)
-        }))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .appLiquidGlassSurface(
+            enabled: theme.isLiquidGlassEnabled,
+            darkMode: theme.isDarkMode,
+            cornerRadius: 14
+        )
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(theme.isDarkMode ? Color.white.opacity(0.06) : Color.black.opacity(0.04), lineWidth: 1)
