@@ -109,10 +109,11 @@ struct SupportHubView: View {
                 .foregroundColor(.secondary)
         }
         .padding(16)
-        .background(Color(UIColor { _ in
-            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .systemBackground
-        }))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 18
+        )
         .shadow(color: .black.opacity(themeManager.isDarkMode ? 0.2 : 0.06), radius: 4, x: 0, y: 2)
     }
 }
@@ -240,10 +241,11 @@ struct SupportRecommendationsView: View {
                 .foregroundColor(.secondary)
         }
         .padding(16)
-        .background(Color(UIColor { _ in
-            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .systemBackground
-        }))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 18
+        )
         .shadow(color: .black.opacity(themeManager.isDarkMode ? 0.2 : 0.06), radius: 4, x: 0, y: 2)
     }
 }

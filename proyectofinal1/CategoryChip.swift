@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Category Chip (Componente Compartido - Versión Única)
 struct CategoryChip: View {
+    @EnvironmentObject var themeManager: ThemeManager
     let title: String
     let isSelected: Bool
     let fontSize: Double
@@ -15,27 +16,15 @@ struct CategoryChip: View {
                 .foregroundColor(isSelected ? .white : (isDarkMode ? .white : .black))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(
-                    isSelected ?
-                    LinearGradient(
-                        gradient: Gradient(colors: [.black, .gray.opacity(0.8)]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    ) :
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color(UIColor { _ in
-                                isDarkMode ? UIColor(white: 0.15, alpha: 1) : .secondarySystemBackground
-                            }),
-                            Color(UIColor { _ in
-                                isDarkMode ? UIColor(white: 0.15, alpha: 1) : .secondarySystemBackground
-                            })
-                        ]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+                .appLiquidGlassSurface(
+                    enabled: themeManager.isLiquidGlassEnabled,
+                    darkMode: themeManager.isDarkMode,
+                    cornerRadius: 20
                 )
-                .cornerRadius(20)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .stroke(isSelected ? Color.white.opacity(0.55) : Color.clear, lineWidth: 1)
+                )
         }
     }
 }

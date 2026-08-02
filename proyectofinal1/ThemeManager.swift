@@ -20,6 +20,7 @@ enum ThemeMode: String, CaseIterable {
 class ThemeManager: NSObject, ObservableObject {
     @Published var currentThemeMode: ThemeMode = .auto
     @Published var isDarkMode: Bool = false
+    @Published var isLiquidGlassEnabled: Bool = false
     @Published var currentTime: String = ""
     @Published var dayPeriod: String = ""
     
@@ -28,6 +29,7 @@ class ThemeManager: NSObject, ObservableObject {
     override init() {
         super.init()
         self.currentThemeMode = loadThemeMode()
+        self.isLiquidGlassEnabled = loadLiquidGlassEnabled()
         self.isDarkMode = shouldUseDarkMode()
         self.currentTime = getCurrentTimeFormatted()
         self.dayPeriod = getDayPeriodText()
@@ -39,6 +41,11 @@ class ThemeManager: NSObject, ObservableObject {
         currentThemeMode = mode
         saveThemeMode(mode)
         updateDarkMode()
+    }
+
+    func setLiquidGlassEnabled(_ isEnabled: Bool) {
+        isLiquidGlassEnabled = isEnabled
+        saveLiquidGlassEnabled(isEnabled)
     }
     
     private func updateDarkMode() {
@@ -118,6 +125,19 @@ class ThemeManager: NSObject, ObservableObject {
     
     private func saveThemeMode(_ mode: ThemeMode) {
         UserDefaults.standard.set(mode.rawValue, forKey: "themeMode")
+        UserDefaults.standard.synchronize()
+    }
+
+    private func loadLiquidGlassEnabled() -> Bool {
+        if UserDefaults.standard.object(forKey: "liquidGlassEnabled") == nil {
+            return false
+        }
+
+        return UserDefaults.standard.bool(forKey: "liquidGlassEnabled")
+    }
+
+    private func saveLiquidGlassEnabled(_ isEnabled: Bool) {
+        UserDefaults.standard.set(isEnabled, forKey: "liquidGlassEnabled")
         UserDefaults.standard.synchronize()
     }
 }

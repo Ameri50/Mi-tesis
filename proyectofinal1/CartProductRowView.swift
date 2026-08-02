@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct CartProductRowView: View {
+    @EnvironmentObject var themeManager: ThemeManager
     var cartItem: CartItemModel
     @EnvironmentObject var cartManager: CartManager
     
@@ -52,9 +53,12 @@ struct CartProductRowView: View {
                 }
             }
             .padding()
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
+            .shadow(color: Color.black.opacity(themeManager.isDarkMode ? 0.12 : 0.05), radius: 4, x: 0, y: 2)
             .padding(.horizontal)
         }
     }

@@ -34,6 +34,7 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         profileSection
                         themeSection
+                        liquidGlassSection
                         languageSection
                         fontSizeSection
                         notificationsSection
@@ -134,7 +135,11 @@ struct SettingsView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
-        .background(Color(.secondarySystemGroupedBackground))
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 16
+        )
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -161,6 +166,39 @@ struct SettingsView: View {
         }
     }
 
+    // MARK: - Liquid Glass
+    private var liquidGlassSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionTitle("Liquid Glass")
+
+            Toggle(isOn: liquidGlassBinding) {
+                HStack(spacing: 12) {
+                    Image(systemName: "drop.fill")
+                        .foregroundColor(.cyan)
+                        .frame(width: 24)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Modo Liquid Glass")
+                            .font(.system(size: appFontSize))
+                            .foregroundColor(themeManager.isDarkMode ? .white : .black)
+
+                        Text("Activa superficies de vidrio en toda la aplicacion.")
+                            .font(.system(size: appFontSize - 3))
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .tint(.cyan)
+            .padding()
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
+        }
+    }
+
     // MARK: - Idioma
     private var languageSection: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -172,8 +210,11 @@ struct SettingsView: View {
             }
             .pickerStyle(.segmented)
             .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
         }
     }
 
@@ -204,8 +245,11 @@ struct SettingsView: View {
                     .foregroundColor(.secondary)
             }
             .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
         }
     }
 
@@ -249,8 +293,11 @@ struct SettingsView: View {
             }
             .tint(themeManager.isDarkMode ? .white : .black)
             .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
         }
     }
 
@@ -304,11 +351,19 @@ struct SettingsView: View {
                         }
                     }
                     .padding()
-                    .background(Color(.secondarySystemGroupedBackground))
+                    .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 16
+        )
                 }
                 .disabled(isDeletingProducts)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
         }
     }
 
@@ -336,7 +391,11 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
         }
     }
 
@@ -357,7 +416,11 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
         }
     }
 
@@ -380,8 +443,16 @@ struct SettingsView: View {
                     .foregroundColor(.red.opacity(0.4))
             }
             .padding()
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 16
+        )
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 16
+            )
         }
     }
 
@@ -431,7 +502,18 @@ struct SettingsView: View {
                 .foregroundColor(.secondary.opacity(0.5))
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 16
+        )
+    }
+
+    private var liquidGlassBinding: Binding<Bool> {
+        Binding(
+            get: { themeManager.isLiquidGlassEnabled },
+            set: { themeManager.setLiquidGlassEnabled($0) }
+        )
     }
 
     private var languageBinding: Binding<String> {
