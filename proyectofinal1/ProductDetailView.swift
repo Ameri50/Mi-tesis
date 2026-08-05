@@ -1,19 +1,31 @@
 import SwiftUI
 
-// NOTA: Este es un EJEMPLO de cómo integrar el Chat Support en tu ProductDetailView
-// Reemplaza el código de tu DetailView actual con las secciones marcadas como "AGREGAR"
-
-struct ProductDetailView: View {
+struct productDetailView: View {
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
+    @EnvironmentObject var cartManager: CartManager
+    @ObservedObject private var store = ProductStore.shared  // fuente de productos para recomendaciones
+
     @State private var selectedColor: ColorOption?
     @State private var selectedStorage: StorageOption?
     @State private var quantity: Int = 1
     @State private var isFavorite: Bool = false
-    @State private var showChat: Bool = false  // ✅ AGREGAR ESTA LÍNEA
-    
+    @State private var showChat: Bool = false
+
     let product: Product
     var onAddToCart: ((Int, ColorOption?, StorageOption?) -> Void)?
-    
+
+    // MARK: - Productos relacionados (misma categoría)
+    private var relatedProducts: [Product] {
+        store.products.related(to: product)
+    }
+
+    // MARK: - Accesorios recomendados para este producto
+    private var recommendedAccessories: [Product] {
+        store.products.accessories(for: product)
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -27,10 +39,9 @@ struct ProductDetailView: View {
                             }
                             .foregroundColor(.blue)
                         }
-                        
+
                         Spacer()
-                        
-                        // ✅ AGREGAR BOTÓN DE CHAT AQUÍ
+
                         Button(action: { showChat = true }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "bubble.left.fill")
@@ -43,7 +54,7 @@ struct ProductDetailView: View {
                             .background(Color.blue)
                             .cornerRadius(20)
                         }
-                        
+
                         Button(action: { isFavorite.toggle() }) {
                             Image(systemName: isFavorite ? "heart.fill" : "heart")
                                 .foregroundColor(isFavorite ? .red : .gray)
@@ -51,27 +62,17 @@ struct ProductDetailView: View {
                     }
                     .padding(.horizontal)
                     .padding(.top)
-                    
+
                     // MARK: - Imagen del producto
-                    VStack {
-                        if !product.imageName.isEmpty {
-                            Image(product.imageName)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(height: 300)
-                                .cornerRadius(12)
-                        } else {
-                            Image(systemName: "photo")
-                                .font(.system(size: 100))
-                                .foregroundColor(.gray)
-                                .frame(height: 300)
-                                .frame(maxWidth: .infinity)
-                                .background(Color(.systemGray5))
-                                .cornerRadius(12)
-                        }
-                    }
-                    .padding(.horizontal)
-                    
+                    // Usa RemoteOrLocalImage + finalImageURL para soportar tanto
+                    // imágenes locales del catálogo como imágenes subidas a Firebase Storage.
+                    RemoteOrLocalImage(source: product.finalImageURL, contentMode: .fit)
+                        .frame(height: 300)
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.systemGray5))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+
                     // MARK: - Información del producto
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
@@ -79,7 +80,7 @@ struct ProductDetailView: View {
                                 Text(product.name)
                                     .font(.title2)
                                     .fontWeight(.bold)
-                                
+
                                 HStack(spacing: 4) {
                                     Image(systemName: "star.fill")
                                         .foregroundColor(.orange)
@@ -92,7 +93,7 @@ struct ProductDetailView: View {
                             }
                             Spacer()
                         }
-                        
+
                         // Stock Status
                         HStack {
                             Text(product.stockStatus)
@@ -105,7 +106,7 @@ struct ProductDetailView: View {
                                 .cornerRadius(6)
                             Spacer()
                         }
-                        
+
                         // Precio
                         HStack(spacing: 8) {
                             if product.isOnSale {
@@ -113,12 +114,12 @@ struct ProductDetailView: View {
                                     .font(.title)
                                     .fontWeight(.bold)
                                     .foregroundColor(.green)
-                                
+
                                 Text("$\(String(format: "%.2f", product.price))")
                                     .font(.body)
                                     .strikethrough()
                                     .foregroundColor(.secondary)
-                                
+
                                 Text("-\(product.discount)%")
                                     .font(.caption)
                                     .fontWeight(.bold)
@@ -134,26 +135,26 @@ struct ProductDetailView: View {
                             }
                             Spacer()
                         }
-                        
+
                         Divider()
-                        
+
                         // Descripción
                         Text("Descripción")
                             .font(.headline)
-                        
+
                         Text(product.description)
                             .font(.body)
                             .foregroundColor(.secondary)
                             .lineLimit(5)
                     }
                     .padding(.horizontal)
-                    
+
                     // MARK: - Opciones de color
                     if !product.colorOptions.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Colores disponibles")
                                 .font(.headline)
-                            
+
                             HStack(spacing: 12) {
                                 ForEach(product.colorOptions) { color in
                                     VStack {
@@ -167,7 +168,7 @@ struct ProductDetailView: View {
                                                         lineWidth: 3
                                                     )
                                             )
-                                        
+
                                         Text(color.name)
                                             .font(.caption)
                                             .lineLimit(1)
@@ -181,13 +182,13 @@ struct ProductDetailView: View {
                         }
                         .padding(.horizontal)
                     }
-                    
+
                     // MARK: - Opciones de almacenamiento
                     if !product.storageOptions.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Capacidad")
                                 .font(.headline)
-                            
+
                             HStack(spacing: 8) {
                                 ForEach(product.storageOptions) { storage in
                                     Button(action: { selectedStorage = storage }) {
@@ -211,36 +212,63 @@ struct ProductDetailView: View {
                         }
                         .padding(.horizontal)
                     }
-                    
+
+                    // MARK: - Productos relacionados / Recomendaciones
+                    // (justo debajo de Capacidad, como indica RelatedProductsSection.swift)
+                    relatedProductsSection(
+                        title: "También te puede interesar",
+                        products: relatedProducts
+                    )
+                    .environmentObject(themeManager)
+                    .environmentObject(localizationManager)
+                    .environmentObject(cartManager)
+
+                    relatedProductsSection(
+                        title: "Recomendado para ti",
+                        products: recommendedAccessories
+                    )
+                    .environmentObject(themeManager)
+                    .environmentObject(localizationManager)
+                    .environmentObject(cartManager)
+
                     // MARK: - Cantidad
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Cantidad")
                             .font(.headline)
-                        
+
                         HStack(spacing: 12) {
                             Button(action: { if quantity > 1 { quantity -= 1 } }) {
                                 Image(systemName: "minus.circle.fill")
                                     .font(.title2)
                                     .foregroundColor(.blue)
                             }
-                            
+
                             Text("\(quantity)")
                                 .font(.headline)
                                 .frame(maxWidth: .infinity)
-                            
+
                             Button(action: { quantity += 1 }) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.title2)
                                     .foregroundColor(.blue)
                             }
-                            
+
                             Spacer()
                         }
                     }
                     .padding(.horizontal)
-                    
+
                     // MARK: - Botón Agregar al carrito
                     Button(action: {
+                        // Llama directamente a CartManager: no dependemos de que cada
+                        // pantalla que presenta ProductDetailView recuerde pasar onAddToCart.
+                        cartManager.add(
+                            product: product,
+                            selectedColor: selectedColor?.name ?? (product.colorOptions.first?.name ?? "Único"),
+                            selectedStorage: selectedStorage?.capacity ?? (product.storageOptions.first?.capacity ?? "Único"),
+                            quantity: quantity
+                        )
+                        // Sigue notificando por si algún caller quiere reaccionar (opcional).
                         onAddToCart?(quantity, selectedColor, selectedStorage)
                         dismiss()
                     }) {
@@ -261,15 +289,11 @@ struct ProductDetailView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
         }
-        // ✅ AGREGAR SHEET PARA MOSTRAR EL CHAT
+        // MARK: - Sheet del Chat de soporte
         .sheet(isPresented: $showChat) {
-            ChatSupportView(
-                product: product,
-                onMessageSent: { message in
-                    print("Mensaje enviado: \(message)")
-                    // TODO: Aquí puedes guardar el mensaje en Firebase
-                }
-            )
+            SoporteView()
+                .environmentObject(themeManager)
+                .environmentObject(localizationManager)
         }
     }
 }
@@ -279,12 +303,11 @@ extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
         let rgb = Int(hex, radix: 16) ?? 0
-        
+
         let red = Double((rgb >> 16) & 0xFF) / 255.0
         let green = Double((rgb >> 8) & 0xFF) / 255.0
         let blue = Double(rgb & 0xFF) / 255.0
-        
+
         self.init(red: red, green: green, blue: blue)
     }
 }
-

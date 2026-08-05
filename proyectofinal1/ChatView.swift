@@ -1,328 +1,300 @@
-// ChatView.swift - Vista de Chat estilo WhatsApp
 import SwiftUI
 
-struct ChatView: View {
-    @AppStorage("appFontSize") private var fontSize: Double = 16
+struct ProductDetailView: View {
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
-    @EnvironmentObject var geminiManager: GeminiManager
-    @State private var messageText = ""
-    @State private var showClearAlert = false
-    @FocusState private var isInputFocused: Bool
-    
+    @EnvironmentObject var cartManager: CartManager
+    @ObservedObject private var store = ProductStore.shared  // fuente de productos para recomendaciones
+
+    @State private var selectedColor: ColorOption?
+    @State private var selectedStorage: StorageOption?
+    @State private var quantity: Int = 1
+    @State private var isFavorite: Bool = false
+    @State private var showChat: Bool = false
+
+    let product: Product
+    var onAddToCart: ((Int, ColorOption?, StorageOption?) -> Void)?
+
+    // MARK: - Productos relacionados (misma categoría)
+    private var relatedProducts: [Product] {
+        store.products.related(to: product)
+    }
+
+    // MARK: - Accesorios recomendados para este producto
+    private var recommendedAccessories: [Product] {
+        store.products.accessories(for: product)
+    }
+
     var body: some View {
-        ZStack {
-            // Fondo estilo WhatsApp
-            Color(UIColor.systemGroupedBackground)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                // Messages
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        LazyVStack(spacing: 8) {
-                            if geminiManager.conversationHistory.isEmpty {
-                                emptyStateView
-                            } else {
-                                ForEach(geminiManager.conversationHistory) { message in
-                                    MessageBubbleWhatsApp(message: message)
-                                        .id(message.id)
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 16) {
+                    // MARK: - Header con botón de Chat
+                    HStack {
+                        Button(action: { dismiss() }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "chevron.left")
+                                Text("Atrás")
+                            }
+                            .foregroundColor(.blue)
+                        }
+
+                        Spacer()
+
+                        Button(action: { showChat = true }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "bubble.left.fill")
+                                Text("Chat")
+                                    .font(.caption)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.blue)
+                            .cornerRadius(20)
+                        }
+
+                        Button(action: { isFavorite.toggle() }) {
+                            Image(systemName: isFavorite ? "heart.fill" : "heart")
+                                .foregroundColor(isFavorite ? .red : .gray)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.top)
+
+                    // MARK: - Imagen del producto
+                    // Usa RemoteOrLocalImage + finalImageURL para soportar tanto
+                    // imágenes locales del catálogo como imágenes subidas a Firebase Storage.
+                    RemoteOrLocalImage(source: product.finalImageURL, contentMode: .fit)
+                        .frame(height: 300)
+                        .frame(maxWidth: .infinity)
+                        .background(Color(.systemGray5))
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+
+                    // MARK: - Información del producto
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(product.name)
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+
+                                HStack(spacing: 4) {
+                                    Image(systemName: "star.fill")
+                                        .foregroundColor(.orange)
+                                    Text("\(String(format: "%.1f", product.rating))")
+                                        .font(.subheadline)
+                                    Text("(\(product.reviewCount) reseñas)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
                             }
-                            
-                            // Loading indicator
-                            if geminiManager.isLoading {
-                                LoadingBubbleWhatsApp()
+                            Spacer()
+                        }
+
+                        // Stock Status
+                        HStack {
+                            Text(product.stockStatus)
+                                .font(.caption)
+                                .fontWeight(.semibold)
+                                .foregroundColor(product.stockColor == "red" ? .red : (product.stockColor == "orange" ? .orange : .green))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(product.stockColor).opacity(0.1))
+                                .cornerRadius(6)
+                            Spacer()
+                        }
+
+                        // Precio
+                        HStack(spacing: 8) {
+                            if product.isOnSale {
+                                Text("$\(String(format: "%.2f", product.discountedPrice))")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.green)
+
+                                Text("$\(String(format: "%.2f", product.price))")
+                                    .font(.body)
+                                    .strikethrough()
+                                    .foregroundColor(.secondary)
+
+                                Text("-\(product.discount)%")
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.red)
+                                    .cornerRadius(4)
+                            } else {
+                                Text("$\(String(format: "%.2f", product.price))")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                            }
+                            Spacer()
+                        }
+
+                        Divider()
+
+                        // Descripción
+                        Text("Descripción")
+                            .font(.headline)
+
+                        Text(product.description)
+                            .font(.body)
+                            .foregroundColor(.secondary)
+                            .lineLimit(5)
+                    }
+                    .padding(.horizontal)
+
+                    // MARK: - Opciones de color
+                    if !product.colorOptions.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Colores disponibles")
+                                .font(.headline)
+
+                            HStack(spacing: 12) {
+                                ForEach(product.colorOptions) { color in
+                                    VStack {
+                                        Circle()
+                                            .fill(Color(hex: color.hexColor))
+                                            .frame(width: 50, height: 50)
+                                            .overlay(
+                                                Circle()
+                                                    .stroke(
+                                                        selectedColor?.id == color.id ? Color.blue : Color.clear,
+                                                        lineWidth: 3
+                                                    )
+                                            )
+
+                                        Text(color.name)
+                                            .font(.caption)
+                                            .lineLimit(1)
+                                    }
+                                    .onTapGesture {
+                                        selectedColor = color
+                                    }
+                                }
+                                Spacer()
                             }
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.top, 8)
-                        .padding(.bottom, 80)
+                        .padding(.horizontal)
                     }
-                    .onChange(of: geminiManager.conversationHistory.count) {
-                        scrollToBottom(proxy: proxy)
-                    }
-                    .onChange(of: geminiManager.isLoading) {
-                        scrollToBottom(proxy: proxy)
-                    }
-                }
-                
-                // Input area (fixed at bottom)
-                VStack(spacing: 0) {
-                    // Error message
-                    if !geminiManager.errorMessage.isEmpty {
-                        ErrorBannerCompact(message: geminiManager.errorMessage)
-                    }
-                    
-                    inputView
-                }
-            }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                VStack(spacing: 2) {
-                    Text(localizationManager.translate("chat.title"))
-                        .font(.system(size: fontSize + 2, weight: .semibold))
-                    if geminiManager.isLoading {
-                        Text(localizationManager.translate("chat.typing"))
-                            .font(.system(size: fontSize - 4, weight: .regular))
-                            .foregroundColor(.green)
-                    } else {
-                        Text(localizationManager.translate("chat.online"))
-                            .font(.system(size: fontSize - 4, weight: .regular))
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Menu {
-                    Button(role: .destructive, action: { showClearAlert = true }) {
-                        Label(localizationManager.translate("chat.clearChat"), systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-            }
-        }
-        .alert(localizationManager.translate("chat.clearChat"), isPresented: $showClearAlert) {
-            Button(localizationManager.translate("cancel"), role: .cancel) {}
-            Button(localizationManager.translate("delete"), role: .destructive) {
-                geminiManager.clearConversation()
-            }
-        } message: {
-            Text(localizationManager.translate("chat.clearConfirm"))
-        }
-    }
-    
-    // MARK: - Empty State
-    private var emptyStateView: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            
-            // Icon
-            ZStack {
-                Circle()
-                    .fill(Color.blue.opacity(0.1))
-                    .frame(width: 100, height: 100)
-                
-                Image(systemName: "bubble.left.and.bubble.right.fill")
-                    .font(.system(size: 45))
-                    .foregroundColor(.blue)
-            }
-            
-            VStack(spacing: 8) {
-                Text(localizationManager.translate("chat.emptyTitle"))
-                    .font(.system(size: fontSize + 2, weight: .bold))
-                
-                Text(localizationManager.translate("chat.emptySubtitle"))
-                    .font(.system(size: fontSize, weight: .regular))
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            
-            // Suggestions
-            VStack(spacing: 12) {
-                SuggestionBubble(
-                    icon: "hand.wave.fill",
-                    text: localizationManager.translate("chat.suggestion1"),
-                    action: sendSuggestion,
-                    fontSize: fontSize
-                )
-                
-                SuggestionBubble(
-                    icon: "iphone",
-                    text: localizationManager.translate("chat.suggestion2"),
-                    action: sendSuggestion,
-                    fontSize: fontSize
-                )
-                
-                SuggestionBubble(
-                    icon: "wrench.and.screwdriver",
-                    text: localizationManager.translate("chat.suggestion3"),
-                    action: sendSuggestion,
-                    fontSize: fontSize
-                )
-                
-                SuggestionBubble(
-                    icon: "sparkles",
-                    text: localizationManager.translate("chat.suggestion4"),
-                    action: sendSuggestion,
-                    fontSize: fontSize
-                )
-            }
-            .padding(.horizontal)
-            
-            Spacer()
-        }
-    }
-    
-    // MARK: - Input View
-    private var inputView: some View {
-        HStack(alignment: .bottom, spacing: 8) {
-            // Text field
-            HStack {
-                TextField(localizationManager.translate("chat.messagePlaceholder"), text: $messageText, axis: .vertical)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: fontSize, weight: .regular))
-                    .lineLimit(1...6)
-                    .focused($isInputFocused)
-                    .disabled(geminiManager.isLoading)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color(.systemGray6))
-            .cornerRadius(20)
-            
-            // Send button
-            Button(action: sendMessage) {
-                ZStack {
-                    Circle()
-                        .fill(canSend ? Color.blue : Color.gray.opacity(0.3))
-                        .frame(width: 36, height: 36)
-                    
-                    Image(systemName: "arrow.up")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
-                }
-            }
-            .disabled(!canSend)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
-        .background(Color(.systemBackground))
-    }
-    
-    // MARK: - Helpers
-    private var canSend: Bool {
-        !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !geminiManager.isLoading
-    }
-    
-    private func sendMessage() {
-        guard canSend else { return }
-        
-        let message = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
-        messageText = ""
-        
-        // Agregar mensaje del usuario al historial
-        let userMsg = GeminiManager.ChatMessage(role: "user", text: message)
-        geminiManager.conversationHistory.append(userMsg)
-        
-        Task {
-            // Usar sendChatMessage para mantener contexto completo
-            await geminiManager.sendChatMessage(message)
-        }
-    }
-    
-    private func sendSuggestion(text: String) {
-        messageText = text
-        sendMessage()
-    }
-    
-    private func scrollToBottom(proxy: ScrollViewProxy) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            if let lastMessage = geminiManager.conversationHistory.last {
-                withAnimation(.easeOut(duration: 0.3)) {
-                    proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                }
-            }
-        }
-    }
-}
 
-// MARK: - Loading Bubble WhatsApp Style
-struct LoadingBubbleWhatsApp: View {
-    @State private var animateOpacity = false
-    
-    var body: some View {
-        HStack(alignment: .bottom, spacing: 0) {
-            HStack(spacing: 6) {
-                ForEach(0..<3) { i in
-                    Circle()
-                        .fill(Color.secondary)
-                        .frame(width: 8, height: 8)
-                        .opacity(animateOpacity ? 0.3 : 1)
-                        .animation(
-                            Animation.easeInOut(duration: 0.6)
-                                .repeatForever()
-                                .delay(Double(i) * 0.2),
-                            value: animateOpacity
+                    // MARK: - Opciones de almacenamiento
+                    if !product.storageOptions.isEmpty {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Capacidad")
+                                .font(.headline)
+
+                            HStack(spacing: 8) {
+                                ForEach(product.storageOptions) { storage in
+                                    Button(action: { selectedStorage = storage }) {
+                                        Text(storage.capacity)
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 8)
+                                            .background(
+                                                selectedStorage?.id == storage.id
+                                                    ? Color.blue
+                                                    : Color(.systemGray5)
+                                            )
+                                            .foregroundColor(
+                                                selectedStorage?.id == storage.id ? .white : .black
+                                            )
+                                            .cornerRadius(8)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+
+                    // MARK: - Productos relacionados / Recomendaciones
+                    // (justo debajo de Capacidad, como indica RelatedProductsSection.swift)
+                    relatedProductsSection(
+                        title: "También te puede interesar",
+                        products: relatedProducts
+                    )
+                    .environmentObject(themeManager)
+                    .environmentObject(localizationManager)
+                    .environmentObject(cartManager)
+
+                    relatedProductsSection(
+                        title: "Recomendado para ti",
+                        products: recommendedAccessories
+                    )
+                    .environmentObject(themeManager)
+                    .environmentObject(localizationManager)
+                    .environmentObject(cartManager)
+
+                    // MARK: - Cantidad
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Cantidad")
+                            .font(.headline)
+
+                        HStack(spacing: 12) {
+                            Button(action: { if quantity > 1 { quantity -= 1 } }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.blue)
+                            }
+
+                            Text("\(quantity)")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+
+                            Button(action: { quantity += 1 }) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.blue)
+                            }
+
+                            Spacer()
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    // MARK: - Botón Agregar al carrito
+                    Button(action: {
+                        // Llama directamente a CartManager: no dependemos de que cada
+                        // pantalla que presenta ProductDetailView recuerde pasar onAddToCart.
+                        cartManager.add(
+                            product: product,
+                            selectedColor: selectedColor?.name ?? (product.colorOptions.first?.name ?? "Único"),
+                            selectedStorage: selectedStorage?.capacity ?? (product.storageOptions.first?.capacity ?? "Único"),
+                            quantity: quantity
                         )
+                        // Sigue notificando por si algún caller quiere reaccionar (opcional).
+                        onAddToCart?(quantity, selectedColor, selectedStorage)
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: "cart.badge.plus")
+                            Text("Agregar al carrito")
+                        }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.systemGray5))
-            .cornerRadius(18)
-            
-            Spacer(minLength: 60)
+            .navigationBarTitleDisplayMode(.inline)
         }
-        .onAppear { animateOpacity = true }
-    }
-}
-
-// MARK: - Suggestion Bubble
-struct SuggestionBubble: View {
-    let icon: String
-    let text: String
-    let action: (String) -> Void
-    let fontSize: Double
-    
-    var body: some View {
-        Button(action: { action(text) }) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(.blue)
-                    .frame(width: 32)
-                
-                Text(text)
-                    .font(.system(size: fontSize, weight: .regular))
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                Image(systemName: "arrow.up.circle.fill")
-                    .font(.system(size: 22))
-                    .foregroundColor(.blue.opacity(0.3))
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 14)
-            .background(Color(.systemBackground))
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        // MARK: - Sheet del Chat de soporte
+        .sheet(isPresented: $showChat) {
+            SoporteView()
+                .environmentObject(themeManager)
+                .environmentObject(localizationManager)
         }
     }
 }
 
-// MARK: - Error Banner Compact
-struct ErrorBannerCompact: View {
-    @AppStorage("appFontSize") private var fontSize: Double = 16
-    
-    let message: String
-    
-    var body: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "wifi.slash")
-                .font(.caption)
-                .foregroundColor(.red)
-            
-            Text(message)
-                .font(.system(size: fontSize - 4, weight: .regular))
-                .foregroundColor(.secondary)
-            
-            Spacer()
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(Color(.systemGray6))
-    }
-}
-
-// MARK: - Preview
-#Preview {
-    NavigationView {
-        ChatView()
-            .environmentObject(GeminiManager.shared)
-    }
-}

@@ -4,21 +4,32 @@ import SwiftUI
 // Sección horizontal reutilizable de "Recomendaciones" / "También te puede interesar".
 // Se usa en ProductDetailView (debajo de Capacidad) y en CartView (arriba del resumen de pago).
 // Cada tarjeta navega directo al detalle del producto tocado.
-struct relatedProductsSection: View {
+//
+// `accessory` es un view builder opcional que se muestra a la derecha del título
+// (por ejemplo, el botón de "expandir carrito" en CartView). Si no se pasa nada,
+// no aparece ningún accesorio y el comportamiento es idéntico al de antes.
+struct relatedProductsSection<Accessory: View>: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
     @EnvironmentObject var cartManager: CartManager
 
     let title: String
     let products: [Product]
+    @ViewBuilder var accessory: () -> Accessory
 
     var body: some View {
         if !products.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                Text(title)
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(themeManager.isDarkMode ? .white : .black)
-                    .padding(.horizontal, 20)
+                HStack {
+                    Text(title)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(themeManager.isDarkMode ? .white : .black)
+
+                    Spacer()
+
+                    accessory()
+                }
+                .padding(.horizontal, 20)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
@@ -40,6 +51,16 @@ struct relatedProductsSection: View {
                 }
             }
         }
+    }
+}
+
+// Permite seguir llamando `relatedProductsSection(title:products:)` sin accesorio,
+// tal como ya se usa en ProductDetailView, sin tener que tocar esas llamadas.
+extension relatedProductsSection where Accessory == EmptyView {
+    init(title: String, products: [Product]) {
+        self.title = title
+        self.products = products
+        self.accessory = { EmptyView() }
     }
 }
 
@@ -75,4 +96,3 @@ private struct RelatedProductCard: View {
         .appLiquidGlassSurface(cornerRadius: 18)
     }
 }
-

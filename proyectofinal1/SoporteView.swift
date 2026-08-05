@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - Modelo de Mensaje
-struct ChatMessage: Identifiable, Codable {
+struct SupportBotMessage: Identifiable, Codable {
     let id: UUID
     let role: String
     let text: String
@@ -36,7 +36,7 @@ struct ErrorBanner: View {
 struct MessageBubble: View {
     @EnvironmentObject var themeManager: ThemeManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
-    let message: ChatMessage
+    let message: SupportBotMessage
     
     private var isUser: Bool { message.role == "user" }
     
@@ -145,7 +145,7 @@ struct SoporteView: View {
     @State private var messageText = ""
     @State private var showClearAlert = false
     @FocusState private var isInputFocused: Bool
-    @State private var supportHistory: [ChatMessage] = []
+    @State private var supportHistory: [SupportBotMessage] = []
     @FocusState private var isLoadingUnused: Bool // no-op, mantenido por compatibilidad de layout
     
     private var isLoading: Bool { gemini.isLoading }
@@ -531,14 +531,14 @@ struct SoporteView: View {
         messageText = ""
         isInputFocused = false
         
-        supportHistory.append(ChatMessage(role: "user", text: text))
+        supportHistory.append(SupportBotMessage(role: "user", text: text))
         saveSupportHistory()
         
         // Filtro rápido: si claramente no es sobre repuestos/servicio técnico Apple,
         // respondemos al instante sin llamar a Gemini.
         guard isOnTopic(text) else {
             let offTopicReply = "¡Hola! 👋 Solo puedo ayudarte con temas de repuestos y servicio técnico de productos Apple (pantallas, baterías, cámaras, etc.). ¿Tienes alguna consulta sobre eso?"
-            supportHistory.append(ChatMessage(role: "model", text: offTopicReply))
+            supportHistory.append(SupportBotMessage(role: "model", text: offTopicReply))
             saveSupportHistory()
             return
         }
@@ -551,7 +551,7 @@ struct SoporteView: View {
                 : gemini.errorMessage
             
             if !replyText.isEmpty {
-                supportHistory.append(ChatMessage(role: "model", text: replyText))
+                supportHistory.append(SupportBotMessage(role: "model", text: replyText))
                 saveSupportHistory()
             }
         }
@@ -580,7 +580,7 @@ struct SoporteView: View {
     
     private func loadSupportHistory() {
         if let data = UserDefaults.standard.data(forKey: "support_history"),
-           let decoded = try? JSONDecoder().decode([ChatMessage].self, from: data) {
+           let decoded = try? JSONDecoder().decode([SupportBotMessage].self, from: data) {
             supportHistory = decoded
         }
     }

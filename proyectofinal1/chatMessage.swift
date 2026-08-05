@@ -8,7 +8,7 @@ struct ChatMessage: Identifiable, Codable {
     let senderType: SenderType
     let message: String
     let timestamp: Date
-    let isRead: Bool
+    var isRead: Bool
 
     enum SenderType: String, Codable {
         case user = "user"
@@ -33,30 +33,16 @@ struct ChatMessage: Identifiable, Codable {
         self.isRead = isRead
     }
 
-    enum CodingKeys: String, CodingKey {
-        case id, productId, userId, senderType, message, timestamp, isRead
-    }
-
+    // Decoder tolerante: si "isRead" no viene en el JSON, usa false en vez de fallar
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(String.self, forKey: .id)
-        self.productId = try container.decode(String.self, forKey: .productId)
-        self.userId = try container.decode(String.self, forKey: .userId)
-        self.senderType = try container.decode(SenderType.self, forKey: .senderType)
-        self.message = try container.decode(String.self, forKey: .message)
-        self.timestamp = try container.decode(Date.self, forKey: .timestamp)
-        self.isRead = try container.decode(Bool.self, forKey: .isRead)
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(productId, forKey: .productId)
-        try container.encode(userId, forKey: .userId)
-        try container.encode(senderType, forKey: .senderType)
-        try container.encode(message, forKey: .message)
-        try container.encode(timestamp, forKey: .timestamp)
-        try container.encode(isRead, forKey: .isRead)
+        id = try container.decode(String.self, forKey: .id)
+        productId = try container.decode(String.self, forKey: .productId)
+        userId = try container.decode(String.self, forKey: .userId)
+        senderType = try container.decode(SenderType.self, forKey: .senderType)
+        message = try container.decode(String.self, forKey: .message)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        isRead = try container.decodeIfPresent(Bool.self, forKey: .isRead) ?? false
     }
 }
 
@@ -86,31 +72,5 @@ struct ChatSession: Identifiable, Codable {
         self.createdAt = createdAt
         self.messages = messages
         self.isActive = isActive
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case id, productId, productName, userId, createdAt, messages, isActive
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(String.self, forKey: .id)
-        self.productId = try container.decode(String.self, forKey: .productId)
-        self.productName = try container.decode(String.self, forKey: .productName)
-        self.userId = try container.decode(String.self, forKey: .userId)
-        self.createdAt = try container.decode(Date.self, forKey: .createdAt)
-        self.messages = try container.decode([ChatMessage].self, forKey: .messages)
-        self.isActive = try container.decode(Bool.self, forKey: .isActive)
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
-        try container.encode(productId, forKey: .productId)
-        try container.encode(productName, forKey: .productName)
-        try container.encode(userId, forKey: .userId)
-        try container.encode(createdAt, forKey: .createdAt)
-        try container.encode(messages, forKey: .messages)
-        try container.encode(isActive, forKey: .isActive)
     }
 }

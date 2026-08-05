@@ -29,6 +29,7 @@ struct CartView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var navigateToPayment = false
+    @State private var isExpanded = false // 👈 oculta "you may also like" y expande la lista de productos
     @ObservedObject private var store = ProductStore.shared  // 👈 fuente de productos para recomendaciones
 
     /// Productos que NO están ya en el carrito, priorizando las categorías
@@ -69,20 +70,32 @@ struct CartView: View {
                     .environmentObject(themeManager)
             }
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if !cartManager.isEmpty {
+                if !cartManager.isEmpty {
+                    // 👈 Botón de expandir/contraer, separado del de delete
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                isExpanded.toggle()
+                            }
+                        }) {
+                            Image(systemName: isExpanded ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
+                                .foregroundColor(themeManager.isDarkMode ? .white : .primary)
+                        }
+                        .accessibilityLabel(
+                            isExpanded
+                            ? localizationManager.translate("cart.collapse")
+                            : localizationManager.translate("cart.expand")
+                        )
+                    }
+
+                    // 👈 Botón de delete, separado del de expandir
+                    ToolbarItem(placement: .navigationBarTrailing) {
                         Button(localizationManager.translate("delete")) {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 cartManager.clearCart()
                             }
                         }
                         .foregroundColor(.red)
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(localizationManager.translate("login.close")) {
-                        dismiss()
                     }
                 }
             }
@@ -138,8 +151,17 @@ struct CartView: View {
                 .padding(.horizontal)
                 .padding(.top)
             }
+            // 👈 Cuando está expandido, la lista de productos ocupa todo el alto disponible
+            .frame(maxHeight: isExpanded ? .infinity : nil)
 
-            cartSummary(sizes: sizes)
+            if !isExpanded {
+                cartSummary(sizes: sizes)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            } else {
+                // 👈 Resumen colapsado: solo el total y los botones de acción, sin recomendaciones
+                collapsedSummary(sizes: sizes)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
         }
     }
 
@@ -156,6 +178,27 @@ struct CartView: View {
 
             Divider()
 
+            cartTotalsAndActions(sizes: sizes)
+        }
+        .padding(.vertical)
+        .background(Color(UIColor { _ in
+            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .secondarySystemBackground
+        }))
+    }
+
+    /// Versión sin la sección "you may also like", usada cuando isExpanded == true
+    private func collapsedSummary(sizes: CartFontSizes) -> some View {
+        VStack(spacing: 16) {
+            cartTotalsAndActions(sizes: sizes)
+        }
+        .padding(.vertical)
+        .background(Color(UIColor { _ in
+            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .secondarySystemBackground
+        }))
+    }
+
+    private func cartTotalsAndActions(sizes: CartFontSizes) -> some View {
+        VStack(spacing: 16) {
             VStack(spacing: 8) {
                 HStack {
                     Text(localizationManager.translate("cart.itemsTotal"))
@@ -212,10 +255,6 @@ struct CartView: View {
             }
             .padding(.horizontal)
         }
-        .padding(.vertical)
-        .background(Color(UIColor { _ in
-            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .secondarySystemBackground
-        }))
     }
 
     private func sendWhatsAppMessage() {
@@ -372,4 +411,3 @@ struct CartItemRow: View {
         .environmentObject(CartManager())
         .environmentObject(ThemeManager())
 }
-
