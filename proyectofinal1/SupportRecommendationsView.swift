@@ -1,20 +1,28 @@
+import AppIntents
 import SwiftUI
-
-// MARK: - Estilo de presión reutilizable
-private struct PressableCardStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .opacity(configuration.isPressed ? 0.9 : 1)
-            .animation(.spring(response: 0.32, dampingFraction: 0.7), value: configuration.isPressed)
-    }
-}
-
-struct SupportHubView: View {
+struct SupportRecommendationsView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
     @EnvironmentObject var cartManager: CartManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
+    @ObservedObject private var store = ProductStore.shared
+
+    private struct RecommendationRoute: Identifiable {
+        let id = UUID()
+        let title: String
+        let subtitle: String
+        let category: String
+        let icon: String
+        let tint: Color
+    }
+
+    private let routes: [RecommendationRoute] = [
+        RecommendationRoute(title: "Para estudiar", subtitle: "iPad y accesorios que rinden bien en clases y tareas.", category: "iPad", icon: "ipad.gen3", tint: .blue),
+        RecommendationRoute(title: "Para trabajo", subtitle: "Mac y accesorios para productividad diaria.", category: "Mac", icon: "macbook", tint: .purple),
+        RecommendationRoute(title: "Para uso diario", subtitle: "iPhone con buena relacion precio-rendimiento.", category: "iPhone", icon: "iphone.gen3", tint: .orange),
+        RecommendationRoute(title: "Audio y movilidad", subtitle: "AirPods y opciones portatiles para el dia a dia.", category: "AirPods", icon: "airpodspro", tint: .green),
+        RecommendationRoute(title: "Ver catalogo completo", subtitle: "Explora todas las categorias disponibles de la tienda.", category: "", icon: "square.grid.2x2.fill", tint: .pink)
+    ]
 
     var body: some View {
         ZStack {
@@ -28,37 +36,30 @@ struct SupportHubView: View {
                     VStack(alignment: .leading, spacing: 22) {
                         header
 
-                        sectionLabel("CÓMO PODEMOS AYUDARTE")
+                        sectionLabel("EXPLORA POR CATEGORÍA")
 
                         VStack(spacing: 14) {
-                            NavigationLink {
-                                SoporteView()
-                                    .environmentObject(themeManager)
-                                    .environmentObject(localizationManager)
-                            } label: {
-                                supportOptionCard(
-                                    icon: "message.fill",
-                                    title: localizationManager.translate("support.chat"),
-                                    subtitle: "Habla con el asistente tecnico para resolver dudas de reparaciones y repuestos.",
-                                    gradient: [Color.orange, Color.pink]
-                                )
+                            ForEach(routes) { route in
+                                if route.category.isEmpty {
+                                    NavigationLink {
+                                        CategoryView()
+                                            .environmentObject(cartManager)
+                                            .environmentObject(themeManager)
+                                            .environmentObject(localizationManager)
+                                    } label: {
+                                        recommendationCard(route: route)
+                                    }
+                                } else {
+                                    NavigationLink {
+                                        ProductListView(category: route.category)
+                                            .environmentObject(themeManager)
+                                            .environmentObject(cartManager)
+                                            .environmentObject(localizationManager)
+                                    } label: {
+                                        recommendationCard(route: route)
+                                    }
+                                }
                             }
-                            .buttonStyle(PressableCardStyle())
-
-                            NavigationLink {
-                                SupportRecommendationsView()
-                                    .environmentObject(themeManager)
-                                    .environmentObject(localizationManager)
-                                    .environmentObject(cartManager)
-                            } label: {
-                                supportOptionCard(
-                                    icon: "sparkles",
-                                    title: "Recomendaciones",
-                                    subtitle: "Explora sugerencias de productos segun lo que necesitas comprar.",
-                                    gradient: [Color.blue, Color.purple]
-                                )
-                            }
-                            .buttonStyle(PressableCardStyle())
                         }
                     }
                     .padding(16)
@@ -66,8 +67,11 @@ struct SupportHubView: View {
                 }
             }
         }
-        .navigationTitle(localizationManager.translate("support.title"))
+        .navigationTitle("Recomendaciones")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            _ = store.products.count
+        }
     }
 
     private var header: some View {
@@ -76,25 +80,25 @@ struct SupportHubView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.orange, Color.pink],
+                            colors: [Color.blue, Color.purple],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 52, height: 52)
-                    .shadow(color: Color.orange.opacity(0.35), radius: 10, x: 0, y: 4)
+                    .shadow(color: Color.blue.opacity(0.35), radius: 10, x: 0, y: 4)
 
-                Image(systemName: "questionmark.bubble.fill")
+                Image(systemName: "sparkles")
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(.white)
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(localizationManager.translate("support.heading"))
+                Text("Recomendaciones rapidas")
                     .font(.system(size: fontSize + 5, weight: .bold, design: .rounded))
                     .foregroundColor(themeManager.isDarkMode ? .white : .primary)
 
-                Text("Elige si quieres conversar con el chatbot tecnico o abrir recomendaciones rapidas de compra.")
+                Text("Entrar aqui te lleva a categorias utiles para elegir el producto correcto segun el uso que le daras.")
                     .font(.system(size: fontSize - 1))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -105,8 +109,8 @@ struct SupportHubView: View {
         .background(
             LinearGradient(
                 colors: [
-                    Color.orange.opacity(themeManager.isDarkMode ? 0.24 : 0.16),
-                    Color.pink.opacity(themeManager.isDarkMode ? 0.10 : 0.06),
+                    Color.blue.opacity(themeManager.isDarkMode ? 0.24 : 0.16),
+                    Color.purple.opacity(themeManager.isDarkMode ? 0.10 : 0.06),
                     Color.clear
                 ],
                 startPoint: .topLeading,
@@ -128,27 +132,25 @@ struct SupportHubView: View {
             .padding(.leading, 4)
     }
 
-    private func supportOptionCard(icon: String, title: String, subtitle: String, gradient: [Color]) -> some View {
+    private func recommendationCard(route: RecommendationRoute) -> some View {
         HStack(spacing: 16) {
             ZStack {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(
-                        LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
+                    .fill(route.tint.gradient)
                     .frame(width: 52, height: 52)
-                    .shadow(color: gradient[0].opacity(0.35), radius: 8, x: 0, y: 3)
+                    .shadow(color: route.tint.opacity(0.35), radius: 8, x: 0, y: 3)
 
-                Image(systemName: icon)
-                    .font(.system(size: 22, weight: .semibold))
+                Image(systemName: route.icon)
+                    .font(.system(size: 20, weight: .semibold))
                     .foregroundColor(.white)
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
+                Text(route.title)
                     .font(.system(size: fontSize + 1, weight: .semibold))
                     .foregroundColor(themeManager.isDarkMode ? .white : .primary)
 
-                Text(subtitle)
+                Text(route.subtitle)
                     .font(.system(size: fontSize - 3))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -177,5 +179,14 @@ struct SupportHubView: View {
                 .stroke(Color.white.opacity(themeManager.isDarkMode ? 0.06 : 0.5), lineWidth: themeManager.isLiquidGlassEnabled ? 0 : 1)
         )
         .shadow(color: .black.opacity(themeManager.isDarkMode ? 0.25 : 0.06), radius: 10, x: 0, y: 5)
+    }
+}
+
+#Preview("Soporte") {
+    NavigationStack {
+        SupportHubView()
+            .environmentObject(ThemeManager())
+            .environmentObject(LocalizationManager())
+            .environmentObject(CartManager())
     }
 }
