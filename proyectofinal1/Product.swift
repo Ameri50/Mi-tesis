@@ -350,3 +350,68 @@ struct Product: Identifiable, Codable, Hashable {
 // MARK: - SeedProduct (para compatibilidad con datos locales)
 // Usa Product internamente pero con alias para que el codigo existente siga funcionando.
 typealias SeedProduct = Product
+
+// MARK: - Recomendaciones / productos relacionados
+private let accessoryCategoryKeyword = "accesorio" // cubre "Accesorios" sin importar mayúsculas/acentos exactos
+
+extension Array where Element == Product {
+    /// Productos relacionados a `product`: misma categoría, excluyéndolo a él mismo
+    /// y priorizando los que están en stock. Usado en ProductDetailView.
+    func related(to product: Product, limit: Int = 10) -> [Product] {
+        let sameCategory = self.filter { $0.id != product.id && $0.category == product.category }
+        let inStockFirst = sameCategory.sorted { $0.inStock && !$1.inStock }
+        return Array(inStockFirst.prefix(limit))
+    }
+
+    /// Accesorios que se le pueden agregar a `product` (categoría "Accesorios").
+    /// Si el accesorio declara `suggestedDevices` (ej: ["iPhone", "iPhone 15 Pro"]),
+    /// se prioriza si coincide con la categoría o el nombre de `product`.
+    /// Si ningún accesorio tiene esa data cargada, cae a mostrar accesorios en general.
+    func accessories(for product: Product, limit: Int = 10) -> [Product] {
+        let pool = self.filter {
+            $0.id != product.id && $0.category.localizedCaseInsensitiveContains(accessoryCategoryKeyword)
+        }
+        guard !pool.isEmpty else { return [] }
+
+        let matched = pool.filter { accessory in
+            accessory.suggestedDevices.contains { device in
+                device.localizedCaseInsensitiveContains(product.category)
+                    || product.name.localizedCaseInsensitiveContains(device)
+            }
+        }
+
+        if !matched.isEmpty {
+            let matchedIds = Set(matched.map { $0.id })
+            let rest = pool.filter { !matchedIds.contains($0.id) }
+            return Array((matched + rest).prefix(limit))
+        }
+        return Array(pool.prefix(limit))
+    }
+
+    /// Recomendaciones para el carrito: productos que NO están ya en el carrito.
+    /// Prioriza primero accesorios compatibles con lo que el usuario ya lleva,
+    /// luego accesorios en general, luego productos de la misma categoría.
+    func recommendations(excluding excludedIds: Set<String>, favoringCategories categories: Set<String>, limit: Int = 10) -> [Product] {
+        let candidates = self.filter { !excludedIds.contains($0.id) }
+
+        func score(_ p: Product) -> Int {
+            if p.category.localizedCaseInsensitiveContains(accessoryCategoryKeyword) {
+                let matchesCartItem = p.suggestedDevices.contains { device in
+                    categories.contains { cartCategory in
+                        cartCategory.localizedCaseInsensitiveContains(device)
+                            || device.localizedCaseInsensitiveContains(cartCategory)
+                    }
+                }
+                return (matchesCartItem ? 3 : 2) + (p.inStock ? 1 : 0)
+            }
+            if categories.contains(p.category) {
+                return 1 + (p.inStock ? 1 : 0)
+            }
+            return p.inStock ? 1 : 0
+        }
+
+        let sorted = candidates.sorted { score($0) > score($1) }
+        return Array(sorted.prefix(limit))
+    }
+}
+

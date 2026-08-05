@@ -51,6 +51,7 @@ struct ProductDetailView: View {
 
     let product: Product  // ✅ Ahora usa Product (que era SeedProduct)
     @EnvironmentObject var cartManager: CartManager
+    @ObservedObject private var store = ProductStore.shared  // 👈 fuente de productos para recomendaciones
     @State private var isAddedToCart = false
     @State private var selectedColorIndex: Int? = nil
     @State private var selectedStorageIndex: Int? = nil
@@ -293,6 +294,26 @@ struct ProductDetailView: View {
                             .padding(.horizontal, 20)
                         }
 
+                        // MARK: - Recomendaciones (productos relacionados)
+                        RelatedProductsSection(
+                            title: localizationManager.translate("product.youMayAlsoLike"),
+                            products: store.products.related(to: product)
+                        )
+                        .environmentObject(themeManager)
+                        .environmentObject(localizationManager)
+                        .environmentObject(cartManager)
+                        .padding(.top, 8)
+
+                        // MARK: - Accesorios recomendados para este producto
+                        RelatedProductsSection(
+                            title: localizationManager.translate("product.recommendedAccessories"),
+                            products: store.products.accessories(for: product)
+                        )
+                        .environmentObject(themeManager)
+                        .environmentObject(localizationManager)
+                        .environmentObject(cartManager)
+                        .padding(.top, 8)
+
                         // MARK: - Specs Row
                         HStack(spacing: 10) {
                             SpecBadge(icon: "shippingbox",      label: localizationManager.translate("product.freeShipping"),       theme: themeManager)
@@ -407,3 +428,4 @@ struct SpecBadge: View {
         )
     }
 }
+

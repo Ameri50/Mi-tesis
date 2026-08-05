@@ -29,6 +29,19 @@ struct CartView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     @State private var navigateToPayment = false
+    @ObservedObject private var store = ProductStore.shared  // 👈 fuente de productos para recomendaciones
+
+    /// Productos que NO están ya en el carrito, priorizando las categorías
+    /// de lo que el usuario ya tiene en el carrito (ej: si lleva un iPhone,
+    /// sugiere primero fundas/cargadores de la misma categoría).
+    private var recommendedProducts: [Product] {
+        let idsInCart = Set(cartManager.cartItems.map { $0.product.id })
+        let categoriesInCart = Set(cartManager.cartItems.map { $0.product.category })
+        return store.products.recommendations(
+            excluding: idsInCart,
+            favoringCategories: categoriesInCart
+        )
+    }
 
     var body: some View {
         let sizes = CartFontSizes(fontSize: fontSize)
@@ -39,6 +52,8 @@ struct CartView: View {
                     themeManager.isDarkMode ? UIColor(white: 0.11, alpha: 1) : .systemBackground
                 })
                 .ignoresSafeArea()
+                // ✅ Fondo de la pantalla de carrito ahora respeta Liquid Glass
+                .appLiquidGlassSurface(cornerRadius: 0)
 
                 if cartManager.isEmpty {
                     emptyCartView(sizes: sizes)
@@ -130,6 +145,15 @@ struct CartView: View {
 
     private func cartSummary(sizes: CartFontSizes) -> some View {
         VStack(spacing: 16) {
+            // MARK: - Recomendaciones antes de pagar
+            RelatedProductsSection(
+                title: localizationManager.translate("cart.youMayAlsoLike"),
+                products: recommendedProducts
+            )
+            .environmentObject(themeManager)
+            .environmentObject(localizationManager)
+            .environmentObject(cartManager)
+
             Divider()
 
             VStack(spacing: 8) {
@@ -348,3 +372,4 @@ struct CartItemRow: View {
         .environmentObject(CartManager())
         .environmentObject(ThemeManager())
 }
+

@@ -1,6 +1,30 @@
 import SwiftUI
 
+// MARK: - Environment global para Liquid Glass
+// Permite que CUALQUIER vista use `.appLiquidGlassSurface()` sin tener que
+// pasar `themeManager.isLiquidGlassEnabled` / `themeManager.isDarkMode` a mano.
+// Se inyecta una sola vez en proyectofinal1App.swift.
+private struct LiquidGlassEnabledKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var liquidGlassEnabled: Bool {
+        get { self[LiquidGlassEnabledKey.self] }
+        set { self[LiquidGlassEnabledKey.self] = newValue }
+    }
+}
+
 extension View {
+    /// Nueva forma recomendada: toma el estado del Environment global.
+    /// Úsala en vistas nuevas para que el toggle de Ajustes afecte
+    /// automáticamente a toda la app, sin pasar parámetros.
+    func appLiquidGlassSurface(cornerRadius: CGFloat = 16) -> some View {
+        modifier(EnvironmentLiquidGlassSurfaceModifier(cornerRadius: cornerRadius))
+    }
+
+    /// Forma anterior, se mantiene por compatibilidad con las vistas
+    /// que ya pasan `enabled`/`darkMode` explícitamente.
     func appLiquidGlassSurface(
         enabled: Bool,
         darkMode: Bool,
@@ -10,6 +34,22 @@ extension View {
             AppLiquidGlassSurfaceModifier(
                 enabled: enabled,
                 darkMode: darkMode,
+                cornerRadius: cornerRadius
+            )
+        )
+    }
+}
+
+private struct EnvironmentLiquidGlassSurfaceModifier: ViewModifier {
+    @Environment(\.liquidGlassEnabled) private var enabled
+    @Environment(\.colorScheme) private var colorScheme
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content.modifier(
+            AppLiquidGlassSurfaceModifier(
+                enabled: enabled,
+                darkMode: colorScheme == .dark,
                 cornerRadius: cornerRadius
             )
         )

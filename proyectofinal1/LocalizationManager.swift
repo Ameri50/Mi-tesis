@@ -134,6 +134,9 @@ final class LocalizationManager: ObservableObject {
             "product.description": "Descripcion",
             "product.details": "Detalles",
             "product.quantity": "Cantidad",
+            "product.youMayAlsoLike": "Tambien te puede interesar",
+            "product.recommendedAccessories": "Accesorios recomendados",
+            "cart.youMayAlsoLike": "Tambien te puede interesar",
 
             "support.title": "Soporte",
             "support.chat": "Chat",
@@ -440,6 +443,9 @@ final class LocalizationManager: ObservableObject {
             "product.description": "Description",
             "product.details": "Details",
             "product.quantity": "Quantity",
+            "product.youMayAlsoLike": "You may also like",
+            "product.recommendedAccessories": "Recommended accessories",
+            "cart.youMayAlsoLike": "You may also like",
 
             "support.title": "Support",
             "support.chat": "Chat",
@@ -644,3 +650,4 @@ final class LocalizationManager: ObservableObject {
         ?? key
     }
 }
+
