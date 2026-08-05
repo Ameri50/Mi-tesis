@@ -18,10 +18,12 @@ struct RepairDetailView: View {
 
                     // MARK: - Icono principal
                     ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(Color(UIColor { _ in
-                                themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : UIColor(white: 0.95, alpha: 1)
-                            }))
+                        RoundedRectangle(cornerRadius: 20, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                    .stroke(Color.white.opacity(themeManager.isDarkMode ? 0.14 : 0.4), lineWidth: 1)
+                            )
                             .frame(width: 180, height: 180)
 
                         Image(systemName: part.icon)
@@ -53,15 +55,11 @@ struct RepairDetailView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(20)
-                    .background(Color(UIColor { _ in
-                        themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .white
-                    }))
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.gray.opacity(themeManager.isDarkMode ? 0.2 : 0.08), lineWidth: 1)
+                    .appLiquidGlassSurface(
+                        enabled: themeManager.isLiquidGlassEnabled,
+                        darkMode: themeManager.isDarkMode,
+                        cornerRadius: 16
                     )
-                    .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
                     .padding(.horizontal, 16)
 
                     // MARK: - Info cards
@@ -110,15 +108,11 @@ struct RepairDetailView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(16)
-                    .background(Color(UIColor { _ in
-                        themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .white
-                    }))
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.gray.opacity(themeManager.isDarkMode ? 0.2 : 0.08), lineWidth: 1)
+                    .appLiquidGlassSurface(
+                        enabled: themeManager.isLiquidGlassEnabled,
+                        darkMode: themeManager.isDarkMode,
+                        cornerRadius: 16
                     )
-                    .shadow(color: Color.black.opacity(0.05), radius: 6, x: 0, y: 2)
                     .padding(.horizontal, 16)
 
                     // MARK: - Botón de contacto
@@ -177,15 +171,11 @@ struct RepairDetailView: View {
             Spacer()
         }
         .padding(14)
-        .background(Color(UIColor { _ in
-            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .white
-        }))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(themeManager.isDarkMode ? 0.2 : 0.06), lineWidth: 1)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 12
         )
-        .shadow(color: Color.black.opacity(0.04), radius: 4, x: 0, y: 1)
     }
 }
 

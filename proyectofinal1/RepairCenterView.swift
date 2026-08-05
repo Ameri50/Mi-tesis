@@ -51,6 +51,12 @@ struct RepairCenterView: View {
                 .foregroundStyle(.gray)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 18
+        )
         .padding(.top, 4)
     }
 
@@ -83,6 +89,12 @@ struct RepairCenterView: View {
                 .padding(.horizontal, 4)
             }
         }
+        .padding(.vertical, 12)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 18
+        )
     }
 
     // MARK: - Model selector
@@ -113,6 +125,12 @@ struct RepairCenterView: View {
                 .padding(.horizontal, 4)
             }
         }
+        .padding(.vertical, 12)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 18
+        )
     }
 
     // MARK: - Parts list
@@ -128,7 +146,13 @@ struct RepairCenterView: View {
                         .font(.system(size: fontSize - 2))
                         .foregroundStyle(.gray)
                 }
+                .frame(maxWidth: .infinity)
                 .padding(.vertical, 40)
+                .appLiquidGlassSurface(
+                    enabled: themeManager.isLiquidGlassEnabled,
+                    darkMode: themeManager.isDarkMode,
+                    cornerRadius: 18
+                )
             } else {
                 ForEach(filteredParts) { part in
                     NavigationLink(destination:
@@ -159,10 +183,12 @@ struct RepairPartCardView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color(UIColor { _ in
-                        themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : UIColor(white: 0.95, alpha: 1)
-                    }))
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(Color.white.opacity(themeManager.isDarkMode ? 0.14 : 0.4), lineWidth: 1)
+                    )
                     .frame(width: 70, height: 70)
 
                 Image(systemName: part.icon)
@@ -204,15 +230,11 @@ struct RepairPartCardView: View {
         }
         .padding(14)
         .frame(minHeight: 100)
-        .background(Color(UIColor { _ in
-            themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .white
-        }))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(themeManager.isDarkMode ? 0.2 : 0.06), lineWidth: 1)
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 16
         )
-        .shadow(color: Color.black.opacity(themeManager.isDarkMode ? 0.2 : 0.04), radius: 6, x: 0, y: 2)
     }
 
 }

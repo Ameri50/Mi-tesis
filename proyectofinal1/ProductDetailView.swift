@@ -35,7 +35,7 @@ struct productDetailView: View {
                         Button(action: { dismiss() }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "chevron.left")
-                                Text("Atrás")
+                                Text(localizationManager.translate("common.back"))
                             }
                             .foregroundColor(.blue)
                         }
@@ -86,7 +86,7 @@ struct productDetailView: View {
                                         .foregroundColor(.orange)
                                     Text("\(String(format: "%.1f", product.rating))")
                                         .font(.subheadline)
-                                    Text("(\(product.reviewCount) reseñas)")
+                                    Text("(\(product.reviewCount) \(localizationManager.translate("product.reviews")))")
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -139,7 +139,7 @@ struct productDetailView: View {
                         Divider()
 
                         // Descripción
-                        Text("Descripción")
+                        Text(localizationManager.translate("product.description"))
                             .font(.headline)
 
                         Text(product.description)
@@ -274,7 +274,7 @@ struct productDetailView: View {
                     }) {
                         HStack {
                             Image(systemName: "cart.badge.plus")
-                            Text("Agregar al carrito")
+                            Text(localizationManager.translate("product.addToCart"))
                         }
                         .font(.headline)
                         .foregroundColor(.white)
@@ -311,3 +311,4 @@ extension Color {
         self.init(red: red, green: green, blue: blue)
     }
 }
+

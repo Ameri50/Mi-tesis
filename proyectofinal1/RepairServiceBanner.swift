@@ -36,7 +36,7 @@ struct RepairServiceBanner: View {
                     HStack(spacing: 4) {
                         Image(systemName: "checkmark.seal.fill")
                             .font(.system(size: 9))
-                        Text("Garantía incluida")
+                        Text(localizationManager.translate("repair.warrantyIncluded"))
                             .font(.system(size: fontSize - 7, weight: .semibold))
                     }
                     .foregroundStyle(themeManager.isDarkMode ? .white.opacity(0.7) : .black.opacity(0.6))
@@ -77,3 +77,4 @@ struct RepairServiceBanner: View {
         .buttonStyle(.plain)
     }
 }
+

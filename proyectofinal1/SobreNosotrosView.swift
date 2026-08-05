@@ -110,12 +110,12 @@ struct SobreNosotrosView: View {
             }
             
             VStack(alignment: .leading, spacing: 12) {
-                Text("Hace más de 5 años, nuestro equipo decidió crear una solución innovadora para transformar la forma en que los clientes interactúan con las marcas.")
+                Text(localizationManager.translate("about.storyPart1"))
                     .font(.system(size: fontSize - 0.5, weight: .regular))
                     .foregroundColor(.gray)
                     .lineSpacing(1.6)
                 
-                Text("Lo que comenzó como una pequeña idea, se ha convertido en una plataforma confiable que sirve a miles de usuarios.")
+                Text(localizationManager.translate("about.storyPart2"))
                     .font(.system(size: fontSize - 0.5, weight: .regular))
                     .foregroundColor(.gray)
                     .lineSpacing(1.6)
@@ -382,7 +382,7 @@ struct DetalleValorView: View {
         case "Colaboración":
             return ("person.2.fill", .blue, "Creemos en el poder del trabajo en equipo. La colaboración nos permite combinar diferentes perspectivas y talentos para crear algo extraordinario. Juntos somos más fuertes.")
         case "Integridad":
-            return ("checkmark.circle.fill", .green, "Actuamos siempre con honestidad, transparencia y responsabilidad. La integridad es la base de todas nuestras relaciones y decisiones. Hacemos lo correcto, incluso cuando nadie está mirando.")
+            return ("checkm/Users/moisesrojas/Downloads/localizacion-fix/SobreNosotrosView.swiftark.circle.fill", .green, "Actuamos siempre con honestidad, transparencia y responsabilidad. La integridad es la base de todas nuestras relaciones y decisiones. Hacemos lo correcto, incluso cuando nadie está mirando.")
         default:
             return ("info.circle.fill", .gray, "")
         }
@@ -448,3 +448,4 @@ struct DetalleValorView: View {
             .environmentObject(LocalizationManager())
     }
 }
+

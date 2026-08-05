@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CategoryCard: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
     let category: ProductCategory
 
     var body: some View {
@@ -24,7 +25,7 @@ struct CategoryCard: View {
                     .foregroundStyle(.primary)
                     .lineLimit(1)
 
-                Text("\(category.products.count) producto\(category.products.count == 1 ? "" : "s")")
+                Text("\(category.products.count) \(localizationManager.translate(category.products.count == 1 ? "category.product" : "category.products"))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -55,3 +56,4 @@ struct CategoryCard: View {
         }
     }
 }
+

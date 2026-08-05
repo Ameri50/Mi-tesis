@@ -338,13 +338,13 @@ struct SettingsView: View {
                             .frame(width: 24)
 
                         if isDeletingProducts {
-                            Text("Eliminando productos...")
+                            Text(localizationManager.translate("settings.deleteAllProductsProgress"))
                                 .font(.system(size: appFontSize))
                                 .foregroundColor(.red)
                             Spacer()
                             ProgressView()
                         } else {
-                            Text("Borrar TODOS los productos")
+                            Text(localizationManager.translate("settings.deleteAllProducts"))
                                 .font(.system(size: appFontSize))
                                 .foregroundColor(.red)
                             Spacer()
@@ -539,3 +539,4 @@ struct ThemePickerSheet: View {
         .padding()
     }
 }
+

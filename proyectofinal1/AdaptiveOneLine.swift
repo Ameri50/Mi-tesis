@@ -98,6 +98,7 @@ struct StatusBadge: View {
 // MARK: - RatingChip
 // Chip de estrellas + calificación + reseñas, con ajuste automático.
 struct RatingChip: View {
+    @EnvironmentObject var localizationManager: LocalizationManager
     let rating: Double
     let reviewCount: Int
 
@@ -114,7 +115,7 @@ struct RatingChip: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(.orange)
                 .adaptiveOneLine()
-            Text("• \(reviewCount) reseñas")
+            Text("• \(reviewCount) \(localizationManager.translate("product.reviews"))")
                 .font(.system(size: 13))
                 .foregroundStyle(.gray)
                 .adaptiveOneLine()
@@ -152,3 +153,4 @@ struct SectionCard<Content: View>: View {
             .shadow(color: Color.black.opacity(themeManager.isDarkMode ? 0.25 : 0.05), radius: 8, x: 0, y: 3)
     }
 }
+

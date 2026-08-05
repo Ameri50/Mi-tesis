@@ -328,12 +328,12 @@ struct SoporteView: View {
                         Circle()
                             .fill(Color.green)
                             .frame(width: 8, height: 8)
-                        Text("Disponible")
+                        Text(localizationManager.translate("support.available"))
                             .font(.system(size: fontSize - 3, weight: .semibold))
                             .foregroundColor(.green)
                     }
                     
-                    Text("Lun - Vie: 9:00 - 18:00")
+                    Text(localizationManager.translate("support.hours"))
                         .font(.system(size: fontSize - 4, weight: .regular))
                         .foregroundColor(.secondary)
                 }
@@ -341,7 +341,7 @@ struct SoporteView: View {
                 Spacer()
                 
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text("Tiempo promedio")
+                    Text(localizationManager.translate("support.avgResponseTime"))
                         .font(.system(size: fontSize - 4, weight: .regular))
                         .foregroundColor(.secondary)
                     
@@ -629,3 +629,4 @@ struct SoporteView: View {
             .environmentObject(LocalizationManager())
     }
 }
+

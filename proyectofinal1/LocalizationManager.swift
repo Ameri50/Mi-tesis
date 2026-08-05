@@ -137,6 +137,7 @@ final class LocalizationManager: ObservableObject {
             "product.youMayAlsoLike": "Tambien te puede interesar",
             "product.recommendedAccessories": "Accesorios recomendados",
             "cart.youMayAlsoLike": "Tambien te puede interesar",
+            "product.reviews": "reseñas",
 
             "support.title": "Soporte",
             "support.chat": "Chat",
@@ -163,6 +164,8 @@ final class LocalizationManager: ObservableObject {
             "support.category3.subtitle": "Duracion, carga lenta, puerto danado",
             "support.category4.title": "Almacenamiento y software",
             "support.category4.subtitle": "Espacio, actualizaciones, rendimiento",
+            "support.hours": "Lun - Vie: 9:00 - 18:00",
+            "support.avgResponseTime": "Tiempo promedio",
 
             "orders.title": "Mis Ordenes",
             "orders.empty.title": "Aun no tienes compras",
@@ -255,6 +258,7 @@ final class LocalizationManager: ObservableObject {
             "repair.compatibleWith": "Compatible con",
             "repair.request": "Solicitar reparacion",
             "repair.whatsappPrefix": "Hola, me interesa el servicio de reparacion",
+            "repair.warrantyIncluded": "Garantia incluida",
 
             "product.noImage": "Sin imagen",
             "product.freeShipping": "Envio gratis",
@@ -291,7 +295,7 @@ final class LocalizationManager: ObservableObject {
             "payment.secure": "Pago seguro - Procesado por Culqi",
             "payment.payAmount": "Pagar S/",
             "payment.successTitle": "Pago registrado!",
-            "payment.successMessage": "Tu pedido fue guardado.\\nTe contactaremos para confirmar.",
+            "payment.successMessage": "Tu pedido fue guardado.\nTe contactaremos para confirmar.",
             "payment.backHome": "Volver al inicio",
 
             "about.title": "Sobre Nosotros",
@@ -318,7 +322,15 @@ final class LocalizationManager: ObservableObject {
             "about.timeline2024": "Expansion regional",
             "about.hours": "Lunes a Viernes: 9:00 - 18:00",
             "about.available": "Estamos disponibles para ayudarte",
-            "about.contactSupport": "Preguntas o sugerencias? Contactanos desde la seccion de Soporte"
+            "about.contactSupport": "Preguntas o sugerencias? Contactanos desde la seccion de Soporte",
+            "about.storyPart1": "Hace mas de 5 anios, nuestro equipo decidio crear una solucion innovadora para transformar la forma en que los clientes interactuan con las marcas.",
+            "about.storyPart2": "Lo que comenzo como una pequenia idea, se ha convertido en una plataforma confiable que sirve a miles de usuarios.",
+
+            "common.back": "Atras",
+            "common.copy": "Copiar",
+            "common.copied": "Copiado!",
+            "payment.transferPrefix": "Transfiere",
+            "payment.transferSuffix": "a esta cuenta"
         ],
         "en": [
             "settings.title": "Settings",
@@ -446,6 +458,7 @@ final class LocalizationManager: ObservableObject {
             "product.youMayAlsoLike": "You may also like",
             "product.recommendedAccessories": "Recommended accessories",
             "cart.youMayAlsoLike": "You may also like",
+            "product.reviews": "reviews",
 
             "support.title": "Support",
             "support.chat": "Chat",
@@ -472,6 +485,8 @@ final class LocalizationManager: ObservableObject {
             "support.category3.subtitle": "Battery life, slow charging, damaged port",
             "support.category4.title": "Storage and software",
             "support.category4.subtitle": "Space, updates, performance",
+            "support.hours": "Mon - Fri: 9:00 - 18:00",
+            "support.avgResponseTime": "Average response time",
 
             "orders.title": "My Orders",
             "orders.empty.title": "You do not have any purchases yet",
@@ -564,6 +579,7 @@ final class LocalizationManager: ObservableObject {
             "repair.compatibleWith": "Compatible with",
             "repair.request": "Request repair",
             "repair.whatsappPrefix": "Hi, I am interested in the repair service",
+            "repair.warrantyIncluded": "Warranty included",
 
             "product.noImage": "No image",
             "product.freeShipping": "Free shipping",
@@ -600,7 +616,7 @@ final class LocalizationManager: ObservableObject {
             "payment.secure": "Secure payment - Processed by Culqi",
             "payment.payAmount": "Pay S/",
             "payment.successTitle": "Payment recorded!",
-            "payment.successMessage": "Your order was saved.\\nWe will contact you to confirm.",
+            "payment.successMessage": "Your order was saved.\nWe will contact you to confirm.",
             "payment.backHome": "Back to home",
 
             "about.title": "About Us",
@@ -627,7 +643,15 @@ final class LocalizationManager: ObservableObject {
             "about.timeline2024": "Regional expansion",
             "about.hours": "Monday to Friday: 9:00 - 18:00",
             "about.available": "We are available to help you",
-            "about.contactSupport": "Questions or suggestions? Contact us from the Support section"
+            "about.contactSupport": "Questions or suggestions? Contact us from the Support section",
+            "about.storyPart1": "More than 5 years ago, our team decided to create an innovative solution to transform the way customers interact with brands.",
+            "about.storyPart2": "What started as a small idea has become a trusted platform that serves thousands of users.",
+
+            "common.back": "Back",
+            "common.copy": "Copy",
+            "common.copied": "Copied!",
+            "payment.transferPrefix": "Transfer",
+            "payment.transferSuffix": "to this account"
         ]
     ]
 
@@ -650,4 +674,5 @@ final class LocalizationManager: ObservableObject {
         ?? key
     }
 }
+
 

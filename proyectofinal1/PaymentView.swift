@@ -83,7 +83,7 @@ struct PaymentView: View {
                         }
 
                         HStack {
-                            Text("Total")
+                            Text(localizationManager.translate("cart.total"))
                                 .font(.system(size: 17, weight: .bold))
                                 .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                             Spacer()
@@ -147,13 +147,13 @@ struct PaymentView: View {
                             .foregroundStyle(.secondary)
                             .padding(.bottom, 16)
 
-                        InfoRow(label: "Titular", value: PaymentConfig.yapeNombre)
-                        InfoRow(label: "Número Yape", value: PaymentConfig.yapeNumero, copyable: true)
-                        InfoRow(label: "Monto exacto",
+                        InfoRow(label: localizationManager.translate("payment.holder"), value: PaymentConfig.yapeNombre)
+                        InfoRow(label: localizationManager.translate("payment.yapeNumber"), value: PaymentConfig.yapeNumero, copyable: true)
+                        InfoRow(label: localizationManager.translate("payment.exactAmount"),
                                 value: "S/ \(String(format: "%.2f", cartManager.totalPrice))",
                                 valueColor: Color(red: 0.42, green: 0.13, blue: 0.66))
 
-                        HintBox(text: "Luego de yapear, envía el comprobante por WhatsApp al mismo número.",
+                        HintBox(text: localizationManager.translate("payment.yapeHint"),
                                 color: Color(red: 0.42, green: 0.13, blue: 0.66))
                             .padding(.top, 10)
 
@@ -162,7 +162,7 @@ struct PaymentView: View {
                             saveOrder(method: "Yape")
                             withAnimation { showSuccess = true }
                         } label: {
-                            Text("Ya yapié ✓")
+                            Text(localizationManager.translate("payment.confirmed"))
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
@@ -194,19 +194,19 @@ struct PaymentView: View {
                             .font(.system(size: 18, weight: .bold))
                             .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                             .padding(.bottom, 4)
-                        Text("Transfiere S/ \(String(format: "%.2f", cartManager.totalPrice)) a esta cuenta")
+                        Text("\(localizationManager.translate("payment.transferPrefix")) S/ \(String(format: "%.2f", cartManager.totalPrice)) \(localizationManager.translate("payment.transferSuffix"))")
                             .font(.system(size: 14))
                             .foregroundStyle(.secondary)
                             .padding(.bottom, 16)
 
-                        InfoRow(label: "Titular", value: PaymentConfig.ibNombre)
-                        InfoRow(label: "N° de cuenta", value: PaymentConfig.ibCuenta, copyable: true)
-                        InfoRow(label: "CCI", value: PaymentConfig.ibCCI, copyable: true)
-                        InfoRow(label: "Monto exacto",
+                        InfoRow(label: localizationManager.translate("payment.holder"), value: PaymentConfig.ibNombre)
+                        InfoRow(label: localizationManager.translate("payment.accountNumber"), value: PaymentConfig.ibCuenta, copyable: true)
+                        InfoRow(label: localizationManager.translate("payment.cci"), value: PaymentConfig.ibCCI, copyable: true)
+                        InfoRow(label: localizationManager.translate("payment.exactAmount"),
                                 value: "S/ \(String(format: "%.2f", cartManager.totalPrice))",
                                 valueColor: Color(red: 0.0, green: 0.24, blue: 0.65))
 
-                        HintBox(text: "Envía el voucher por WhatsApp para confirmar tu pedido.",
+                        HintBox(text: localizationManager.translate("payment.interbankHint"),
                                 color: Color(red: 0.0, green: 0.24, blue: 0.65))
                             .padding(.top, 10)
 
@@ -215,7 +215,7 @@ struct PaymentView: View {
                             saveOrder(method: "Interbank")
                             withAnimation { showSuccess = true }
                         } label: {
-                            Text("Ya transferí ✓")
+                            Text(localizationManager.translate("payment.transferred"))
                                 .font(.system(size: 16, weight: .bold))
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
@@ -343,6 +343,7 @@ struct PaymentMethodButton: View {
 }
 
 struct InfoRow: View {
+    @EnvironmentObject var localizationManager: LocalizationManager
     let label: String
     let value: String
     var copyable: Bool = false
@@ -355,7 +356,7 @@ struct InfoRow: View {
                 .font(.system(size: 13))
                 .foregroundStyle(.secondary)
             Spacer()
-            Text(copied ? "¡Copiado!" : value)
+            Text(copied ? localizationManager.translate("common.copied") : value)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(copied ? .green : valueColor)
             if copyable {
@@ -366,7 +367,7 @@ struct InfoRow: View {
                         withAnimation { copied = false }
                     }
                 } label: {
-                    Text("Copiar")
+                    Text(localizationManager.translate("common.copy"))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(.blue)
                         .padding(.horizontal, 8)
@@ -423,6 +424,7 @@ struct PaymentSheet<Content: View>: View {
 }
 
 struct CardPaymentSheet: View {
+    @EnvironmentObject var localizationManager: LocalizationManager
     let total: Double
     let themeManager: ThemeManager
     let onConfirm: () -> Void
@@ -444,16 +446,16 @@ struct CardPaymentSheet: View {
                     .padding(.bottom, 14)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Tarjeta de pago")
+                    Text(localizationManager.translate("payment.cardTitle"))
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
 
-                    Text("Ingresa los datos de tu tarjeta")
+                    Text(localizationManager.translate("payment.cardSubtitleText"))
                         .font(.system(size: 14))
                         .foregroundStyle(.secondary)
 
                     VStack(spacing: 10) {
-                        TextField("Número de tarjeta", text: $cardNumber)
+                        TextField(localizationManager.translate("payment.cardNumber"), text: $cardNumber)
                             .keyboardType(.numberPad)
                             .padding(12)
                             .background(Color.gray.opacity(0.1))
@@ -471,19 +473,19 @@ struct CardPaymentSheet: View {
                                 }
                             }
 
-                        TextField("Nombre en la tarjeta", text: $cardName)
+                        TextField(localizationManager.translate("payment.cardName"), text: $cardName)
                             .padding(12)
                             .background(Color.gray.opacity(0.1))
                             .cornerRadius(10)
 
                         HStack(spacing: 10) {
-                            TextField("MM/AA", text: $expiry)
+                            TextField(localizationManager.translate("payment.expiry"), text: $expiry)
                                 .keyboardType(.numberPad)
                                 .padding(12)
                                 .background(Color.gray.opacity(0.1))
                                 .cornerRadius(10)
 
-                            TextField("CVV", text: $cvv)
+                            TextField(localizationManager.translate("payment.cvv"), text: $cvv)
                                 .keyboardType(.numberPad)
                                 .padding(12)
                                 .background(Color.gray.opacity(0.1))
@@ -495,13 +497,13 @@ struct CardPaymentSheet: View {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
-                        Text("Pago seguro · Procesado por Culqi")
+                        Text(localizationManager.translate("payment.secure"))
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
                     }
 
                     Button(action: onConfirm) {
-                        Text("Pagar S/ \(String(format: "%.2f", total))")
+                        Text("\(localizationManager.translate("payment.payAmount")) \(String(format: "%.2f", total))")
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
@@ -511,7 +513,7 @@ struct CardPaymentSheet: View {
                     }
 
                     Button(action: onCancel) {
-                        Text("Cancelar")
+                        Text(localizationManager.translate("cancel"))
                             .font(.system(size: 15, weight: .medium))
                             .foregroundStyle(.secondary)
                             .frame(maxWidth: .infinity)
@@ -532,6 +534,7 @@ struct CardPaymentSheet: View {
 }
 
 struct SuccessOverlay: View {
+    @EnvironmentObject var localizationManager: LocalizationManager
     let onDismiss: () -> Void
 
     var body: some View {
@@ -541,15 +544,15 @@ struct SuccessOverlay: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 64))
                     .foregroundStyle(.green)
-                Text("¡Pago registrado!")
+                Text(localizationManager.translate("payment.successTitle"))
                     .font(.system(size: 22, weight: .bold))
                     .foregroundStyle(.white)
-                Text("Tu pedido fue guardado.\nTe contactaremos para confirmar.")
+                Text(localizationManager.translate("payment.successMessage"))
                     .font(.system(size: 15))
                     .foregroundStyle(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
                 Button(action: onDismiss) {
-                    Text("Volver al inicio")
+                    Text(localizationManager.translate("payment.backHome"))
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -565,3 +568,4 @@ struct SuccessOverlay: View {
         .transition(.opacity)
     }
 }
+
