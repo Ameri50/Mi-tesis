@@ -5,8 +5,10 @@ import FirebaseFirestore
 class ProductStore: ObservableObject {
     static let shared = ProductStore()
 
-    @Published var products: [SeedProduct] = []
+    @Published var products: [Product] = []
     @Published var isLoading = true
+    @Published var accessories: [Product] = []
+    @Published var relatedProducts: [Product] = []
 
     private var listener: ListenerRegistration?
     private let db = Firestore.firestore()
@@ -28,10 +30,14 @@ class ProductStore: ObservableObject {
         let inStock: Bool?
         let isOnSale: Bool?
         let discount: Int?
+        let suggestedDevices: [String]?
+        let tags: [String]?
+        let compatibleWith: [String]?
     }
 
     private init() {
         products = localProducts
+        accessories = products.filter { $0.category.localizedCaseInsensitiveContains("accesorio") }
         startListening()
     }
 
@@ -44,6 +50,7 @@ class ProductStore: ObservableObject {
                 print("❌ Error escuchando productos: \(error.localizedDescription)")
                 Task { @MainActor in
                     self.products = self.localProducts
+                    self.updateAccessories()
                     self.isLoading = false
                 }
                 return
@@ -52,6 +59,7 @@ class ProductStore: ObservableObject {
             guard let documents = snapshot?.documents else {
                 Task { @MainActor in
                     self.products = self.localProducts
+                    self.updateAccessories()
                     self.isLoading = false
                 }
                 return
@@ -71,7 +79,7 @@ class ProductStore: ObservableObject {
                     Self.parseDraft(from: data, documentID: documentID)
                 }
 
-                var mergedProducts: [SeedProduct] = []
+                var mergedProducts: [Product] = []
                 var consumedWebKeys = Set<String>()
 
                 for localProduct in localProducts {
@@ -86,7 +94,7 @@ class ProductStore: ObservableObject {
                     }
                 }
 
-                let newProducts = drafts.compactMap { draft -> SeedProduct? in
+                let newProducts = drafts.compactMap { draft -> Product? in
                     let key = Self.productKey(name: draft.name, category: draft.category ?? "Otros")
                     guard !consumedWebKeys.contains(key), localByKey[key] == nil else { return nil }
                     return Self.materializeProduct(from: draft, fallback: nil)
@@ -97,10 +105,17 @@ class ProductStore: ObservableObject {
                     let combinedProducts = mergedProducts + newProducts
                     let uniqueProducts = Self.deduplicatedProducts(combinedProducts)
                     self.products = uniqueProducts
+                    self.updateAccessories()
                     self.isLoading = false
                     print("✅ ProductStore: \(uniqueProducts.count) productos únicos cargados")
                 }
             }
+        }
+    }
+
+    private func updateAccessories() {
+        self.accessories = products.filter {
+            $0.category.localizedCaseInsensitiveContains("accesorio")
         }
     }
 
@@ -128,11 +143,14 @@ class ProductStore: ObservableObject {
             reviewCount: firstInt(in: data, keys: ["reviewCount", "reviewsCount"]),
             inStock: firstBool(in: data, keys: ["inStock", "available"]),
             isOnSale: firstBool(in: data, keys: ["isOnSale", "onSale"]),
-            discount: firstInt(in: data, keys: ["discount", "discountPercent"])
+            discount: firstInt(in: data, keys: ["discount", "discountPercent"]),
+            suggestedDevices: parseStringArray(from: data, keys: ["suggestedDevices", "deviceTypes", "compatibleDevices"]),
+            tags: parseStringArray(from: data, keys: ["tags", "labels"]),
+            compatibleWith: parseStringArray(from: data, keys: ["compatibleWith", "compatible"])
         )
     }
 
-    nonisolated private static func materializeProduct(from draft: ProductDraft, fallback: SeedProduct?) -> SeedProduct {
+    nonisolated private static func materializeProduct(from draft: ProductDraft, fallback: Product?) -> Product {
         let base = fallback
 
         let imageSource = draft.imageSource
@@ -180,7 +198,22 @@ class ProductStore: ObservableObject {
             ?? base?.inStock
             ?? (stock > 0)
 
-        return SeedProduct(
+        // ⭐ NUEVO: Maneja suggestedDevices
+        let suggestedDevices = draft.suggestedDevices
+            ?? base?.suggestedDevices
+            ?? []
+
+        // ⭐ NUEVO: Maneja tags
+        let tags = draft.tags
+            ?? base?.tags
+            ?? []
+
+        // ⭐ NUEVO: Maneja compatibleWith
+        let compatibleWith = draft.compatibleWith
+            ?? base?.compatibleWith
+            ?? []
+
+        return Product(
             id: draft.id,
             name: draft.name,
             price: draft.price ?? base?.price ?? 0,
@@ -197,7 +230,10 @@ class ProductStore: ObservableObject {
             inStock: inStock,
             imageURL: imageSource.isEmpty ? nil : imageSource,
             isOnSale: isOnSale,
-            discount: discount
+            discount: discount,
+            suggestedDevices: suggestedDevices,
+            tags: tags,
+            compatibleWith: compatibleWith
         )
     }
 
@@ -212,13 +248,13 @@ class ProductStore: ObservableObject {
 
     nonisolated private static func firstDouble(in data: [String: Any], keys: [String]) -> Double? {
         for key in keys {
-            if let value = data[key] as? Double {
-                return value
+            if let doubleValue = data[key] as? Double, doubleValue.isFinite {
+                return doubleValue
             }
-            if let value = data[key] as? Int {
-                return Double(value)
+            if let intValue = data[key] as? Int {
+                return Double(intValue)
             }
-            if let value = data[key] as? String, let parsed = Double(value) {
+            if let stringValue = data[key] as? String, let parsed = Double(stringValue), parsed.isFinite {
                 return parsed
             }
         }
@@ -420,9 +456,9 @@ class ProductStore: ObservableObject {
         }
     }
 
-    nonisolated private static func deduplicatedProducts(_ products: [SeedProduct]) -> [SeedProduct] {
+    nonisolated private static func deduplicatedProducts(_ products: [Product]) -> [Product] {
         var seenKeys = Set<String>()
-        var uniqueProducts: [SeedProduct] = []
+        var uniqueProducts: [Product] = []
 
         for product in products {
             let key = productKey(name: product.name, category: product.category)

@@ -1,0 +1,286 @@
+{
+  "products": {
+    "iphone15pro": {
+      "id": "iphone15pro",
+      "name": "iPhone 15 Pro",
+      "category": "iPhone",
+      "price": 999,
+      "description": "El iPhone 15 Pro con A17 Pro es el dispositivo más avanzado jamás creado. Diseño de titanio. Cámara pro de 48MP. Grabación de video en 4K. Action button personalizable.",
+      "image": "iphone3",
+      "stock": 25,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewCount": 156,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Negro", "hexColor": "#1C1C1E" },
+        { "name": "Blanco", "hexColor": "#E8E8ED" },
+        { "name": "Titanio Natural", "hexColor": "#C0C0C0" },
+        { "name": "Titanio Azul", "hexColor": "#3478F6" }
+      ],
+      "storageOptions": [
+        { "capacity": "128GB", "priceMultiplier": 1.0 },
+        { "capacity": "256GB", "priceMultiplier": 1.1 },
+        { "capacity": "512GB", "priceMultiplier": 1.3 },
+        { "capacity": "1TB", "priceMultiplier": 1.5 }
+      ],
+      "suggestedDevices": [],
+      "tags": ["flagship", "última-generación", "cámara-profesional"],
+      "compatibleWith": ["iPhone"]
+    },
+    "ipad_pro_12_9": {
+      "id": "ipad_pro_12_9",
+      "name": "iPad Pro 12.9\"",
+      "category": "iPad",
+      "price": 1199,
+      "description": "iPad Pro de 12.9 pulgadas con M2. Pantalla Liquid Retina XDR. Ideal para profesionales. Soporta Apple Pencil y Magic Keyboard.",
+      "image": "ipad01",
+      "stock": 15,
+      "inStock": true,
+      "rating": 4.7,
+      "reviewCount": 98,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Plata", "hexColor": "#E8E8ED" },
+        { "name": "Gris Espacial", "hexColor": "#3A3A3C" }
+      ],
+      "storageOptions": [
+        { "capacity": "256GB", "priceMultiplier": 1.0 },
+        { "capacity": "512GB", "priceMultiplier": 1.15 },
+        { "capacity": "1TB", "priceMultiplier": 1.3 },
+        { "capacity": "2TB", "priceMultiplier": 1.5 }
+      ],
+      "suggestedDevices": [],
+      "tags": ["tablet-profesional", "m2-chip", "pantalla-4k"],
+      "compatibleWith": ["iPad"]
+    },
+    "macbook_pro_14": {
+      "id": "macbook_pro_14",
+      "name": "MacBook Pro 14\"",
+      "category": "MacBook",
+      "price": 1999,
+      "description": "MacBook Pro 14 pulgadas con M3 Pro. Pantalla Liquid Retina XDR. Batería de 18 horas. Ideal para desarrolladores y creativos.",
+      "image": "macbook",
+      "stock": 10,
+      "inStock": true,
+      "rating": 4.9,
+      "reviewCount": 204,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Plata", "hexColor": "#E8E8ED" },
+        { "name": "Gris Espacial", "hexColor": "#3A3A3C" }
+      ],
+      "storageOptions": [
+        { "capacity": "512GB", "priceMultiplier": 1.0 },
+        { "capacity": "1TB", "priceMultiplier": 1.2 },
+        { "capacity": "2TB", "priceMultiplier": 1.5 }
+      ],
+      "suggestedDevices": [],
+      "tags": ["laptop-profesional", "m3-pro", "desarrollo"],
+      "compatibleWith": ["Mac", "MacBook"]
+    },
+    "funda_iphone_15": {
+      "id": "funda_iphone_15",
+      "name": "Funda iPhone 15 Pro - Protección Premium",
+      "category": "Accesorios",
+      "price": 29.99,
+      "description": "Funda de silicona de alta calidad para iPhone 15 Pro. Protege contra caídas y rayones. Cómoda de sostener. Bordes elevados para proteger pantalla y cámara.",
+      "image": "funda",
+      "stock": 150,
+      "inStock": true,
+      "rating": 4.6,
+      "reviewCount": 342,
+      "isOnSale": true,
+      "discount": 15,
+      "colorOptions": [
+        { "name": "Negro", "hexColor": "#1C1C1E" },
+        { "name": "Azul", "hexColor": "#3478F6" },
+        { "name": "Rojo", "hexColor": "#FF3B30" },
+        { "name": "Verde", "hexColor": "#30D158" }
+      ],
+      "storageOptions": [],
+      "suggestedDevices": ["iPhone 15", "iPhone 15 Pro"],
+      "tags": ["protección", "silicona", "colores"],
+      "compatibleWith": ["iPhone"]
+    },
+    "cable_iphone_usbc": {
+      "id": "cable_iphone_usbc",
+      "name": "Cable USB-C a Lightning",
+      "category": "Accesorios",
+      "price": 19.99,
+      "description": "Cable de carga rápida USB-C a Lightning. Certificado MFi. Durabilidad garantizada. Compatible con todos los modelos de iPhone recientes.",
+      "image": "cable",
+      "stock": 200,
+      "inStock": true,
+      "rating": 4.5,
+      "reviewCount": 456,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Blanco", "hexColor": "#E8E8ED" },
+        { "name": "Negro", "hexColor": "#1C1C1E" }
+      ],
+      "storageOptions": [],
+      "suggestedDevices": ["iPhone", "iPhone 15", "iPhone 14", "iPhone 13"],
+      "tags": ["carga", "cable", "usb-c"],
+      "compatibleWith": ["iPhone"]
+    },
+    "apple_pencil_pro": {
+      "id": "apple_pencil_pro",
+      "name": "Apple Pencil Pro",
+      "category": "Accesorios",
+      "price": 129.99,
+      "description": "Apple Pencil Pro con presión y ángulo de inclinación. Táctil precisa. Batería recargable. Perfecto para dibujar, diseñar y tomar notas en iPad.",
+      "image": "applepencil",
+      "stock": 80,
+      "inStock": true,
+      "rating": 4.8,
+      "reviewCount": 267,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Plata", "hexColor": "#E8E8ED" }
+      ],
+      "storageOptions": [],
+      "suggestedDevices": ["iPad", "iPad Pro"],
+      "tags": ["lápiz", "dibujo", "profesional"],
+      "compatibleWith": ["iPad"]
+    },
+    "magic_keyboard_ipad": {
+      "id": "magic_keyboard_ipad",
+      "name": "Magic Keyboard para iPad Pro",
+      "category": "Accesorios",
+      "price": 349.99,
+      "description": "Magic Keyboard con trackpad. Funda frontal magnética. Retroiluminación por sensor. Conexión inalámbrica segura.",
+      "image": "keyboard",
+      "stock": 45,
+      "inStock": true,
+      "rating": 4.7,
+      "reviewCount": 189,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Negro", "hexColor": "#1C1C1E" }
+      ],
+      "storageOptions": [],
+      "suggestedDevices": ["iPad", "iPad Pro"],
+      "tags": ["teclado", "trackpad", "wireless"],
+      "compatibleWith": ["iPad"]
+    },
+    "magic_mouse": {
+      "id": "magic_mouse",
+      "name": "Magic Mouse",
+      "category": "Accesorios",
+      "price": 79.99,
+      "description": "Magic Mouse inalámbrico con batería recargable. Gestos Multi-Touch intuitivos. Compatible con Mac.",
+      "image": "mouse",
+      "stock": 120,
+      "inStock": true,
+      "rating": 4.4,
+      "reviewCount": 312,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Blanco", "hexColor": "#E8E8ED" },
+        { "name": "Negro", "hexColor": "#1C1C1E" }
+      ],
+      "storageOptions": [],
+      "suggestedDevices": ["Mac", "MacBook"],
+      "tags": ["mouse", "wireless", "gestos"],
+      "compatibleWith": ["Mac", "MacBook"]
+    },
+    "magic_keyboard_mac": {
+      "id": "magic_keyboard_mac",
+      "name": "Magic Keyboard",
+      "category": "Accesorios",
+      "price": 99.99,
+      "description": "Magic Keyboard inalámbrico con batería recargable. Teclas silenciosas. Compatible con Mac.",
+      "image": "keyboard",
+      "stock": 90,
+      "inStock": true,
+      "rating": 4.5,
+      "reviewCount": 278,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Blanco", "hexColor": "#E8E8ED" },
+        { "name": "Negro", "hexColor": "#1C1C1E" }
+      ],
+      "storageOptions": [],
+      "suggestedDevices": ["Mac", "MacBook"],
+      "tags": ["teclado", "wireless", "silencioso"],
+      "compatibleWith": ["Mac", "MacBook"]
+    },
+    "cargador_magsafe": {
+      "id": "cargador_magsafe",
+      "name": "Cargador MagSafe",
+      "category": "Accesorios",
+      "price": 39.99,
+      "description": "Cargador MagSafe inalámbrico. Magnetismo inteligente. Conexión automática. Compatible con iPhone 12 y posteriores.",
+      "image": "cargador magsafe",
+      "stock": 110,
+      "inStock": true,
+      "rating": 4.6,
+      "reviewCount": 524,
+      "isOnSale": true,
+      "discount": 20,
+      "colorOptions": [
+        { "name": "Blanco", "hexColor": "#E8E8ED" }
+      ],
+      "storageOptions": [],
+      "suggestedDevices": ["iPhone 15", "iPhone 14", "iPhone 13", "iPhone 12"],
+      "tags": ["cargador", "wireless", "magsafe"],
+      "compatibleWith": ["iPhone"]
+    },
+    "airpods_pro": {
+      "id": "airpods_pro",
+      "name": "AirPods Pro",
+      "category": "AirPods",
+      "price": 249.99,
+      "description": "AirPods Pro con cancelación activa de ruido. Modo Transparencia. Audio espacial. Estuche de carga inalámbrica MagSafe.",
+      "image": "airpodspro",
+      "stock": 60,
+      "inStock": true,
+      "rating": 4.7,
+      "reviewCount": 687,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Blanco", "hexColor": "#E8E8ED" }
+      ],
+      "storageOptions": [],
+      "suggestedDevices": [],
+      "tags": ["auriculares", "wireless", "anc"],
+      "compatibleWith": ["iPhone", "iPad", "Mac"]
+    },
+    "apple_watch_series_9": {
+      "id": "apple_watch_series_9",
+      "name": "Apple Watch Series 9",
+      "category": "Apple Watch",
+      "price": 399.99,
+      "description": "Apple Watch Series 9 con pantalla siempre activa. Batería de 18 horas. Ritmo cardíaco y SPO2. GPS y celular disponibles.",
+      "image": "reloj",
+      "stock": 40,
+      "inStock": true,
+      "rating": 4.6,
+      "reviewCount": 421,
+      "isOnSale": false,
+      "discount": 0,
+      "colorOptions": [
+        { "name": "Plata", "hexColor": "#E8E8ED" },
+        { "name": "Oro", "hexColor": "#D4AF37" },
+        { "name": "Negro", "hexColor": "#1C1C1E" }
+      ],
+      "storageOptions": [
+        { "capacity": "41mm", "priceMultiplier": 1.0 },
+        { "capacity": "45mm", "priceMultiplier": 1.05 }
+      ],
+      "suggestedDevices": [],
+      "tags": ["smartwatch", "salud", "fitness"],
+      "compatibleWith": ["iPhone", "iPad", "Mac"]
+    }
+  }
+}

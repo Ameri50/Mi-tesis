@@ -4,7 +4,7 @@ import SwiftUI
 // Sección horizontal reutilizable de "Recomendaciones" / "También te puede interesar".
 // Se usa en ProductDetailView (debajo de Capacidad) y en CartView (arriba del resumen de pago).
 // Cada tarjeta navega directo al detalle del producto tocado.
-struct RelatedProductsSection: View {
+struct relatedProductsSection: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
     @EnvironmentObject var cartManager: CartManager

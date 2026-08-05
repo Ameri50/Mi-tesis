@@ -41,7 +41,7 @@ class StoreViewModel: ObservableObject {
                     self.products = snapshot.documents.compactMap { doc in
                         do {
                             var product = try doc.data(as: Product.self)
-                            product.id = doc.documentID
+                            product.name = doc.documentID
                             return product
                         } catch {
                             print("❌ Error decodificando producto: \(error)")

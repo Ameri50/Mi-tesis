@@ -146,7 +146,7 @@ struct CartView: View {
     private func cartSummary(sizes: CartFontSizes) -> some View {
         VStack(spacing: 16) {
             // MARK: - Recomendaciones antes de pagar
-            RelatedProductsSection(
+            relatedProductsSection(
                 title: localizationManager.translate("cart.youMayAlsoLike"),
                 products: recommendedProducts
             )

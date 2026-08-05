@@ -1,22 +1,36 @@
 import Foundation
 
-// MARK: - Color Option (para opciones de color del producto)
+// MARK: - Enums para categorías y tipos de dispositivos
+enum DeviceCategory: String, CaseIterable, Codable {
+    case iPhone = "iPhone"
+    case iPad = "iPad"
+    case Mac = "Mac"
+    case MacBook = "MacBook"
+    case appleWatch = "Apple Watch"
+    case airPods = "AirPods"
+    case accesorios = "Accesorios"
+    case otros = "Otros"
+}
+
+// MARK: - ColorOption
 struct ColorOption: Identifiable, Codable, Equatable, Hashable {
-    var id: UUID = UUID()
+    let id: UUID
     var name: String
     var hexColor: String
+
+    init(name: String, hexColor: String) {
+        self.id = UUID()
+        self.name = name
+        self.hexColor = hexColor
+    }
 
     enum CodingKeys: String, CodingKey {
         case name, hexColor
     }
 
-    init(name: String, hexColor: String) {
-        self.name = name
-        self.hexColor = hexColor
-    }
-
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = UUID()
         self.name = try container.decode(String.self, forKey: .name)
         self.hexColor = try container.decode(String.self, forKey: .hexColor)
     }
@@ -30,25 +44,32 @@ struct ColorOption: Identifiable, Codable, Equatable, Hashable {
     static func == (lhs: ColorOption, rhs: ColorOption) -> Bool {
         lhs.name == rhs.name && lhs.hexColor == rhs.hexColor
     }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine(hexColor)
+    }
 }
 
-// MARK: - Storage Option (para opciones de almacenamiento)
+// MARK: - StorageOption
 struct StorageOption: Identifiable, Codable, Equatable, Hashable {
-    var id: UUID = UUID()
+    let id: UUID
     var capacity: String
-    var priceMultiplier: Double
+    var priceMultiplier: Double = 1.0
+
+    init(capacity: String, priceMultiplier: Double = 1.0) {
+        self.id = UUID()
+        self.capacity = capacity
+        self.priceMultiplier = priceMultiplier
+    }
 
     enum CodingKeys: String, CodingKey {
         case capacity, priceMultiplier
     }
 
-    init(capacity: String, priceMultiplier: Double) {
-        self.capacity = capacity
-        self.priceMultiplier = priceMultiplier
-    }
-
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = UUID()
         self.capacity = try container.decode(String.self, forKey: .capacity)
         self.priceMultiplier = try container.decode(Double.self, forKey: .priceMultiplier)
     }
@@ -62,11 +83,16 @@ struct StorageOption: Identifiable, Codable, Equatable, Hashable {
     static func == (lhs: StorageOption, rhs: StorageOption) -> Bool {
         lhs.capacity == rhs.capacity && lhs.priceMultiplier == rhs.priceMultiplier
     }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(capacity)
+        hasher.combine(priceMultiplier)
+    }
 }
 
-// MARK: - Product Model (Sincronizado con Firestore)
+// MARK: - Product (modelo principal mejorado)
 struct Product: Identifiable, Codable, Hashable {
-    var id: String = UUID().uuidString
+    let id: String
     var name: String
     var price: Double
     var category: String
@@ -75,32 +101,34 @@ struct Product: Identifiable, Codable, Hashable {
     var stock: Int = 50
     var colorOptions: [ColorOption] = []
     var storageOptions: [StorageOption] = []
-
-    // Campos para ProductDetailView
     var imageName: String = ""
     var additionalImages: [String] = []
     var rating: Double = 4.5
     var reviewCount: Int = 0
     var inStock: Bool = true
-
-    // Campos legados
     var imageURL: String?
     var isOnSale: Bool = false
     var discount: Int = 0
+    var suggestedDevices: [String] = []
+    var tags: [String] = []
+    var compatibleWith: [String] = []
+    
+    // Campos adicionales para compatibilidad
     var specs: String = ""
     var reviews: [String] = []
     var weight: Double = 0
     var dimensions: String = ""
     var color: String = ""
-    var suggestedDevices: [String] = []
 
     // MARK: - Computed Properties
-    /// Retorna la URL final de la imagen
     var finalImageURL: String {
+        if let url = imageURL, !url.isEmpty {
+            return url
+        }
         if !image_url.isEmpty {
             return image_url
         }
-        return imageURL ?? imageName
+        return imageName
     }
 
     /// Estado del stock para mostrar
@@ -131,16 +159,25 @@ struct Product: Identifiable, Codable, Hashable {
         return price - (price * Double(discount) / 100)
     }
 
-    /// Texto para mostrar en UI cuando el idioma está en inglés.
-    /// Mantiene el contenido original intacto, pero lo presenta traducido.
     var displayDescription: String {
         Self.translateDescription(description)
     }
 
-    /// Alias para compatibilidad con ProductDetailView que usa productDescription
     var productDescription: String {
         get { description }
         set { description = newValue }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, price, category
+        case image_url, description, stock
+        case colorOptions, storageOptions
+        case imageName, additionalImages
+        case rating, reviewCount
+        case inStock, imageURL
+        case isOnSale, discount
+        case suggestedDevices, tags, compatibleWith
+        case specs, reviews, weight, dimensions, color
     }
 
     // MARK: - Inicializador principal
@@ -162,12 +199,14 @@ struct Product: Identifiable, Codable, Hashable {
         imageURL: String? = nil,
         isOnSale: Bool = false,
         discount: Int = 0,
+        suggestedDevices: [String] = [],
+        tags: [String] = [],
+        compatibleWith: [String] = [],
         specs: String = "",
         reviews: [String] = [],
         weight: Double = 0,
         dimensions: String = "",
-        color: String = "",
-        suggestedDevices: [String] = []
+        color: String = ""
     ) {
         self.id = id
         self.name = name
@@ -186,14 +225,86 @@ struct Product: Identifiable, Codable, Hashable {
         self.imageURL = imageURL
         self.isOnSale = isOnSale
         self.discount = discount
+        self.suggestedDevices = suggestedDevices
+        self.tags = tags
+        self.compatibleWith = compatibleWith
         self.specs = specs
         self.reviews = reviews
         self.weight = weight
         self.dimensions = dimensions
         self.color = color
-        self.suggestedDevices = suggestedDevices
     }
 
+    // MARK: - Inicializador alternativo para compatibilidad
+    init(
+        id: UUID = UUID(),
+        name: String,
+        price: Double,
+        category: String,
+        imageName: String,
+        additionalImages: [String],
+        productDescription: String,
+        colorOptions: [ColorOption] = [],
+        storageOptions: [StorageOption] = [],
+        stock: Int = 50,
+        rating: Double = 4.5,
+        reviewCount: Int = 0,
+        isOnSale: Bool = false,
+        discount: Int = 0,
+        inStock: Bool = true
+    ) {
+        self.init(
+            id: id.uuidString,
+            name: name,
+            price: price,
+            category: category,
+            description: productDescription,
+            stock: stock,
+            colorOptions: colorOptions,
+            storageOptions: storageOptions,
+            imageName: imageName,
+            additionalImages: additionalImages,
+            rating: rating,
+            reviewCount: reviewCount,
+            inStock: inStock,
+            isOnSale: isOnSale,
+            discount: discount
+        )
+    }
+
+    // MARK: - Inicializador alternativo 2
+    init(
+        id: UUID = UUID(),
+        name: String,
+        price: Double,
+        imageName: String,
+        category: String,
+        specs: String,
+        reviews: [String],
+        weight: Double,
+        dimensions: String,
+        color: String,
+        suggestedDevices: [String],
+        additionalImages: [String]? = nil,
+        description: String
+    ) {
+        self.init(
+            id: id.uuidString,
+            name: name,
+            price: price,
+            category: category,
+            description: description,
+            imageName: imageName,
+            additionalImages: additionalImages ?? [],
+            suggestedDevices: suggestedDevices, specs: specs,
+            reviews: reviews,
+            weight: weight,
+            dimensions: dimensions,
+            color: color
+        )
+    }
+
+    // MARK: - Traducción de descripciones
     private static func translateDescription(_ raw: String) -> String {
         var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -277,141 +388,148 @@ struct Product: Identifiable, Codable, Hashable {
         return text
     }
 
-    // MARK: - Inicializadores de compatibilidad
-    init(
-        id: UUID = UUID(),
-        name: String,
-        price: Double,
-        category: String,
-        imageName: String,
-        additionalImages: [String],
-        productDescription: String,
-        colorOptions: [ColorOption] = [],
-        storageOptions: [StorageOption] = [],
-        stock: Int = 50,
-        rating: Double = 4.5,
-        reviewCount: Int = 0,
-        isOnSale: Bool = false,
-        discount: Int = 0,
-        inStock: Bool = true
-    ) {
-        self.init(
-            id: id.uuidString,
-            name: name,
-            price: price,
-            category: category,
-            description: productDescription,
-            stock: stock,
-            colorOptions: colorOptions,
-            storageOptions: storageOptions,
-            imageName: imageName,
-            additionalImages: additionalImages,
-            rating: rating,
-            reviewCount: reviewCount,
-            inStock: inStock,
-            isOnSale: isOnSale,
-            discount: discount
-        )
+    // MARK: - Hashable
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(name)
+        hasher.combine(price)
     }
 
-    init(
-        id: UUID = UUID(),
-        name: String,
-        price: Double,
-        imageName: String,
-        category: String,
-        specs: String,
-        reviews: [String],
-        weight: Double,
-        dimensions: String,
-        color: String,
-        suggestedDevices: [String],
-        additionalImages: [String]?,
-        description: String
-    ) {
-        self.init(
-            id: id.uuidString,
-            name: name,
-            price: price,
-            category: category,
-            description: description,
-            imageName: imageName,
-            additionalImages: additionalImages ?? [],
-            specs: specs,
-            reviews: reviews,
-            weight: weight,
-            dimensions: dimensions,
-            color: color,
-            suggestedDevices: suggestedDevices
-        )
+    static func == (lhs: Product, rhs: Product) -> Bool {
+        lhs.id == rhs.id
     }
 }
 
-// MARK: - SeedProduct (para compatibilidad con datos locales)
-// Usa Product internamente pero con alias para que el codigo existente siga funcionando.
+// MARK: - SeedProduct (para compatibilidad)
 typealias SeedProduct = Product
 
-// MARK: - Recomendaciones / productos relacionados
-private let accessoryCategoryKeyword = "accesorio" // cubre "Accesorios" sin importar mayúsculas/acentos exactos
+// MARK: - Recomendaciones mejoradas
+private let accessoryCategoryKeyword = "accesorio"
 
 extension Array where Element == Product {
     /// Productos relacionados a `product`: misma categoría, excluyéndolo a él mismo
-    /// y priorizando los que están en stock. Usado en ProductDetailView.
+    /// y priorizando los que están en stock
     func related(to product: Product, limit: Int = 10) -> [Product] {
-        let sameCategory = self.filter { $0.id != product.id && $0.category == product.category }
-        let inStockFirst = sameCategory.sorted { $0.inStock && !$1.inStock }
+        let sameCategory = self.filter {
+            $0.id != product.id &&
+            $0.category == product.category
+        }
+        let inStockFirst = sameCategory.sorted {
+            $0.inStock && !$1.inStock
+        }
         return Array(inStockFirst.prefix(limit))
     }
 
-    /// Accesorios que se le pueden agregar a `product` (categoría "Accesorios").
-    /// Si el accesorio declara `suggestedDevices` (ej: ["iPhone", "iPhone 15 Pro"]),
-    /// se prioriza si coincide con la categoría o el nombre de `product`.
-    /// Si ningún accesorio tiene esa data cargada, cae a mostrar accesorios en general.
+    /// Accesorios personalizados para `product`
+    /// Prioriza accesorios que tienen suggestedDevices que coinciden con el producto
     func accessories(for product: Product, limit: Int = 10) -> [Product] {
         let pool = self.filter {
-            $0.id != product.id && $0.category.localizedCaseInsensitiveContains(accessoryCategoryKeyword)
+            $0.id != product.id &&
+            $0.category.localizedCaseInsensitiveContains(accessoryCategoryKeyword)
+        }
+        guard !pool.isEmpty else { return [] }
+
+        // Intenta encontrar accesorios que coincidan con suggestedDevices
+        let matched = pool.filter { accessory in
+            // Si el accesorio NO tiene suggestedDevices, no lo incluye en matched
+            guard !accessory.suggestedDevices.isEmpty else { return false }
+            
+            return accessory.suggestedDevices.contains { device in
+                // Compara con la categoría del producto actual
+                device.localizedCaseInsensitiveContains(product.category)
+                    // O compara con el nombre del producto
+                    || product.name.localizedCaseInsensitiveContains(device)
+                    // O compara con compatibleWith
+                    || product.compatibleWith.contains { compat in
+                        device.localizedCaseInsensitiveContains(compat)
+                    }
+            }
+        }
+
+        if !matched.isEmpty {
+            // Prioriza matched, luego el resto
+            let matchedIds = Set(matched.map { $0.id })
+            let rest = pool.filter { !matchedIds.contains($0.id) }
+            return Array((matched + rest).prefix(limit))
+        }
+        
+        // Si no hay matches, devuelve accesorios genéricos (los sin suggestedDevices)
+        let generic = pool.filter { $0.suggestedDevices.isEmpty }
+        return Array((generic + pool).prefix(limit))
+    }
+
+    /// Accesorios alternativos para búsqueda cruzada
+    func accessoriesForCategory(_ category: String, limit: Int = 10) -> [Product] {
+        let pool = self.filter {
+            $0.category.localizedCaseInsensitiveContains(accessoryCategoryKeyword)
         }
         guard !pool.isEmpty else { return [] }
 
         let matched = pool.filter { accessory in
             accessory.suggestedDevices.contains { device in
-                device.localizedCaseInsensitiveContains(product.category)
-                    || product.name.localizedCaseInsensitiveContains(device)
+                device.localizedCaseInsensitiveContains(category)
             }
         }
 
         if !matched.isEmpty {
-            let matchedIds = Set(matched.map { $0.id })
-            let rest = pool.filter { !matchedIds.contains($0.id) }
-            return Array((matched + rest).prefix(limit))
+            return Array(matched.prefix(limit))
         }
         return Array(pool.prefix(limit))
     }
 
-    /// Recomendaciones para el carrito: productos que NO están ya en el carrito.
-    /// Prioriza primero accesorios compatibles con lo que el usuario ya lleva,
-    /// luego accesorios en general, luego productos de la misma categoría.
-    func recommendations(excluding excludedIds: Set<String>, favoringCategories categories: Set<String>, limit: Int = 10) -> [Product] {
+    /// Recomendaciones para el carrito: productos que NO están ya en el carrito
+    /// Prioriza accesorios compatibles con lo que el usuario ya lleva
+    func recommendations(
+        excluding excludedIds: Set<String>,
+        favoringCategories categories: Set<String>,
+        limit: Int = 10
+    ) -> [Product] {
         let candidates = self.filter { !excludedIds.contains($0.id) }
 
         func score(_ p: Product) -> Int {
+            // Si es accesorio
             if p.category.localizedCaseInsensitiveContains(accessoryCategoryKeyword) {
+                // ¿Coincide con alguna categoría del carrito?
                 let matchesCartItem = p.suggestedDevices.contains { device in
                     categories.contains { cartCategory in
                         cartCategory.localizedCaseInsensitiveContains(device)
                             || device.localizedCaseInsensitiveContains(cartCategory)
                     }
                 }
+                // Accesorio que coincide: 3 puntos + 1 si está en stock = 4 máximo
                 return (matchesCartItem ? 3 : 2) + (p.inStock ? 1 : 0)
             }
+            
+            // Si es de la misma categoría
             if categories.contains(p.category) {
                 return 1 + (p.inStock ? 1 : 0)
             }
+            
+            // Otros productos
             return p.inStock ? 1 : 0
         }
 
         let sorted = candidates.sorted { score($0) > score($1) }
         return Array(sorted.prefix(limit))
     }
-}
 
+    /// Busca productos por sugerencia de dispositivo
+    func productsForDevice(_ deviceName: String, limit: Int = 10) -> [Product] {
+        let matched = self.filter { product in
+            product.suggestedDevices.contains { device in
+                device.localizedCaseInsensitiveContains(deviceName)
+            }
+        }
+        return Array(matched.prefix(limit))
+    }
+
+    /// Busca productos por tags
+    func productsByTag(_ tag: String, limit: Int = 10) -> [Product] {
+        let matched = self.filter { product in
+            product.tags.contains { t in
+                t.localizedCaseInsensitiveCompare(tag) == .orderedSame
+            }
+        }
+        return Array(matched.prefix(limit))
+    }
+}
