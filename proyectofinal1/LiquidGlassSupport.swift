@@ -61,12 +61,19 @@ private struct AppLiquidGlassSurfaceModifier: ViewModifier {
     let darkMode: Bool
     let cornerRadius: CGFloat
 
+    @ViewBuilder
     func body(content: Content) -> some View {
         if enabled {
-            content
-                .background(glassBackground)
-                .overlay(glassBorder)
-                .shadow(color: .black.opacity(darkMode ? 0.18 : 0.08), radius: 10, x: 0, y: 4)
+            if #available(iOS 26.0, *) {
+                content
+                    .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+                    .shadow(color: .black.opacity(darkMode ? 0.18 : 0.08), radius: 10, x: 0, y: 4)
+            } else {
+                content
+                    .background(glassBackground)
+                    .overlay(glassBorder)
+                    .shadow(color: .black.opacity(darkMode ? 0.18 : 0.08), radius: 10, x: 0, y: 4)
+            }
         } else {
             content
                 .background(fallbackBackground)

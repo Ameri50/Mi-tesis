@@ -45,7 +45,7 @@ struct productDetailView: View {
                         Button(action: { showChat = true }) {
                             HStack(spacing: 4) {
                                 Image(systemName: "bubble.left.fill")
-                                Text("Chat")
+                                Text(localizationManager.translate("support.chat"))
                                     .font(.caption)
                             }
                             .foregroundColor(.white)
@@ -142,7 +142,7 @@ struct productDetailView: View {
                         Text(localizationManager.translate("product.description"))
                             .font(.headline)
 
-                        Text(product.description)
+                        Text(product.displayDescription)
                             .font(.body)
                             .foregroundColor(.secondary)
                             .lineLimit(5)
@@ -152,7 +152,7 @@ struct productDetailView: View {
                     // MARK: - Opciones de color
                     if !product.colorOptions.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Colores disponibles")
+                            Text(localizationManager.translate("product.availableColors"))
                                 .font(.headline)
 
                             HStack(spacing: 12) {
@@ -186,7 +186,7 @@ struct productDetailView: View {
                     // MARK: - Opciones de almacenamiento
                     if !product.storageOptions.isEmpty {
                         VStack(alignment: .leading, spacing: 12) {
-                            Text("Capacidad")
+                            Text(localizationManager.translate("product.capacity"))
                                 .font(.headline)
 
                             HStack(spacing: 8) {
@@ -216,7 +216,7 @@ struct productDetailView: View {
                     // MARK: - Productos relacionados / Recomendaciones
                     // (justo debajo de Capacidad, como indica RelatedProductsSection.swift)
                     relatedProductsSection(
-                        title: "También te puede interesar",
+                        title: localizationManager.translate("product.youMayAlsoLike"),
                         products: relatedProducts
                     )
                     .environmentObject(themeManager)
@@ -224,7 +224,7 @@ struct productDetailView: View {
                     .environmentObject(cartManager)
 
                     relatedProductsSection(
-                        title: "Recomendado para ti",
+                        title: localizationManager.translate("product.recommendedForYou"),
                         products: recommendedAccessories
                     )
                     .environmentObject(themeManager)
@@ -233,7 +233,7 @@ struct productDetailView: View {
 
                     // MARK: - Cantidad
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Cantidad")
+                        Text(localizationManager.translate("product.quantity"))
                             .font(.headline)
 
                         HStack(spacing: 12) {
@@ -264,8 +264,8 @@ struct productDetailView: View {
                         // pantalla que presenta ProductDetailView recuerde pasar onAddToCart.
                         cartManager.add(
                             product: product,
-                            selectedColor: selectedColor?.name ?? (product.colorOptions.first?.name ?? "Único"),
-                            selectedStorage: selectedStorage?.capacity ?? (product.storageOptions.first?.capacity ?? "Único"),
+                            selectedColor: selectedColor?.name ?? (product.colorOptions.first?.name ?? localizationManager.translate("product.uniqueOption")),
+                            selectedStorage: selectedStorage?.capacity ?? (product.storageOptions.first?.capacity ?? localizationManager.translate("product.uniqueOption")),
                             quantity: quantity
                         )
                         // Sigue notificando por si algún caller quiere reaccionar (opcional).

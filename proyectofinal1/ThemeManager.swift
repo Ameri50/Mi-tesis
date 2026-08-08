@@ -20,7 +20,7 @@ enum ThemeMode: String, CaseIterable {
 class ThemeManager: NSObject, ObservableObject {
     @Published var currentThemeMode: ThemeMode = .auto
     @Published var isDarkMode: Bool = false
-    @Published var isLiquidGlassEnabled: Bool = false
+    @Published var isLiquidGlassEnabled: Bool = true
     @Published var currentTime: String = ""
     @Published var dayPeriod: String = ""
     
@@ -130,7 +130,7 @@ class ThemeManager: NSObject, ObservableObject {
 
     private func loadLiquidGlassEnabled() -> Bool {
         if UserDefaults.standard.object(forKey: "liquidGlassEnabled") == nil {
-            return false
+            return true
         }
 
         return UserDefaults.standard.bool(forKey: "liquidGlassEnabled")

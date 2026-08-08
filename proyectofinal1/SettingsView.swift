@@ -112,13 +112,13 @@ struct SettingsView: View {
 
             VStack(spacing: 4) {
                 HStack(spacing: 6) {
-                    Text(userManager.currentUser?.name ?? "Usuario")
+                    Text(userManager.currentUser?.name ?? localizationManager.translate("settings.defaultUser"))
                         .font(.system(size: appFontSize + 2, weight: .semibold))
                         .foregroundColor(themeManager.isDarkMode ? .white : .black)
 
                     // Badge admin visible solo para el propio admin
                     if userManager.currentUser?.isAdmin == true {
-                        Text("ADMIN")
+                        Text(localizationManager.translate("settings.admin"))
                             .font(.system(size: 10, weight: .bold))
                             .foregroundColor(.white)
                             .padding(.horizontal, 6)
@@ -169,7 +169,7 @@ struct SettingsView: View {
     // MARK: - Liquid Glass
     private var liquidGlassSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionTitle("Liquid Glass")
+            sectionTitle(localizationManager.translate("settings.liquidGlass"))
 
             Toggle(isOn: liquidGlassBinding) {
                 HStack(spacing: 12) {
@@ -178,11 +178,11 @@ struct SettingsView: View {
                         .frame(width: 24)
 
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Modo Liquid Glass")
+                        Text(localizationManager.translate("settings.liquidGlassMode"))
                             .font(.system(size: appFontSize))
                             .foregroundColor(themeManager.isDarkMode ? .white : .black)
 
-                        Text("Activa superficies de vidrio en toda la aplicacion.")
+                        Text(localizationManager.translate("settings.liquidGlassDescription"))
                             .font(.system(size: appFontSize - 3))
                             .foregroundColor(.secondary)
                             .fixedSize(horizontal: false, vertical: true)

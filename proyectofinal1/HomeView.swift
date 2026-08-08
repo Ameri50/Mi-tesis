@@ -138,7 +138,7 @@ struct HomeView: View {
                 HStack(spacing: 12) {
                     ForEach(categories, id: \.self) { category in
                         CategoryChip(
-                            title: category,
+                            title: localizedCategory(category),
                             isSelected: selectedCategory == category,
                             fontSize: fontSize,
                             isDarkMode: themeManager.isDarkMode,
@@ -162,6 +162,17 @@ struct HomeView: View {
         )
     }
     
+    private func localizedCategory(_ category: String) -> String {
+        switch category {
+        case "Todos": return localizationManager.translate("category.todos")
+        case "Apple Watch": return localizationManager.translate("category.applewatch")
+        case "AirPods": return localizationManager.translate("category.airpods")
+        case "TV y Casa": return localizationManager.translate("category.tvhome")
+        case "Accesorios": return localizationManager.translate("category.accessories")
+        default: return category
+        }
+    }
+
     private var emptyStateSection: some View {
         VStack(spacing: 12) {
             Image(systemName: "cube.box")

@@ -28,7 +28,7 @@ struct SupportHubView: View {
                     VStack(alignment: .leading, spacing: 22) {
                         header
 
-                        sectionLabel("CÓMO PODEMOS AYUDARTE")
+                        sectionLabel(localizationManager.translate("support.helpSection"))
 
                         VStack(spacing: 14) {
                             NavigationLink {
@@ -39,7 +39,7 @@ struct SupportHubView: View {
                                 supportOptionCard(
                                     icon: "message.fill",
                                     title: localizationManager.translate("support.chat"),
-                                    subtitle: "Habla con el asistente tecnico para resolver dudas de reparaciones y repuestos.",
+                                    subtitle: localizationManager.translate("support.chatSubtitle"),
                                     gradient: [Color.orange, Color.pink]
                                 )
                             }
@@ -53,8 +53,8 @@ struct SupportHubView: View {
                             } label: {
                                 supportOptionCard(
                                     icon: "sparkles",
-                                    title: "Recomendaciones",
-                                    subtitle: "Explora sugerencias de productos segun lo que necesitas comprar.",
+                                    title: localizationManager.translate("support.recommendations"),
+                                    subtitle: localizationManager.translate("support.recommendationsSubtitle"),
                                     gradient: [Color.blue, Color.purple]
                                 )
                             }
@@ -94,7 +94,7 @@ struct SupportHubView: View {
                     .font(.system(size: fontSize + 5, weight: .bold, design: .rounded))
                     .foregroundColor(themeManager.isDarkMode ? .white : .primary)
 
-                Text("Elige si quieres conversar con el chatbot tecnico o abrir recomendaciones rapidas de compra.")
+                Text(localizationManager.translate("support.hubSubtitle"))
                     .font(.system(size: fontSize - 1))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

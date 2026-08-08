@@ -93,6 +93,7 @@ struct proyectofinal1App: App {
                         .environmentObject(fontSizeManager)
                         .environmentObject(userManager)
                         .environmentObject(localizationManager)
+                        .environment(\.liquidGlassEnabled, themeManager.isLiquidGlassEnabled)
                         .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
                 }
             }

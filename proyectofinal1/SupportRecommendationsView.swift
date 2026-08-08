@@ -16,13 +16,15 @@ struct SupportRecommendationsView: View {
         let tint: Color
     }
 
-    private let routes: [RecommendationRoute] = [
-        RecommendationRoute(title: "Para estudiar", subtitle: "iPad y accesorios que rinden bien en clases y tareas.", category: "iPad", icon: "ipad.gen3", tint: .blue),
-        RecommendationRoute(title: "Para trabajo", subtitle: "Mac y accesorios para productividad diaria.", category: "Mac", icon: "macbook", tint: .purple),
-        RecommendationRoute(title: "Para uso diario", subtitle: "iPhone con buena relacion precio-rendimiento.", category: "iPhone", icon: "iphone.gen3", tint: .orange),
-        RecommendationRoute(title: "Audio y movilidad", subtitle: "AirPods y opciones portatiles para el dia a dia.", category: "AirPods", icon: "airpodspro", tint: .green),
-        RecommendationRoute(title: "Ver catalogo completo", subtitle: "Explora todas las categorias disponibles de la tienda.", category: "", icon: "square.grid.2x2.fill", tint: .pink)
-    ]
+    private var routes: [RecommendationRoute] {
+        [
+            RecommendationRoute(title: localizationManager.translate("support.study"), subtitle: localizationManager.translate("support.studySubtitle"), category: "iPad", icon: "ipad.gen3", tint: .blue),
+            RecommendationRoute(title: localizationManager.translate("support.work"), subtitle: localizationManager.translate("support.workSubtitle"), category: "Mac", icon: "macbook", tint: .purple),
+            RecommendationRoute(title: localizationManager.translate("support.dailyUse"), subtitle: localizationManager.translate("support.dailyUseSubtitle"), category: "iPhone", icon: "iphone.gen3", tint: .orange),
+            RecommendationRoute(title: localizationManager.translate("support.audioMobility"), subtitle: localizationManager.translate("support.audioMobilitySubtitle"), category: "AirPods", icon: "airpodspro", tint: .green),
+            RecommendationRoute(title: localizationManager.translate("support.fullCatalog"), subtitle: localizationManager.translate("support.fullCatalogSubtitle"), category: "", icon: "square.grid.2x2.fill", tint: .pink)
+        ]
+    }
 
     var body: some View {
         ZStack {
@@ -36,7 +38,7 @@ struct SupportRecommendationsView: View {
                     VStack(alignment: .leading, spacing: 22) {
                         header
 
-                        sectionLabel("EXPLORA POR CATEGORÍA")
+                        sectionLabel(localizationManager.translate("support.exploreByCategory"))
 
                         VStack(spacing: 14) {
                             ForEach(routes) { route in
@@ -67,7 +69,7 @@ struct SupportRecommendationsView: View {
                 }
             }
         }
-        .navigationTitle("Recomendaciones")
+        .navigationTitle(localizationManager.translate("support.recommendations"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             _ = store.products.count
@@ -94,11 +96,11 @@ struct SupportRecommendationsView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Recomendaciones rapidas")
+                Text(localizationManager.translate("support.quickRecommendations"))
                     .font(.system(size: fontSize + 5, weight: .bold, design: .rounded))
                     .foregroundColor(themeManager.isDarkMode ? .white : .primary)
 
-                Text("Entrar aqui te lleva a categorias utiles para elegir el producto correcto segun el uso que le daras.")
+                Text(localizationManager.translate("support.quickRecommendationsSubtitle"))
                     .font(.system(size: fontSize - 1))
                     .foregroundColor(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

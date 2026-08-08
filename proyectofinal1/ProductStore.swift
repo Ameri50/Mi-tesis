@@ -36,13 +36,13 @@ class ProductStore: ObservableObject {
     }
 
     private init() {
-        products = localProducts
-        accessories = products.filter { $0.category.localizedCaseInsensitiveContains("accesorio") }
         startListening()
     }
 
     func startListening() {
         listener?.remove()
+        isLoading = true
+
         listener = db.collection("products").addSnapshotListener { [weak self] snapshot, error in
             guard let self = self else { return }
 
@@ -58,7 +58,7 @@ class ProductStore: ObservableObject {
 
             guard let documents = snapshot?.documents else {
                 Task { @MainActor in
-                    self.products = self.localProducts
+                    self.products = []
                     self.updateAccessories()
                     self.isLoading = false
                 }
@@ -79,35 +79,17 @@ class ProductStore: ObservableObject {
                     Self.parseDraft(from: data, documentID: documentID)
                 }
 
-                var mergedProducts: [Product] = []
-                var consumedWebKeys = Set<String>()
-
-                for localProduct in localProducts {
-                    let key = Self.productKey(name: localProduct.name, category: localProduct.category)
-                    if let draft = drafts.first(where: {
-                        Self.productKey(name: $0.name, category: $0.category ?? localProduct.category) == key
-                    }) {
-                        consumedWebKeys.insert(key)
-                        mergedProducts.append(Self.materializeProduct(from: draft, fallback: localProduct))
-                    } else {
-                        mergedProducts.append(localProduct)
-                    }
-                }
-
-                let newProducts = drafts.compactMap { draft -> Product? in
+                let firestoreProducts = drafts.map { draft in
                     let key = Self.productKey(name: draft.name, category: draft.category ?? "Otros")
-                    guard !consumedWebKeys.contains(key), localByKey[key] == nil else { return nil }
-                    return Self.materializeProduct(from: draft, fallback: nil)
+                    return Self.materializeProduct(from: draft, fallback: localByKey[key])
                 }
-                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
 
                 DispatchQueue.main.async {
-                    let combinedProducts = mergedProducts + newProducts
-                    let uniqueProducts = Self.deduplicatedProducts(combinedProducts)
+                    let uniqueProducts = Self.deduplicatedProducts(firestoreProducts)
                     self.products = uniqueProducts
                     self.updateAccessories()
                     self.isLoading = false
-                    print("✅ ProductStore: \(uniqueProducts.count) productos únicos cargados")
+                    print("✅ ProductStore: \(uniqueProducts.count) productos cargados desde Firestore")
                 }
             }
         }
@@ -158,21 +140,32 @@ class ProductStore: ObservableObject {
             ?? base?.imageName
             ?? ""
 
-        let description = draft.description
-            ?? base?.description
-            ?? ""
+        let category = draft.category ?? base?.category ?? "Otros"
 
         let stock = draft.stock
             ?? base?.stock
             ?? 50
 
-        let mergedColorOptions = draft.colorOptions
-            ?? base?.colorOptions
-            ?? []
+        let inferredColorOptions = inferColorOptions(
+            from: [draft.name, imageSource, category, base?.color ?? ""]
+        )
+        let mergedColorOptions = nonEmpty(draft.colorOptions)
+            ?? nonEmpty(base?.colorOptions)
+            ?? inferredColorOptions
 
         let mergedStorageOptions = draft.storageOptions
             ?? base?.storageOptions
             ?? []
+
+        let description = meaningfulDescription(draft.description)
+            ?? meaningfulDescription(base?.description)
+            ?? generatedDescription(
+                name: draft.name,
+                category: category,
+                imageSource: imageSource,
+                colorOptions: mergedColorOptions,
+                storageOptions: mergedStorageOptions
+            )
 
         let mergedAdditionalImages = draft.additionalImages
             ?? base?.additionalImages
@@ -217,7 +210,7 @@ class ProductStore: ObservableObject {
             id: draft.id,
             name: draft.name,
             price: draft.price ?? base?.price ?? 0,
-            category: draft.category ?? base?.category ?? "Otros",
+            category: category,
             image_url: imageSource,
             description: description,
             stock: stock,
@@ -321,7 +314,7 @@ class ProductStore: ObservableObject {
     }
 
     nonisolated private static func parseColorOptions(from data: [String: Any]) -> [ColorOption]? {
-        let keys = ["colorOptions", "allColors", "colors", "coloros"]
+        let keys = ["colorOptions", "allColors", "colors", "coloros", "color", "colour"]
         for key in keys {
             guard let value = data[key] else { continue }
 
@@ -392,6 +385,130 @@ class ProductStore: ObservableObject {
             }
         }
         return nil
+    }
+
+    nonisolated private static func nonEmpty(_ options: [ColorOption]?) -> [ColorOption]? {
+        guard let options, !options.isEmpty else { return nil }
+        return deduplicatedColorOptions(options)
+    }
+
+    nonisolated private static func meaningfulDescription(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard text.count >= 18 else { return nil }
+
+        let lowercased = text.lowercased()
+        let genericFragments = ["producto", "sin descripcion", "sin descripción", "description", "descripcion"]
+        if genericFragments.contains(where: { lowercased == $0 }) {
+            return nil
+        }
+
+        return text
+    }
+
+    nonisolated private static func generatedDescription(
+        name: String,
+        category: String,
+        imageSource: String,
+        colorOptions: [ColorOption],
+        storageOptions: [StorageOption]
+    ) -> String {
+        var details: [String] = []
+        details.append("Producto Apple de la categoria \(category), mostrado con la imagen principal de \(imageDescription(from: imageSource, fallback: name)).")
+
+        if !colorOptions.isEmpty {
+            details.append("Colores disponibles: \(colorOptions.map(\.name).joined(separator: ", ")).")
+        }
+
+        if !storageOptions.isEmpty {
+            details.append("Capacidades disponibles: \(storageOptions.map(\.capacity).joined(separator: ", ")).")
+        }
+
+        details.append(categoryDescription(for: category))
+        return details.joined(separator: " ")
+    }
+
+    nonisolated private static func imageDescription(from imageSource: String, fallback: String) -> String {
+        let trimmed = imageSource.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return fallback }
+
+        if trimmed.hasPrefix("http") {
+            return "la foto subida desde la web"
+        }
+
+        return trimmed
+            .replacingOccurrences(of: "_", with: " ")
+            .replacingOccurrences(of: "-", with: " ")
+    }
+
+    nonisolated private static func categoryDescription(for category: String) -> String {
+        let normalized = category.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if normalized.contains("iphone") {
+            return "Ideal para uso diario, fotografia, video y rendimiento movil."
+        }
+        if normalized.contains("ipad") {
+            return "Pensado para estudio, entretenimiento, dibujo y productividad portatil."
+        }
+        if normalized.contains("mac") {
+            return "Recomendado para trabajo, estudio, edicion y tareas de alto rendimiento."
+        }
+        if normalized.contains("watch") {
+            return "Orientado a salud, deporte, notificaciones y seguimiento diario."
+        }
+        if normalized.contains("airpods") || normalized.contains("audio") {
+            return "Diseniado para audio inalambrico, llamadas y movilidad."
+        }
+        if normalized.contains("accesorio") || normalized.contains("accessor") {
+            return "Complementa tu dispositivo Apple y mejora la experiencia de uso."
+        }
+        return "Una opcion practica para completar tu ecosistema Apple."
+    }
+
+    nonisolated private static func inferColorOptions(from sources: [String]) -> [ColorOption] {
+        let catalog: [(tokens: [String], option: ColorOption)] = [
+            (["negro espacial", "space black", "black", "negro"], ColorOption(name: "Negro", hexColor: "#1C1C1E")),
+            (["gris espacial", "space gray", "space grey", "gray", "grey", "gris", "grafito"], ColorOption(name: "Gris Espacial", hexColor: "#3A3A3C")),
+            (["blanco", "white"], ColorOption(name: "Blanco", hexColor: "#F5F5F0")),
+            (["plata", "silver"], ColorOption(name: "Plata", hexColor: "#E8E8ED")),
+            (["luz estelar", "starlight"], ColorOption(name: "Luz Estelar", hexColor: "#F0EDE4")),
+            (["medianoche", "midnight"], ColorOption(name: "Medianoche", hexColor: "#222930")),
+            (["titanio desierto", "desert titanio", "desert titanium"], ColorOption(name: "Titanio Desierto", hexColor: "#C6A882")),
+            (["titanio natural", "natural titanium"], ColorOption(name: "Titanio Natural", hexColor: "#C8B89A")),
+            (["titanio", "titanium"], ColorOption(name: "Titanio", hexColor: "#8E8E93")),
+            (["oro rosa", "rose gold"], ColorOption(name: "Oro Rosa", hexColor: "#E8B4B8")),
+            (["oro", "gold"], ColorOption(name: "Oro", hexColor: "#D4AF37")),
+            (["azul cielo", "sky blue", "celeste"], ColorOption(name: "Azul Cielo", hexColor: "#7EC8E3")),
+            (["azul", "blue"], ColorOption(name: "Azul", hexColor: "#3478F6")),
+            (["verde", "green"], ColorOption(name: "Verde", hexColor: "#30D158")),
+            (["morado", "purple"], ColorOption(name: "Morado", hexColor: "#BF5AF2")),
+            (["amarillo", "yellow"], ColorOption(name: "Amarillo", hexColor: "#FFD60A")),
+            (["naranja", "orange"], ColorOption(name: "Naranja", hexColor: "#FF9F0A")),
+            (["rosa", "pink"], ColorOption(name: "Rosa", hexColor: "#F2A7BB")),
+            (["rojo", "red"], ColorOption(name: "Rojo", hexColor: "#FF3B30")),
+            (["teal"], ColorOption(name: "Teal", hexColor: "#3E7A7E"))
+        ]
+
+        let normalizedSources = sources
+            .map { $0.replacingOccurrences(of: "_", with: " ").replacingOccurrences(of: "-", with: " ").lowercased() }
+
+        let matched = catalog.compactMap { entry -> ColorOption? in
+            normalizedSources.contains { source in
+                entry.tokens.contains { source.contains($0) }
+            } ? entry.option : nil
+        }
+
+        return deduplicatedColorOptions(matched)
+    }
+
+    nonisolated private static func deduplicatedColorOptions(_ options: [ColorOption]) -> [ColorOption] {
+        var seen = Set<String>()
+        var unique: [ColorOption] = []
+        for option in options {
+            let key = option.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            guard !key.isEmpty, seen.insert(key).inserted else { continue }
+            unique.append(option)
+        }
+        return unique
     }
 
     nonisolated private static func safeDouble(_ value: Any?) -> Double? {
