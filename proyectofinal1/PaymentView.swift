@@ -268,11 +268,13 @@ struct PaymentView: View {
 
     // MARK: - Helpers
     private func openWhatsApp() {
-        var msg = "🛒 *COMPRA - TIENDA APPLE*\n\n"
+        let en = localizationManager.currentLanguage == "en"
+        var msg = localizationManager.translate("payment.whatsappHeader") + "\n\n"
         for item in cartManager.cartItems {
             msg += "• \(item.product.name) · \(item.selectedColor) · x\(item.quantity) = S/ \(String(format: "%.2f", item.totalPrice))\n"
         }
-        msg += "\n💰 Total: S/ \(String(format: "%.2f", cartManager.totalPrice))\n✅ Adjunto mi comprobante."
+        msg += "\n💰 Total: S/ \(String(format: "%.2f", cartManager.totalPrice))\n"
+        msg += en ? "✅ I attach my receipt." : "✅ Adjunto mi comprobante."
         guard let encoded = msg.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://wa.me/\(PaymentConfig.whatsappNumero)?text=\(encoded)") else { return }
         if UIApplication.shared.canOpenURL(url) {

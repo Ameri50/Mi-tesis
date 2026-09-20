@@ -12,20 +12,23 @@ struct CategoryChip: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: fontSize - 2, weight: .medium))
+                .font(.system(size: fontSize - 2, weight: isSelected ? .semibold : .medium))
                 .foregroundColor(isSelected ? .white : (isDarkMode ? .white : .black))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 9)
+                .background(
+                    Capsule()
+                        .fill(isSelected
+                              ? Color.white.opacity(isDarkMode ? 0.28 : 0.35)
+                              : Color.clear)
+                )
                 .appLiquidGlassSurface(
                     enabled: themeManager.isLiquidGlassEnabled,
                     darkMode: themeManager.isDarkMode,
-                    cornerRadius: 20
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(isSelected ? Color.white.opacity(0.55) : Color.clear, lineWidth: 1)
+                    cornerRadius: 999
                 )
         }
+        .buttonStyle(.plain)
     }
 }
 

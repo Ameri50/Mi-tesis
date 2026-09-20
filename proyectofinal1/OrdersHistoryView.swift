@@ -222,7 +222,7 @@ struct OrderCardView: View {
             if order.items.count > 1 {
                 Button(action: { withAnimation { isExpanded.toggle() } }) {
                     HStack {
-                        Text(isExpanded ? "Ver menos" : "Ver más detalles")
+                        Text(isExpanded ? localizationManager.translate("cart.collapse") : localizationManager.translate("cart.expand"))
                             .font(.system(size: fontSize - 3, weight: .medium))
                             .foregroundColor(.blue)
                         

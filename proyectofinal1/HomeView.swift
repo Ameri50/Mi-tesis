@@ -34,15 +34,10 @@ struct HomeView: View {
     
     var body: some View {
         ZStack {
-            Color(UIColor { _ in
-                themeManager.isDarkMode ? UIColor(white: 0.11, alpha: 1) : .systemBackground
-            })
-            .ignoresSafeArea()
-            
             VStack(spacing: 0) {
                 HStack(spacing: 12) {
                     Text(localizationManager.translate("home.store"))
-                        .font(.system(size: fontSize + 1, weight: .semibold))
+                        .font(.system(size: fontSize + 8, weight: .bold, design: .rounded))
                         .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                     
                     Spacer()
@@ -50,8 +45,10 @@ struct HomeView: View {
                     Button(action: { showCart = true }) {
                         ZStack(alignment: .topTrailing) {
                             Image(systemName: "cart.fill")
-                                .font(.system(size: 20, weight: .semibold))
+                                .font(.system(size: 17, weight: .semibold))
                                 .foregroundColor(themeManager.isDarkMode ? .white : .black)
+                                .frame(width: 44, height: 44)
+                                .background(.ultraThinMaterial, in: Circle())
                             
                             if cartManager.totalItemsCount > 0 {
                                 Text("\(cartManager.totalItemsCount)")
@@ -60,18 +57,14 @@ struct HomeView: View {
                                     .foregroundColor(.white)
                                     .frame(minWidth: 18, minHeight: 18)
                                     .background(Circle().fill(Color.red))
-                                    .offset(x: 8, y: -8)
+                                    .offset(x: 6, y: -4)
                             }
                         }
                     }
                 }
-                .frame(height: 56)
-                .padding(.horizontal, 16)
-                .appLiquidGlassSurface(
-                    enabled: themeManager.isLiquidGlassEnabled,
-                    darkMode: themeManager.isDarkMode,
-                    cornerRadius: 18
-                )
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 4)
                 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
@@ -98,6 +91,11 @@ struct HomeView: View {
                     .environmentObject(cartManager)
             }
         }
+        .appLiquidGlassSurface(
+            enabled: themeManager.isLiquidGlassEnabled,
+            darkMode: themeManager.isDarkMode,
+            cornerRadius: 0
+        )
     }
     
     private var searchBarSection: some View {
@@ -119,11 +117,12 @@ struct HomeView: View {
                 }
             }
         }
-        .padding(12)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
         .appLiquidGlassSurface(
             enabled: themeManager.isLiquidGlassEnabled,
             darkMode: themeManager.isDarkMode,
-            cornerRadius: 14
+            cornerRadius: 999
         )
     }
     
@@ -135,7 +134,7 @@ struct HomeView: View {
                 .padding(.horizontal, 4)
             
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     ForEach(categories, id: \.self) { category in
                         CategoryChip(
                             title: localizedCategory(category),
@@ -153,13 +152,7 @@ struct HomeView: View {
                 .padding(.horizontal, 4)
             }
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 12)
-        .appLiquidGlassSurface(
-            enabled: themeManager.isLiquidGlassEnabled,
-            darkMode: themeManager.isDarkMode,
-            cornerRadius: 18
-        )
+        .padding(.vertical, 4)
     }
     
     private func localizedCategory(_ category: String) -> String {
@@ -213,9 +206,7 @@ struct HomeProductCardView: View {
             SafeImage(
                 imageName: product.imageName,
                 size: 75,
-                backgroundColor: Color(UIColor { _ in
-                    themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : UIColor(white: 0.95, alpha: 1)
-                })
+                backgroundColor: .clear
             )
             
             VStack(alignment: .leading, spacing: 6) {
@@ -244,13 +235,8 @@ struct HomeProductCardView: View {
         .appLiquidGlassSurface(
             enabled: themeManager.isLiquidGlassEnabled,
             darkMode: themeManager.isDarkMode,
-            cornerRadius: 14
+            cornerRadius: 26
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(themeManager.isDarkMode ? 0.2 : 0.06), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(themeManager.isDarkMode ? 0.2 : 0.04), radius: 6, x: 0, y: 2)
     }
 }
 

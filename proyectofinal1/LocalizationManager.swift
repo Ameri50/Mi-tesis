@@ -1,10 +1,15 @@
 import SwiftUI
 
+extension Notification.Name {
+    static let appLanguageChanged = Notification.Name("appLanguageChanged")
+}
+
 @MainActor
 final class LocalizationManager: ObservableObject {
     @Published var currentLanguage: String {
         didSet {
             UserDefaults.standard.set(currentLanguage, forKey: "selectedLanguage")
+            NotificationCenter.default.post(name: .appLanguageChanged, object: nil)
         }
     }
 
@@ -359,7 +364,57 @@ final class LocalizationManager: ObservableObject {
             "common.copy": "Copiar",
             "common.copied": "Copiado!",
             "payment.transferPrefix": "Transfiere",
-            "payment.transferSuffix": "a esta cuenta"
+            "payment.transferSuffix": "a esta cuenta",
+
+            "cart.collapse": "Ver menos",
+            "cart.expand": "Ver más detalles",
+            "common.loading": "Cargando...",
+            "common.welcomeBack": "¡Bienvenido de nuevo",
+            "product.searchPlaceholder": "Buscar productos...",
+            "product.youSave": "Ahorras %@%",
+            "payment.methodCard": "Tarjeta",
+            "payment.whatsappHeader": "🛒 *COMPRA - TIENDA APPLE*",
+            "profile.userFallback": "Usuario",
+            "profile.guestName": "Invitado",
+            "theme.name.light": "Claro",
+            "theme.name.dark": "Oscuro",
+            "theme.name.auto": "Automático",
+
+            "support.voicePermissionDenied": "Activa el permiso de micrófono y reconocimiento de voz en Ajustes para usar el modo voz.",
+            "support.voiceListening": "Te escucho… habla con confianza 🎙️",
+            "support.voiceResponding": "Respondiendo en voz alta…",
+            "support.voiceIdle": "Toca el micrófono y haz tu pregunta. La conversación continúa igual que en el chat.",
+            "support.offTopic": "¡Hola! 👋 Puedo ayudarte con productos en stock (iPhone, iPad, Mac, Apple Watch, AirPods y accesorios), repuestos y servicio técnico Apple. ¿Sobre qué quieres consultar?",
+            "support.whatsappMessage": "¡Hola! 👋 Me gustaría obtener más información sobre sus productos.",
+
+            "about.value.passion.desc": "Nos apasiona lo que hacemos. Cada proyecto, cada interacción y cada decisión es tomada con dedicación y entusiasmo. Creemos que la pasión es el combustible que impulsa la innovación y la excelencia en todo lo que hacemos. Esa energía se refleja en el cuidado con el que atendemos cada reparación, cada recomendación de producto y cada conversación con nuestros clientes.",
+            "about.value.innovation.desc": "Buscamos constantemente nuevas formas de mejorar y evolucionar. La innovación no es solo una palabra para nosotros, es parte de nuestro ADN. Nos desafiamos a nosotros mismos a pensar diferente, adoptar nuevas tecnologías y encontrar soluciones creativas que hagan tu experiencia más simple, rápida y confiable.",
+            "about.value.collaboration.desc": "Creemos en el poder del trabajo en equipo. La colaboración nos permite combinar diferentes perspectivas y talentos para crear algo extraordinario. Trabajamos codo a codo, tanto internamente como con nuestros clientes, porque sabemos que las mejores soluciones surgen cuando escuchamos y sumamos esfuerzos. Juntos somos más fuertes.",
+            "about.value.integrity.desc": "Actuamos siempre con honestidad, transparencia y responsabilidad. La integridad es la base de todas nuestras relaciones y decisiones: precios claros, diagnósticos honestos y compromisos que cumplimos. Hacemos lo correcto, incluso cuando nadie está mirando, porque tu confianza es lo más valioso que construimos.",
+
+            "legal.updated": "Actualizado: %@",
+            "legal.privacy.title": "Política de Privacidad",
+            "legal.privacy.subtitle": "Aquí explicamos cómo tratamos tus datos dentro de la app y cuándo usas nuestros servicios.",
+            "legal.privacy.date": "31 de julio de 2026",
+            "legal.privacy.s1.title": "Datos que recopilamos",
+            "legal.privacy.s1.body": "Podemos guardar datos de cuenta, historial de compras, mensajes de soporte y preferencias de la app para hacer que tu experiencia sea más rápida y personalizada.",
+            "legal.privacy.s2.title": "Uso de la información",
+            "legal.privacy.s2.body": "Usamos la información para gestionar tu cuenta, dar soporte, procesar pedidos y mejorar recomendaciones dentro de la aplicación.",
+            "legal.privacy.s3.title": "Protección y seguridad",
+            "legal.privacy.s3.body": "Aplicamos medidas técnicas y organizativas para proteger tus datos. No compartimos información personal con terceros salvo que sea necesario para prestar el servicio o que tú lo autorices.",
+            "legal.privacy.s4.title": "Contacto",
+            "legal.privacy.s4.body": "Si quieres revisar, corregir o eliminar información asociada a tu cuenta, puedes escribir a soporte@tech.com o usar la sección de soporte.",
+            "legal.terms.title": "Términos de Servicio",
+            "legal.terms.subtitle": "Estas reglas explican cómo usar la app, comprar productos y solicitar soporte.",
+            "legal.terms.date": "31 de julio de 2026",
+            "legal.terms.s1.title": "Aceptación",
+            "legal.terms.s1.body": "Al usar la app aceptas estos términos y confirmas que la información que registras es veraz y que utilizarás la plataforma de forma responsable.",
+            "legal.terms.s2.title": "Compras y pagos",
+            "legal.terms.s2.body": "Los precios, stock y disponibilidad pueden cambiar según el inventario. Antes de pagar, revisa bien el producto, la configuración elegida y el total final del pedido.",
+            "legal.terms.s3.title": "Soporte y servicio",
+            "legal.terms.s3.body": "La sección de soporte te permite abrir el chatbot técnico o ver recomendaciones de productos. El asesoramiento dentro de la app es orientativo y no reemplaza una evaluación técnica presencial cuando hace falta.",
+            "legal.terms.s4.title": "Cambios",
+            "legal.terms.s4.body": "Podemos actualizar estos términos en cualquier momento para reflejar cambios en el servicio, catálogo o políticas internas. Te recomendamos revisarlos periódicamente."
         ],
         "en": [
             "settings.title": "Settings",
@@ -709,7 +764,57 @@ final class LocalizationManager: ObservableObject {
             "common.copy": "Copy",
             "common.copied": "Copied!",
             "payment.transferPrefix": "Transfer",
-            "payment.transferSuffix": "to this account"
+            "payment.transferSuffix": "to this account",
+
+            "cart.collapse": "Show less",
+            "cart.expand": "View more details",
+            "common.loading": "Loading...",
+            "common.welcomeBack": "Welcome back",
+            "product.searchPlaceholder": "Search products...",
+            "product.youSave": "You save %@%",
+            "payment.methodCard": "Card",
+            "payment.whatsappHeader": "🛒 *ORDER - APPLE STORE*",
+            "profile.userFallback": "User",
+            "profile.guestName": "Guest",
+            "theme.name.light": "Light",
+            "theme.name.dark": "Dark",
+            "theme.name.auto": "Automatic",
+
+            "support.voicePermissionDenied": "Enable microphone and speech recognition permission in Settings to use voice mode.",
+            "support.voiceListening": "I'm listening… speak confidently 🎙️",
+            "support.voiceResponding": "Responding out loud…",
+            "support.voiceIdle": "Tap the microphone and ask your question. The conversation continues just like in the chat.",
+            "support.offTopic": "Hi! 👋 I can help you with products in stock (iPhone, iPad, Mac, Apple Watch, AirPods and accessories), spare parts and Apple technical service. What would you like to ask about?",
+            "support.whatsappMessage": "Hi! 👋 I would like more information about your products.",
+
+            "about.value.passion.desc": "We are passionate about what we do. Every project, every interaction and every decision is made with dedication and enthusiasm. We believe passion is the fuel that drives innovation and excellence in everything we do. That energy shows in the care we put into every repair, every product recommendation and every conversation with our customers.",
+            "about.value.innovation.desc": "We constantly look for new ways to improve and evolve. Innovation is not just a word for us, it is part of our DNA. We challenge ourselves to think differently, adopt new technologies and find creative solutions that make your experience simpler, faster and more reliable.",
+            "about.value.collaboration.desc": "We believe in the power of teamwork. Collaboration lets us combine different perspectives and talents to create something extraordinary. We work side by side, both internally and with our customers, because we know the best solutions emerge when we listen and join efforts. Together we are stronger.",
+            "about.value.integrity.desc": "We always act with honesty, transparency and responsibility. Integrity is the foundation of all our relationships and decisions: clear prices, honest diagnostics and commitments we keep. We do the right thing, even when no one is watching, because your trust is the most valuable thing we build.",
+
+            "legal.updated": "Updated: %@",
+            "legal.privacy.title": "Privacy Policy",
+            "legal.privacy.subtitle": "Here we explain how we handle your data inside the app and when you use our services.",
+            "legal.privacy.date": "July 31, 2026",
+            "legal.privacy.s1.title": "Data we collect",
+            "legal.privacy.s1.body": "We may store account data, purchase history, support messages and app preferences to make your experience faster and more personalized.",
+            "legal.privacy.s2.title": "Use of information",
+            "legal.privacy.s2.body": "We use the information to manage your account, provide support, process orders and improve recommendations within the app.",
+            "legal.privacy.s3.title": "Protection and security",
+            "legal.privacy.s3.body": "We apply technical and organizational measures to protect your data. We do not share personal information with third parties unless necessary to provide the service or you authorize it.",
+            "legal.privacy.s4.title": "Contact",
+            "legal.privacy.s4.body": "If you want to review, correct or delete information associated with your account, you can write to soporte@tech.com or use the support section.",
+            "legal.terms.title": "Terms of Service",
+            "legal.terms.subtitle": "These rules explain how to use the app, buy products and request support.",
+            "legal.terms.date": "July 31, 2026",
+            "legal.terms.s1.title": "Acceptance",
+            "legal.terms.s1.body": "By using the app you accept these terms and confirm that the information you register is truthful and that you will use the platform responsibly.",
+            "legal.terms.s2.title": "Purchases and payments",
+            "legal.terms.s2.body": "Prices, stock and availability may change according to inventory. Before paying, carefully review the product, the chosen configuration and the final order total.",
+            "legal.terms.s3.title": "Support and service",
+            "legal.terms.s3.body": "The support section lets you open the technical chatbot or view product recommendations. In-app advice is guidance only and does not replace an in-person technical evaluation when needed.",
+            "legal.terms.s4.title": "Changes",
+            "legal.terms.s4.body": "We may update these terms at any time to reflect changes in the service, catalog or internal policies. We recommend reviewing them periodically."
         ]
     ]
 

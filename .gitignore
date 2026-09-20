@@ -1,2 +1,14 @@
 proyectofinal1/Secretsview.swift
 proyectofinal1/Secrets.swift
+
+# macOS / Xcode
+.DS_Store
+xcuserdata/
+DerivedData/
+*.xcuserstate
+
+# CocoaPods (se regenera con `pod install`)
+Pods/
+
+# Tooling local
+.qodo/

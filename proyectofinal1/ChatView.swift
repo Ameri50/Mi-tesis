@@ -264,8 +264,8 @@ struct ProductDetailView: View {
                         // pantalla que presenta ProductDetailView recuerde pasar onAddToCart.
                         cartManager.add(
                             product: product,
-                            selectedColor: selectedColor?.name ?? (product.colorOptions.first?.name ?? localizationManager.translate("product.uniqueOption")),
-                            selectedStorage: selectedStorage?.capacity ?? (product.storageOptions.first?.capacity ?? localizationManager.translate("product.uniqueOption")),
+                            selectedColor: selectedColor?.name ?? product.colorOptions.first?.name ?? localizationManager.translate("product.uniqueOption"),
+                            selectedStorage: selectedStorage?.capacity ?? product.storageOptions.first?.capacity ?? localizationManager.translate("product.uniqueOption"),
                             quantity: quantity
                         )
                         // Sigue notificando por si algún caller quiere reaccionar (opcional).
@@ -287,7 +287,9 @@ struct ProductDetailView: View {
                     .padding(.bottom)
                 }
             }
+            .appLiquidGlassSurface(cornerRadius: 0)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
         }
         // MARK: - Sheet del Chat de soporte
         .sheet(isPresented: $showChat) {
@@ -297,5 +299,4 @@ struct ProductDetailView: View {
         }
     }
 }
-
 

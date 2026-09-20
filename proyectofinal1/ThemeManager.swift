@@ -8,10 +8,11 @@ enum ThemeMode: String, CaseIterable {
     case auto = "auto"
     
     var displayName: String {
+        let en = (UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es") == "en"
         switch self {
-        case .light: return "Claro"
-        case .dark: return "Oscuro"
-        case .auto: return "Automático"
+        case .light: return en ? "Light" : "Claro"
+        case .dark: return en ? "Dark" : "Oscuro"
+        case .auto: return en ? "Automatic" : "Automático"
         }
     }
 }
@@ -100,16 +101,17 @@ class ThemeManager: NSObject, ObservableObject {
     private func getDayPeriodText() -> String {
         let calendar = Calendar.current
         let hour = calendar.component(.hour, from: Date())
-        
+        let en = (UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es") == "en"
+
         switch hour {
         case 0..<6:
-            return "Madrugada"
+            return en ? "Early morning" : "Madrugada"
         case 6..<12:
-            return "Mañana"
+            return en ? "Morning" : "Mañana"
         case 12..<18:
-            return "Tarde"
+            return en ? "Afternoon" : "Tarde"
         default:
-            return "Noche"
+            return en ? "Night" : "Noche"
         }
     }
     

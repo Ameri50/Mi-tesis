@@ -169,7 +169,7 @@ struct productDetailView: View {
                                                     )
                                             )
 
-                                        Text(color.name)
+                                        Text(ProductStore.localizedColorName(color.name))
                                             .font(.caption)
                                             .lineLimit(1)
                                     }
@@ -288,6 +288,7 @@ struct productDetailView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
         }
         // MARK: - Sheet del Chat de soporte
         .sheet(isPresented: $showChat) {

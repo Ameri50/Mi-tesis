@@ -9,6 +9,11 @@ struct ProductListView: View {
     let category: String
     @State private var searchText: String = ""
 
+    static var searchPlaceholder: String {
+        (UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es") == "en"
+            ? "Search products..." : "Buscar productos..."
+    }
+
     var filteredProducts: [SeedProduct] {
         if searchText.isEmpty {
             return store.products.filter { $0.category == category }
@@ -47,7 +52,7 @@ struct ProductListView: View {
         }
         .navigationTitle(category)
         .navigationBarTitleDisplayMode(.large)
-        .searchable(text: $searchText, prompt: "Buscar productos...")
+        .searchable(text: $searchText, prompt: ProductListView.searchPlaceholder)
     }
 }
 
@@ -252,7 +257,7 @@ struct SearchBar: UIViewRepresentable {
         searchBar.autocapitalizationType = .none
         searchBar.autocorrectionType = .no
         searchBar.searchBarStyle = .minimal
-        searchBar.placeholder = "Buscar productos..."
+        searchBar.placeholder = ProductListView.searchPlaceholder
         return searchBar
     }
 

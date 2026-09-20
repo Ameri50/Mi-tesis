@@ -63,60 +63,39 @@ private struct AppLiquidGlassSurfaceModifier: ViewModifier {
 
     @ViewBuilder
     func body(content: Content) -> some View {
-        if enabled {
-            if #available(iOS 26.0, *) {
-                content
-                    .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
-                    .shadow(color: .black.opacity(darkMode ? 0.18 : 0.08), radius: 10, x: 0, y: 4)
-            } else {
-                content
-                    .background(glassBackground)
-                    .overlay(glassBorder)
-                    .shadow(color: .black.opacity(darkMode ? 0.18 : 0.08), radius: 10, x: 0, y: 4)
-            }
+        if cornerRadius <= 0 {
+            // Fondo de pantalla completo: superficie base plana, sin cajas.
+            content.background(baseBackground)
         } else {
+            // Tarjeta moderna: relleno elevado continuo + hairline sutil + sombra suave.
             content
-                .background(fallbackBackground)
+                .background(cardFill)
+                .overlay(cardBorder)
+                .shadow(color: .black.opacity(darkMode ? 0.16 : 0.05), radius: 12, x: 0, y: 4)
         }
     }
 
-    private var glassBackground: some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .fill(.ultraThinMaterial)
-            .overlay(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(darkMode ? 0.12 : 0.28),
-                        Color.clear,
-                        Color.blue.opacity(darkMode ? 0.06 : 0.10)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-            )
+    private var baseBackground: some View {
+        LinearGradient(
+            colors: [
+                Color(UIColor { _ in darkMode ? UIColor(white: 0.09, alpha: 1) : UIColor.systemGroupedBackground }),
+                Color(UIColor { _ in darkMode ? UIColor(white: 0.05, alpha: 1) : UIColor.secondarySystemGroupedBackground })
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
     }
 
-    private var glassBorder: some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .stroke(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(darkMode ? 0.24 : 0.45),
-                        Color.white.opacity(0.06),
-                        Color.blue.opacity(darkMode ? 0.12 : 0.16)
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ),
-                lineWidth: 1
-            )
-    }
-
-    private var fallbackBackground: some View {
+    private var cardFill: some View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .fill(Color(UIColor { _ in
-                darkMode ? UIColor(white: 0.15, alpha: 1) : .systemBackground
+                darkMode ? UIColor(white: 0.13, alpha: 1) : UIColor.secondarySystemGroupedBackground
             }))
+    }
+
+    private var cardBorder: some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .stroke(Color.primary.opacity(darkMode ? 0.08 : 0.05), lineWidth: 1)
     }
 }

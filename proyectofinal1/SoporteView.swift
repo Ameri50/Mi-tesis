@@ -13,7 +13,7 @@ struct SupportBotMessage: Identifiable, Codable {
     }
 }
 
-// MARK: - Banner de Errors
+// MARK: - Banner de Errores
 struct ErrorBanner: View {
     @EnvironmentObject var themeManager: ThemeManager
     let message: String
@@ -37,13 +37,13 @@ struct MessageBubble: View {
     @EnvironmentObject var themeManager: ThemeManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
     let message: SupportBotMessage
-    
+
     private var isUser: Bool { message.role == "user" }
-    
+
     var body: some View {
         HStack(alignment: .bottom) {
             if isUser { Spacer(minLength: 24) }
-            
+
             VStack(alignment: .leading, spacing: 6) {
                 Text(message.text)
                     .font(.system(size: fontSize - 2, weight: .regular))
@@ -55,7 +55,7 @@ struct MessageBubble: View {
                 themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .systemGray5
             }))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            
+
             if !isUser { Spacer(minLength: 24) }
         }
         .padding(.horizontal, 4)
@@ -142,11 +142,14 @@ struct SoporteView: View {
     @EnvironmentObject var localizationManager: LocalizationManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @StateObject private var gemini = GeminiManager.shared
+    @StateObject private var speechRecognizer = SpeechRecognizer()
+    @StateObject private var speechSynthesizer = SpeechSynthesizer()
     @State private var messageText = ""
     @State private var showClearAlert = false
+    @State private var isVoiceMode = false
+    @State private var liveReply = ""
     @FocusState private var isInputFocused: Bool
     @State private var supportHistory: [SupportBotMessage] = []
-    @FocusState private var isLoadingUnused: Bool // no-op, mantenido por compatibilidad de layout
     
     private var isLoading: Bool { gemini.isLoading }
     
@@ -185,8 +188,13 @@ struct SoporteView: View {
                                     }
                                 }
                                 
-                                if isLoading {
+                                if isLoading && liveReply.isEmpty {
                                     LoadingBubble()
+                                        .environmentObject(themeManager)
+                                }
+                                
+                                if !liveReply.isEmpty {
+                                    MessageBubble(message: SupportBotMessage(role: "model", text: liveReply))
                                         .environmentObject(themeManager)
                                 }
                             }
@@ -200,15 +208,22 @@ struct SoporteView: View {
                         .onChange(of: isLoading) {
                             scrollToBottom(proxy: proxy)
                         }
+                        .onChange(of: liveReply) {
+                            scrollToBottom(proxy: proxy)
+                        }
                     }
                     
-                    // Área de entrada de texto
+                    // Área de entrada (texto o voz)
                     VStack(spacing: 0) {
                         if !gemini.errorMessage.isEmpty {
                             ErrorBanner(message: gemini.errorMessage)
                                 .environmentObject(themeManager)
                         }
-                        supportInputView
+                        if isVoiceMode {
+                            voiceInputView
+                        } else {
+                            supportInputView
+                        }
                     }
                 }
                 .animation(.easeInOut(duration: 0.25), value: showHeader)
@@ -228,9 +243,13 @@ struct SoporteView: View {
         .onAppear {
             loadSupportHistory()
         }
+        .onDisappear {
+            speechRecognizer.stop()
+            speechSynthesizer.stop()
+        }
     }
     
-    // MARK: - Barra superior propia (reemplaza al .toolbar, que no se renderiza sin NavigationView)
+    // MARK: - Barra superior propia
     private var topBar: some View {
         HStack(spacing: 12) {
             ZStack {
@@ -257,6 +276,17 @@ struct SoporteView: View {
             
             Spacer()
             
+            // Alterna entre modo voz y modo texto (misma conversación)
+            Button(action: toggleVoiceMode) {
+                Image(systemName: isVoiceMode ? "keyboard.fill" : "mic.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(isVoiceMode ? .white : (themeManager.isDarkMode ? .orange : .primary))
+                    .frame(width: 34, height: 34)
+                    .background(
+                        Circle().fill(isVoiceMode ? Color.orange : Color.orange.opacity(0.15))
+                    )
+            }
+            
             Button(action: openWhatsApp) {
                 Image(systemName: "bubble.right.fill")
                     .font(.system(size: 18, weight: .semibold))
@@ -281,7 +311,7 @@ struct SoporteView: View {
         }))
     }
     
-    // MARK: - Bloque de contacto/horario (antes parte de headerSection)
+    // MARK: - Bloque de contacto/horario
     @ViewBuilder
     private var contactInfoSection: some View {
         VStack(spacing: 12) {
@@ -480,44 +510,117 @@ struct SoporteView: View {
         }
     }
     
+    // MARK: - Entrada de voz
+    private var voiceInputView: some View {
+        VStack(spacing: 14) {
+            Group {
+                if speechRecognizer.authorizationDenied {
+                    Text(localizationManager.translate("support.voicePermissionDenied"))
+                } else if speechRecognizer.isListening {
+                    Text(speechRecognizer.transcript.isEmpty
+                         ? localizationManager.translate("support.voiceListening")
+                         : speechRecognizer.transcript)
+                } else if speechSynthesizer.isSpeaking {
+                    Text(localizationManager.translate("support.voiceResponding"))
+                } else {
+                    Text(localizationManager.translate("support.voiceIdle"))
+                }
+            }
+            .font(.system(size: fontSize - 2, weight: .medium))
+            .foregroundColor(.secondary)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 20)
+            .frame(minHeight: 40)
+
+            HStack(spacing: 20) {
+                Button(action: toggleListening) {
+                    ZStack {
+                        Circle()
+                            .fill(speechRecognizer.isListening ? Color.red : Color.orange)
+                            .frame(width: 64, height: 64)
+                            .shadow(color: (speechRecognizer.isListening ? Color.red : Color.orange).opacity(0.4), radius: 12, x: 0, y: 4)
+                        Image(systemName: speechRecognizer.isListening ? "stop.fill" : "mic.fill")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .disabled(isLoading || speechSynthesizer.isSpeaking)
+
+                if speechSynthesizer.isSpeaking {
+                    Button {
+                        if speechSynthesizer.isPaused { speechSynthesizer.resume() } else { speechSynthesizer.pause() }
+                    } label: {
+                        Image(systemName: speechSynthesizer.isPaused ? "play.fill" : "pause.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundColor(.orange)
+                            .frame(width: 44, height: 44)
+                            .background(Circle().fill(Color.orange.opacity(0.15)))
+                    }
+
+                    Button {
+                        speechSynthesizer.stop()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.secondary)
+                            .frame(width: 44, height: 44)
+                            .background(Circle().fill(Color.secondary.opacity(0.12)))
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity)
+        .background(Color(UIColor { _ in
+            themeManager.isDarkMode ? UIColor(white: 0.11, alpha: 1) : .systemBackground
+        }))
+    }
+
     // MARK: - Funciones de ayuda
     private var canSend: Bool {
         !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isLoading
     }
     
-    // Palabras clave que definen el alcance permitido del chat (repuestos/servicio técnico Apple).
-    // Filtro rápido en el cliente: evita gastar una llamada al servidor si el mensaje
-    // claramente no tiene relación con el tema. No reemplaza al system prompt del servidor,
-    // solo añade una barrera adicional y una respuesta instantánea.
     private let allowedKeywords: [String] = [
-        // Productos / marca
         "iphone", "ipad", "mac", "macbook", "airpods", "apple watch", "watch", "apple",
-        // Repuestos / piezas
         "repuesto", "repuestos", "pieza", "piezas", "pantalla", "pantallas", "bateria", "batería",
         "camara", "cámara", "puerto de carga", "conector", "altavoz", "altavoces", "parlante",
         "microfono", "micrófono", "boton", "botón", "tapa", "carcasa", "flex", "placa", "modem",
         "antena", "vidrio", "tactil", "táctil", "cristal",
-        // Servicio
         "reparacion", "reparación", "reparar", "garantia", "garantía", "instalacion", "instalación",
         "diagnostico", "diagnóstico", "servicio tecnico", "servicio técnico", "precio", "precios",
         "costo", "cotizacion", "cotización", "tiempo de entrega", "carrito", "comprar", "cuanto cuesta",
         "cuánto cuesta",
-
-        // Recomendaciones de compra / perfil de uso
         "recomien", "recomendaci", "conviene", "elegir", "mejor opcion", "mejor opción",
         "cual me", "cuál me", "que me", "qué me", "estudiante", "profesor", "universidad",
         "colegio", "trabajo", "oficina", "diseño", "diseñador", "editar video", "edicion",
         "edición", "gamer", "juegos", "videojuegos", "fotografia", "fotografía",
         "presupuesto", "modelo", "diferencia", "comparar", "producto", "productos",
         "catalogo", "catálogo", "quiero comprar", "nuevo", "nueva",
-        // Contacto directo con la tienda
         "telefono", "teléfono", "numero", "número", "llamar", "llamada", "contacto",
         "contactar", "correo", "email", "whatsapp", "hablar con alguien", "asesor",
         "horario", "atencion", "atención",
-
-        // Saludos / conversación mínima permitida
+        "color", "colores", "ficha", "tecnica", "técnica", "procesador", "chip",
+        "air", "duo", "pro max", "plegable", "almacenamiento", "gb",
+        "apple intelligence", "siri", "usb-c", "wifi", "bluetooth",
+        "stock", "disponible", "disponibles", "tienen", "tienes", "hay", "tienda", "inventario",
+        "cuales", "cuáles", "modelos", "opciones", "lista", "decir", "me puedes",
+        "accesorios", "tv", "casa", "watch",
         "hola", "buenas", "buenos dias", "buenos días", "buenas tardes", "buenas noches",
-        "gracias", "ayuda", "necesito ayuda"
+        "gracias", "ayuda", "necesito ayuda",
+        // English keywords
+        "price", "prices", "cost", "how much", "buy", "purchase", "order", "cart", "checkout",
+        "stock", "available", "availability", "have", "do you have", "repair", "repairs",
+        "part", "parts", "spare", "screen", "battery", "charging", "charger", "color", "colors",
+        "spec", "specs", "specification", "specifications", "chip", "processor", "storage",
+        "recommend", "recommendation", "recommendations", "which", "what", "best", "compare",
+        "comparison", "difference", "catalog", "catalogue", "list", "all", "everything",
+        "accessory", "accessories", "warranty", "service", "technician", "technical", "support",
+        "model", "models", "iphone", "ipad", "mac", "macbook", "airpods", "watch", "apple",
+        "student", "work", "office", "gamer", "games", "gaming", "photo", "photography", "video",
+        "budget", "message", "call", "contact", "email", "whatsapp", "hours", "help",
+        "hello", "hi", "hey", "good morning", "good afternoon", "good evening", "thanks", "thank you",
+        "please", "want", "need", "looking for", "foldable", "pro max", "air", "duo"
     ]
 
     private func isOnTopic(_ text: String) -> Bool {
@@ -530,30 +633,88 @@ struct SoporteView: View {
         let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
         messageText = ""
         isInputFocused = false
-        
+        Task { _ = await deliver(text, speak: false) }
+    }
+
+    /// Envía un mensaje al asistente y guarda la respuesta en el historial compartido.
+    /// Lo usan tanto el modo texto como el modo voz para mantener una sola conversación.
+    private func deliver(_ text: String, speak: Bool) async -> String {
         supportHistory.append(SupportBotMessage(role: "user", text: text))
         saveSupportHistory()
-        
-        // Filtro rápido: si claramente no es sobre repuestos/servicio técnico Apple,
-        // respondemos al instante sin llamar a Gemini.
+
         guard isOnTopic(text) else {
-            let offTopicReply = "¡Hola! 👋 Solo puedo ayudarte con temas de repuestos y servicio técnico de productos Apple (pantallas, baterías, cámaras, etc.). ¿Tienes alguna consulta sobre eso?"
+            let offTopicReply = localizationManager.translate("support.offTopic")
             supportHistory.append(SupportBotMessage(role: "model", text: offTopicReply))
             saveSupportHistory()
-            return
+            if speak { speechSynthesizer.speak(offTopicReply) }
+            return offTopicReply
         }
-        
-        Task {
-            await gemini.sendChatMessage(text)
-            
-            let replyText = gemini.errorMessage.isEmpty
-                ? gemini.lastResponse
-                : gemini.errorMessage
-            
-            if !replyText.isEmpty {
-                supportHistory.append(SupportBotMessage(role: "model", text: replyText))
-                saveSupportHistory()
+
+        var spokenChars = 0
+        var spokeFirst = false
+
+        await gemini.sendChatMessageStreaming(text) { partial in
+            liveReply = partial
+            if speak, !spokeFirst, let end = Self.firstSentenceEnd(partial), end >= 12 {
+                spokeFirst = true
+                spokenChars = end
+                speechSynthesizer.speak(String(partial.prefix(end)))
             }
+        }
+
+        liveReply = ""
+        let replyText = gemini.errorMessage.isEmpty
+            ? gemini.lastResponse
+            : gemini.errorMessage
+
+        if !replyText.isEmpty {
+            supportHistory.append(SupportBotMessage(role: "model", text: replyText))
+            saveSupportHistory()
+        }
+
+        if speak, !replyText.isEmpty {
+            if spokeFirst {
+                let remainder = String(replyText.dropFirst(spokenChars))
+                if !remainder.isEmpty { speechSynthesizer.enqueue(remainder) }
+            } else {
+                speechSynthesizer.speak(replyText)
+            }
+        }
+        return replyText
+    }
+
+    /// Índice justo después del primer punto/interrogación/exclamación (fin de la 1ª oración).
+    private static func firstSentenceEnd(_ s: String) -> Int? {
+        let chars = Array(s)
+        for i in 0..<chars.count where chars[i] == "." || chars[i] == "?" || chars[i] == "!" {
+            return i + 1
+        }
+        return nil
+    }
+
+    // MARK: - Modo voz
+    private func toggleVoiceMode() {
+        isVoiceMode.toggle()
+        isInputFocused = false
+        if isVoiceMode {
+            speechSynthesizer.stop()
+        } else {
+            speechRecognizer.stop()
+        }
+    }
+
+    private func toggleListening() {
+        if speechRecognizer.isListening {
+            speechRecognizer.stop()
+            let text = speechRecognizer.transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+            speechRecognizer.transcript = ""
+            guard !text.isEmpty else { return }
+            Task {
+                _ = await deliver(text, speak: true)
+            }
+        } else {
+            speechSynthesizer.stop()
+            speechRecognizer.start()
         }
     }
     
@@ -585,8 +746,6 @@ struct SoporteView: View {
         }
     }
     
-    // MARK: - WhatsApp Method
-    // MARK: - Call & Email Methods
     private func callSupport() {
         guard let url = URL(string: "tel://51951012633") else { return }
         if UIApplication.shared.canOpenURL(url) {
@@ -603,7 +762,7 @@ struct SoporteView: View {
     
     private func openWhatsApp() {
         let phoneNumber = "51951012633"
-        let message = "¡Hola! 👋 Me gustaría obtener más información sobre sus productos."
+        let message = localizationManager.translate("support.whatsappMessage")
         
         guard let encodedMessage = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             return
@@ -621,7 +780,6 @@ struct SoporteView: View {
     }
 }
 
-// MARK: - Preview
 #Preview {
     NavigationView {
         SoporteView()
@@ -629,4 +787,3 @@ struct SoporteView: View {
             .environmentObject(LocalizationManager())
     }
 }
-

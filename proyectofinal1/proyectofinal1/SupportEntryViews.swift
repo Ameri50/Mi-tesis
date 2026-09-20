@@ -55,7 +55,7 @@ struct SupportHubView: View {
                                     icon: "sparkles",
                                     title: localizationManager.translate("support.recommendations"),
                                     subtitle: localizationManager.translate("support.recommendationsSubtitle"),
-                                    gradient: [Color.blue, Color.purple]
+                                    gradient: [Color.cyan, Color.blue]
                                 )
                             }
                             .buttonStyle(PressableCardStyle())
@@ -76,15 +76,15 @@ struct SupportHubView: View {
                 Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color.orange, Color.pink],
+                            colors: [Color.blue, Color.purple],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 52, height: 52)
-                    .shadow(color: Color.orange.opacity(0.35), radius: 10, x: 0, y: 4)
+                    .shadow(color: Color.blue.opacity(0.35), radius: 10, x: 0, y: 4)
 
-                Image(systemName: "questionmark.bubble.fill")
+                Image(systemName: "lifepreserver.fill")
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundColor(.white)
             }
@@ -105,8 +105,8 @@ struct SupportHubView: View {
         .background(
             LinearGradient(
                 colors: [
-                    Color.orange.opacity(themeManager.isDarkMode ? 0.24 : 0.16),
-                    Color.pink.opacity(themeManager.isDarkMode ? 0.10 : 0.06),
+                    Color.blue.opacity(themeManager.isDarkMode ? 0.24 : 0.16),
+                    Color.purple.opacity(themeManager.isDarkMode ? 0.10 : 0.06),
                     Color.clear
                 ],
                 startPoint: .topLeading,

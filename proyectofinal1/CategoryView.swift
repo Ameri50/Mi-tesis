@@ -230,6 +230,10 @@ struct CategoryView: View {
             return localizationManager.translate("category.mac")
         case "Apple Watch":
             return localizationManager.translate("category.applewatch")
+        case "AirPods":
+            return localizationManager.translate("category.airpods")
+        case "TV y Casa":
+            return localizationManager.translate("category.tvhome")
         case "Accesorios":
             return localizationManager.translate("category.accessories")
         default:
@@ -302,6 +306,10 @@ struct CategoryCardView: View {
             return localizationManager.translate("category.mac")
         case "Apple Watch":
             return localizationManager.translate("category.applewatch")
+        case "AirPods":
+            return localizationManager.translate("category.airpods")
+        case "TV y Casa":
+            return localizationManager.translate("category.tvhome")
         case "Accesorios":
             return localizationManager.translate("category.accessories")
         default:

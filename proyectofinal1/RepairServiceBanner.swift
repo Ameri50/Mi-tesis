@@ -11,15 +11,15 @@ struct RepairServiceBanner: View {
             .environmentObject(themeManager)
         ) {
             HStack(spacing: 16) {
-                // Ícono en cuadrado redondeado, negro sólido / blanco sólido según modo
+                // Ícono flotante en círculo de vidrio
                 ZStack {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(themeManager.isDarkMode ? Color.white : Color.black)
+                    Circle()
+                        .fill(.ultraThinMaterial)
                         .frame(width: 52, height: 52)
 
                     Image(systemName: "wrench.and.screwdriver.fill")
                         .font(.system(size: 21, weight: .semibold))
-                        .foregroundColor(themeManager.isDarkMode ? .black : .white)
+                        .foregroundStyle(themeManager.isDarkMode ? .white : .black)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -45,34 +45,16 @@ struct RepairServiceBanner: View {
 
                 Spacer()
 
-                // Flecha en cápsula
-                ZStack {
-                    Circle()
-                        .fill(Color(UIColor { _ in
-                            themeManager.isDarkMode ? UIColor(white: 0.22, alpha: 1) : UIColor(white: 0.94, alpha: 1)
-                        }))
-                        .frame(width: 30, height: 30)
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(themeManager.isDarkMode ? .white.opacity(0.85) : .black.opacity(0.65))
-                }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.gray.opacity(0.5))
             }
             .padding(16)
-            .background(
-                Color(UIColor { _ in
-                    themeManager.isDarkMode ? UIColor(white: 0.13, alpha: 1) : .white
-                })
+            .appLiquidGlassSurface(
+                enabled: themeManager.isLiquidGlassEnabled,
+                darkMode: themeManager.isDarkMode,
+                cornerRadius: 28
             )
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(
-                        themeManager.isDarkMode ? Color.white.opacity(0.15) : Color.black.opacity(0.1),
-                        lineWidth: 1.2
-                    )
-            )
-            .shadow(color: Color.black.opacity(themeManager.isDarkMode ? 0.3 : 0.06), radius: 10, x: 0, y: 4)
         }
         .buttonStyle(.plain)
     }

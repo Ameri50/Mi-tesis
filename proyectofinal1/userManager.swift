@@ -441,6 +441,9 @@ struct AppUser: Identifiable, Codable {
         self.createdAt = Date()
     }
 
-    var displayName: String { isGuest ? "Invitado" : name }
+    var displayName: String {
+        guard isGuest else { return name }
+        return (UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es") == "en" ? "Guest" : "Invitado"
+    }
     var isValidEmail: Bool  { email.contains("@") && email.contains(".") }
 }

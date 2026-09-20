@@ -32,19 +32,33 @@ func isDarkModeByHour() -> Bool {
     return hour >= 20 || hour < 7
 }
 
-// MARK: - AppDelegate
+// MARK: - AppDelegate con Firebase Configuración
 class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
 
-        // ✅ Fix App Check para Simulador
+        // ✅ CONFIGURACIÓN DE APP CHECK (VERSIÓN CORRECTA)
         #if DEBUG
-        let providerFactory = AppCheckDebugProviderFactory()
-        AppCheck.setAppCheckProviderFactory(providerFactory)
+        // En DESARROLLO: usar Debug Provider Factory
+        let debugProvider = AppCheckDebugProviderFactory()
+        AppCheck.setAppCheckProviderFactory(debugProvider)
+        print("✅ App Check: Modo DEBUG activado")
+        #else
+        // En PRODUCCIÓN: usar Device Check Provider Factory
+        let deviceProvider = DeviceCheckProviderFactory()
+        AppCheck.setAppCheckProviderFactory(deviceProvider)
+        print("✅ App Check: Modo PRODUCCIÓN activado")
         #endif
 
+        // Inicializar Firebase
         FirebaseApp.configure()
+        
+        // Actualizar notificaciones
         AppUpdateNotificationManager.shared.configure()
+        
+        print("✅ Firebase configurado correctamente")
         return true
     }
 }
@@ -66,6 +80,7 @@ struct proyectofinal1App: App {
         WindowGroup {
             ZStack {
                 if !isInitialized {
+                    // SPLASH SCREEN
                     ZStack {
                         Color(.systemBackground)
                             .ignoresSafeArea()
@@ -80,6 +95,7 @@ struct proyectofinal1App: App {
                     .preferredColorScheme(isDarkModeByHour() ? .dark : .light)
                     .onAppear {
                         themeManager.isDarkMode = isDarkModeByHour()
+                        // Esperar 1.5 segundos para mostrar splash
                         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                             withAnimation(.easeInOut(duration: 0.4)) {
                                 isInitialized = true
@@ -87,6 +103,7 @@ struct proyectofinal1App: App {
                         }
                     }
                 } else {
+                    // CONTENIDO PRINCIPAL
                     ContentView()
                         .environmentObject(cartManager)
                         .environmentObject(themeManager)

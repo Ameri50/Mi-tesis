@@ -6,6 +6,10 @@
 	<array>
 		<dict/>
 	</array>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>SUPPORT necesita el reconocimiento de voz para que puedas hablar con el asistente en modo voz.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>SUPPORT necesita el micrófono para escuchar tus preguntas en el modo voz del asistente.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>NSAppTransportSecurity</key>

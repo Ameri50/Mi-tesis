@@ -1,10 +1,16 @@
 import SwiftUI
 
+// MARK: - Identificador estable para cada valor (no depende del idioma)
+struct ValorSeleccionado: Identifiable, Equatable {
+    let id: String       // clave fija: "pasion", "innovacion", "colaboracion", "integridad"
+    let titulo: String   // título ya traducido, solo para mostrar en el header
+}
+
 struct SobreNosotrosView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
-    @State private var selectedValor: String? = nil
+    @State private var selectedValor: ValorSeleccionado? = nil
     
     var body: some View {
         ZStack {
@@ -60,6 +66,7 @@ struct SobreNosotrosView: View {
             
             if let valor = selectedValor {
                 DetalleValorView(valor: valor, isDarkMode: themeManager.isDarkMode, fontSize: fontSize, onDismiss: { selectedValor = nil })
+                    .environmentObject(localizationManager)
             }
         }
     }
@@ -145,6 +152,8 @@ struct SobreNosotrosView: View {
         .padding(.horizontal, 16)
     }
     
+    // ✅ CORREGIDO: cada botón ahora pasa un identificador fijo ("pasion", "innovacion", ...)
+    // que no depende del idioma activo, además del título ya traducido para mostrarlo.
     private var valoresModernoSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(localizationManager.translate("about.values"))
@@ -153,19 +162,27 @@ struct SobreNosotrosView: View {
                 .padding(.horizontal, 16)
             
             VStack(spacing: 12) {
-                Button(action: { selectedValor = localizationManager.translate("about.passion") }) {
+                Button(action: {
+                    selectedValor = ValorSeleccionado(id: "pasion", titulo: localizationManager.translate("about.passion"))
+                }) {
                     ValorModerno(icon: "heart.fill", titulo: localizationManager.translate("about.passion"), color: .red, isDarkMode: themeManager.isDarkMode)
                 }
                 
-                Button(action: { selectedValor = localizationManager.translate("about.innovation") }) {
+                Button(action: {
+                    selectedValor = ValorSeleccionado(id: "innovacion", titulo: localizationManager.translate("about.innovation"))
+                }) {
                     ValorModerno(icon: "sparkles", titulo: localizationManager.translate("about.innovation"), color: .orange, isDarkMode: themeManager.isDarkMode)
                 }
                 
-                Button(action: { selectedValor = localizationManager.translate("about.collaboration") }) {
+                Button(action: {
+                    selectedValor = ValorSeleccionado(id: "colaboracion", titulo: localizationManager.translate("about.collaboration"))
+                }) {
                     ValorModerno(icon: "person.2.fill", titulo: localizationManager.translate("about.collaboration"), color: .blue, isDarkMode: themeManager.isDarkMode)
                 }
                 
-                Button(action: { selectedValor = localizationManager.translate("about.integrity") }) {
+                Button(action: {
+                    selectedValor = ValorSeleccionado(id: "integridad", titulo: localizationManager.translate("about.integrity"))
+                }) {
                     ValorModerno(icon: "checkmark.circle.fill", titulo: localizationManager.translate("about.integrity"), color: .green, isDarkMode: themeManager.isDarkMode)
                 }
             }
@@ -224,7 +241,7 @@ struct SobreNosotrosView: View {
     
     private func openWhatsApp() {
         let phoneNumber = "51951012633"
-        let message = "¡Hola! 👋 Me gustaría obtener más información sobre sus productos."
+        let message = localizationManager.translate("support.whatsappMessage")
         
         guard let encodedMessage = message.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
         
@@ -367,22 +384,44 @@ struct TimelineItem: View {
     }
 }
 
+// ✅ CORREGIDO: ahora recibe un ValorSeleccionado (id estable + título traducido)
+// en vez de solo el texto traducido, así el contenido siempre aparece sin
+// importar el idioma activo. También se arregló el ícono roto de "Integridad"
+// (tenía una ruta de archivo pegada por error dentro del string del SF Symbol)
+// y se amplió el contenido de cada valor.
 struct DetalleValorView: View {
-    let valor: String
+    @EnvironmentObject var localizationManager: LocalizationManager
+    let valor: ValorSeleccionado
     let isDarkMode: Bool
     let fontSize: Double
     let onDismiss: () -> Void
     
     private var detalles: (icon: String, color: Color, descripcion: String) {
-        switch valor {
-        case "Pasión":
-            return ("heart.fill", .red, "Nos apasiona lo que hacemos. Cada proyecto, cada interacción y cada decisión es tomada con dedicación y entusiasmo. Creemos que la pasión es el combustible que impulsa la innovación y la excelencia en todo lo que hacemos.")
-        case "Innovación":
-            return ("sparkles", .orange, "Buscamos constantemente nuevas formas de mejorar y evolucionar. La innovación no es solo una palabra para nosotros, es parte de nuestra ADN. Nos desafiamos a nosotros mismos a pensar diferente y a encontrar soluciones creativas.")
-        case "Colaboración":
-            return ("person.2.fill", .blue, "Creemos en el poder del trabajo en equipo. La colaboración nos permite combinar diferentes perspectivas y talentos para crear algo extraordinario. Juntos somos más fuertes.")
-        case "Integridad":
-            return ("checkm/Users/moisesrojas/Downloads/localizacion-fix/SobreNosotrosView.swiftark.circle.fill", .green, "Actuamos siempre con honestidad, transparencia y responsabilidad. La integridad es la base de todas nuestras relaciones y decisiones. Hacemos lo correcto, incluso cuando nadie está mirando.")
+        switch valor.id {
+        case "pasion":
+            return (
+                "heart.fill",
+                .red,
+                localizationManager.translate("about.value.passion.desc")
+            )
+        case "innovacion":
+            return (
+                "sparkles",
+                .orange,
+                localizationManager.translate("about.value.innovation.desc")
+            )
+        case "colaboracion":
+            return (
+                "person.2.fill",
+                .blue,
+                localizationManager.translate("about.value.collaboration.desc")
+            )
+        case "integridad":
+            return (
+                "checkmark.circle.fill",
+                .green,
+                localizationManager.translate("about.value.integrity.desc")
+            )
         default:
             return ("info.circle.fill", .gray, "")
         }
@@ -396,7 +435,7 @@ struct DetalleValorView: View {
             
             VStack(spacing: 20) {
                 HStack {
-                    Text(valor)
+                    Text(valor.titulo)
                         .font(.system(size: fontSize + 4, weight: .bold))
                         .foregroundColor(isDarkMode ? .white : .primary)
                     
@@ -448,4 +487,3 @@ struct DetalleValorView: View {
             .environmentObject(LocalizationManager())
     }
 }
-

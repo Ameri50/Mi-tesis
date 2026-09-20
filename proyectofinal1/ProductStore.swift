@@ -37,6 +37,11 @@ class ProductStore: ObservableObject {
 
     private init() {
         startListening()
+        NotificationCenter.default.addObserver(
+            forName: .appLanguageChanged, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.startListening() }
+        }
     }
 
     func startListening() {
@@ -406,6 +411,40 @@ class ProductStore: ObservableObject {
         return text
     }
 
+    nonisolated private static var isEnglish: Bool {
+        (UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es") == "en"
+    }
+
+    /// Traduce un nombre de color almacenado (español) al idioma activo.
+    nonisolated static func localizedColorName(_ name: String) -> String {
+        guard isEnglish else { return name }
+        let map: [String: String] = [
+            "Negro": "Black",
+            "Gris Espacial": "Space Gray",
+            "Blanco": "White",
+            "Plata": "Silver",
+            "Luz Estelar": "Starlight",
+            "Medianoche": "Midnight",
+            "Titanio Desierto": "Desert Titanium",
+            "Titanio Natural": "Natural Titanium",
+            "Titanio": "Titanium",
+            "Oro Rosa": "Rose Gold",
+            "Oro": "Gold",
+            "Azul Cielo": "Sky Blue",
+            "Azul": "Blue",
+            "Verde": "Green",
+            "Morado": "Purple",
+            "Amarillo": "Yellow",
+            "Naranja": "Orange",
+            "Rosa": "Pink",
+            "Rojo": "Red",
+            "Teal": "Teal",
+            "Rosa Claro": "Light Pink",
+            "Morado Oscuro": "Dark Purple"
+        ]
+        return map[name] ?? name
+    }
+
     nonisolated private static func generatedDescription(
         name: String,
         category: String,
@@ -413,15 +452,20 @@ class ProductStore: ObservableObject {
         colorOptions: [ColorOption],
         storageOptions: [StorageOption]
     ) -> String {
+        let en = isEnglish
         var details: [String] = []
-        details.append("Producto Apple de la categoria \(category), mostrado con la imagen principal de \(imageDescription(from: imageSource, fallback: name)).")
+        details.append(en
+            ? "Apple product in the \(category) category, shown with the main image from \(imageDescription(from: imageSource, fallback: name))."
+            : "Producto Apple de la categoria \(category), mostrado con la imagen principal de \(imageDescription(from: imageSource, fallback: name)).")
 
         if !colorOptions.isEmpty {
-            details.append("Colores disponibles: \(colorOptions.map(\.name).joined(separator: ", ")).")
+            let colors = colorOptions.map { localizedColorName($0.name) }.joined(separator: ", ")
+            details.append(en ? "Available colors: \(colors)." : "Colores disponibles: \(colors).")
         }
 
         if !storageOptions.isEmpty {
-            details.append("Capacidades disponibles: \(storageOptions.map(\.capacity).joined(separator: ", ")).")
+            let capacities = storageOptions.map(\.capacity).joined(separator: ", ")
+            details.append(en ? "Available capacities: \(capacities)." : "Capacidades disponibles: \(capacities).")
         }
 
         details.append(categoryDescription(for: category))
@@ -433,7 +477,7 @@ class ProductStore: ObservableObject {
         guard !trimmed.isEmpty else { return fallback }
 
         if trimmed.hasPrefix("http") {
-            return "la foto subida desde la web"
+            return isEnglish ? "the photo uploaded from the web" : "la foto subida desde la web"
         }
 
         return trimmed
@@ -442,26 +486,27 @@ class ProductStore: ObservableObject {
     }
 
     nonisolated private static func categoryDescription(for category: String) -> String {
+        let en = isEnglish
         let normalized = category.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if normalized.contains("iphone") {
-            return "Ideal para uso diario, fotografia, video y rendimiento movil."
+            return en ? "Ideal for daily use, photography, video and mobile performance." : "Ideal para uso diario, fotografia, video y rendimiento movil."
         }
         if normalized.contains("ipad") {
-            return "Pensado para estudio, entretenimiento, dibujo y productividad portatil."
+            return en ? "Designed for study, entertainment, drawing and portable productivity." : "Pensado para estudio, entretenimiento, dibujo y productividad portatil."
         }
         if normalized.contains("mac") {
-            return "Recomendado para trabajo, estudio, edicion y tareas de alto rendimiento."
+            return en ? "Recommended for work, study, editing and high-performance tasks." : "Recomendado para trabajo, estudio, edicion y tareas de alto rendimiento."
         }
         if normalized.contains("watch") {
-            return "Orientado a salud, deporte, notificaciones y seguimiento diario."
+            return en ? "Focused on health, sports, notifications and daily tracking." : "Orientado a salud, deporte, notificaciones y seguimiento diario."
         }
         if normalized.contains("airpods") || normalized.contains("audio") {
-            return "Diseniado para audio inalambrico, llamadas y movilidad."
+            return en ? "Designed for wireless audio, calls and mobility." : "Diseniado para audio inalambrico, llamadas y movilidad."
         }
         if normalized.contains("accesorio") || normalized.contains("accessor") {
-            return "Complementa tu dispositivo Apple y mejora la experiencia de uso."
+            return en ? "Complements your Apple device and improves the experience." : "Complementa tu dispositivo Apple y mejora la experiencia de uso."
         }
-        return "Una opcion practica para completar tu ecosistema Apple."
+        return en ? "A practical option to complete your Apple ecosystem." : "Una opcion practica para completar tu ecosistema Apple."
     }
 
     nonisolated private static func inferColorOptions(from sources: [String]) -> [ColorOption] {

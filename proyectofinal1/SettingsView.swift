@@ -34,7 +34,6 @@ struct SettingsView: View {
                     VStack(spacing: 20) {
                         profileSection
                         themeSection
-                        liquidGlassSection
                         languageSection
                         fontSizeSection
                         notificationsSection
@@ -163,39 +162,6 @@ struct SettingsView: View {
                 .environmentObject(themeManager)
                 .environmentObject(localizationManager)
                 .presentationDetents([.medium, .large])
-        }
-    }
-
-    // MARK: - Liquid Glass
-    private var liquidGlassSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            sectionTitle(localizationManager.translate("settings.liquidGlass"))
-
-            Toggle(isOn: liquidGlassBinding) {
-                HStack(spacing: 12) {
-                    Image(systemName: "drop.fill")
-                        .foregroundColor(.cyan)
-                        .frame(width: 24)
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(localizationManager.translate("settings.liquidGlassMode"))
-                            .font(.system(size: appFontSize))
-                            .foregroundColor(themeManager.isDarkMode ? .white : .black)
-
-                        Text(localizationManager.translate("settings.liquidGlassDescription"))
-                            .font(.system(size: appFontSize - 3))
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-            }
-            .tint(.cyan)
-            .padding()
-            .appLiquidGlassSurface(
-                enabled: themeManager.isLiquidGlassEnabled,
-                darkMode: themeManager.isDarkMode,
-                cornerRadius: 16
-            )
         }
     }
 
@@ -506,13 +472,6 @@ struct SettingsView: View {
             enabled: themeManager.isLiquidGlassEnabled,
             darkMode: themeManager.isDarkMode,
             cornerRadius: 16
-        )
-    }
-
-    private var liquidGlassBinding: Binding<Bool> {
-        Binding(
-            get: { themeManager.isLiquidGlassEnabled },
-            set: { themeManager.setLiquidGlassEnabled($0) }
         )
     }
 

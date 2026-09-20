@@ -53,8 +53,9 @@ struct PriceTag: View {
                 ? ((originalPrice - currentPrice) / originalPrice) * 100
                 : 0
             let percent = Int(savingsPercent.rounded().clamped(to: 0...100))
+            let en = (UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es") == "en"
 
-            Text("Ahorras \(percent)%")
+            Text(en ? "You save \(percent)%" : "Ahorras \(percent)%")
                 .font(.system(size: fontSize - 6, weight: .bold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 8)

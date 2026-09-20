@@ -296,6 +296,7 @@ struct CartItemRow: View {
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var cartManager: CartManager
+    @EnvironmentObject var localizationManager: LocalizationManager
 
     @Binding var item: CartItemModel
     fileprivate let sizes: CartFontSizes
@@ -324,7 +325,7 @@ struct CartItemRow: View {
                     .lineLimit(2)
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Color: \(item.selectedColor)")
+                    Text("\(localizationManager.translate("product.color")): \(ProductStore.localizedColorName(item.selectedColor))")
                         .font(.system(size: sizes.caption, weight: .regular))
                         .foregroundColor(.secondary)
                     Text("\(item.selectedStorage)")

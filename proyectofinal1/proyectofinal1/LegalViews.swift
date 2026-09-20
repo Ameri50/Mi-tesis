@@ -64,7 +64,7 @@ struct LegalDocumentView: View {
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text("Actualizado: \(lastUpdated)")
+            Text(String(format: localizationManager.translate("legal.updated"), lastUpdated))
                 .font(.system(size: fontSize - 3, weight: .medium))
                 .foregroundColor(.secondary)
         }
@@ -85,56 +85,38 @@ struct LegalDocumentView: View {
 }
 
 struct PrivacyPolicyView: View {
+    @EnvironmentObject var localizationManager: LocalizationManager
+
     var body: some View {
-        LegalDocumentView(
-            title: "Politica de Privacidad",
-            subtitle: "Aqui explicamos como tratamos tus datos dentro de la app y cuando usas nuestros servicios.",
-            lastUpdated: "31 de julio de 2026",
+        let t = localizationManager.translate
+        return LegalDocumentView(
+            title: t("legal.privacy.title"),
+            subtitle: t("legal.privacy.subtitle"),
+            lastUpdated: t("legal.privacy.date"),
             sections: [
-                LegalSection(
-                    title: "Datos que recopilamos",
-                    body: "Podemos guardar datos de cuenta, historial de compras, mensajes de soporte y preferencias de la app para hacer que tu experiencia sea mas rapida y personalizada."
-                ),
-                LegalSection(
-                    title: "Uso de la informacion",
-                    body: "Usamos la informacion para gestionar tu cuenta, dar soporte, procesar pedidos y mejorar recomendaciones dentro de la aplicacion."
-                ),
-                LegalSection(
-                    title: "Proteccion y seguridad",
-                    body: "Aplicamos medidas tecnicas y organizativas para proteger tus datos. No compartimos informacion personal con terceros salvo que sea necesario para prestar el servicio o que tu lo autorices."
-                ),
-                LegalSection(
-                    title: "Contacto",
-                    body: "Si quieres revisar, corregir o eliminar informacion asociada a tu cuenta, puedes escribir a soporte@tech.com o usar la seccion de soporte."
-                )
+                LegalSection(title: t("legal.privacy.s1.title"), body: t("legal.privacy.s1.body")),
+                LegalSection(title: t("legal.privacy.s2.title"), body: t("legal.privacy.s2.body")),
+                LegalSection(title: t("legal.privacy.s3.title"), body: t("legal.privacy.s3.body")),
+                LegalSection(title: t("legal.privacy.s4.title"), body: t("legal.privacy.s4.body"))
             ]
         )
     }
 }
 
 struct TermsOfServiceView: View {
+    @EnvironmentObject var localizationManager: LocalizationManager
+
     var body: some View {
-        LegalDocumentView(
-            title: "Terminos de Servicio",
-            subtitle: "Estas reglas explican como usar la app, comprar productos y solicitar soporte.",
-            lastUpdated: "31 de julio de 2026",
+        let t = localizationManager.translate
+        return LegalDocumentView(
+            title: t("legal.terms.title"),
+            subtitle: t("legal.terms.subtitle"),
+            lastUpdated: t("legal.terms.date"),
             sections: [
-                LegalSection(
-                    title: "Aceptacion",
-                    body: "Al usar la app aceptas estos terminos y confirmas que la informacion que registras es veraz y que utilizaras la plataforma de forma responsable."
-                ),
-                LegalSection(
-                    title: "Compras y pagos",
-                    body: "Los precios, stock y disponibilidad pueden cambiar segun el inventario. Antes de pagar, revisa bien el producto, la configuracion elegida y el total final del pedido."
-                ),
-                LegalSection(
-                    title: "Soporte y servicio",
-                    body: "La seccion de soporte te permite abrir el chatbot tecnico o ver recomendaciones de productos. El asesoramiento dentro de la app es orientativo y no reemplaza una evaluacion tecnica presencial cuando hace falta."
-                ),
-                LegalSection(
-                    title: "Cambios",
-                    body: "Podemos actualizar estos terminos en cualquier momento para reflejar cambios en el servicio, catalogo o politicas internas. Te recomendamos revisarlos periodicamente."
-                )
+                LegalSection(title: t("legal.terms.s1.title"), body: t("legal.terms.s1.body")),
+                LegalSection(title: t("legal.terms.s2.title"), body: t("legal.terms.s2.body")),
+                LegalSection(title: t("legal.terms.s3.title"), body: t("legal.terms.s3.body")),
+                LegalSection(title: t("legal.terms.s4.title"), body: t("legal.terms.s4.body"))
             ]
         )
     }
