@@ -1,7 +1,6 @@
 import Foundation
 import UIKit
 import FirebaseStorage
-import FirebaseFirestore
 
 @MainActor
 class FirebaseImageUploader: ObservableObject {
@@ -12,7 +11,6 @@ class FirebaseImageUploader: ObservableObject {
     @Published var isUploading: Bool = false
     
     private let storage = Storage.storage()
-    private let db = Firestore.firestore()
     
     // Lista de imágenes a subir
     private let imageNames = [
@@ -45,14 +43,11 @@ class FirebaseImageUploader: ObservableObject {
         
         let group = DispatchGroup()
         var successCount = 0
-        var imageURLs: [String: String] = [:] // imageName -> URL
-        
         for (index, imageName) in imageNames.enumerated() {
             group.enter()
             
             uploadImageToStorage(imageName: imageName) { url in
-                if let url = url {
-                    imageURLs[imageName] = url
+                if url != nil {
                     successCount += 1
                     print("✅ Imagen \(index + 1)/\(self.imageNames.count) subida: \(imageName)")
                 } else {
@@ -75,10 +70,8 @@ class FirebaseImageUploader: ObservableObject {
             
             print("🎉 Carga completada: \(successCount)/\(self.imageNames.count) imágenes")
             
-            // Actualizar URLs en Firestore
-            self.updateProductURLsInFirestore(imageURLs: imageURLs) { success in
-                completion(success)
-            }
+            // Las imágenes se mantienen en Storage; Firestore no recibe sus URLs.
+            completion(successCount == self.imageNames.count)
         }
     }
     
@@ -122,57 +115,6 @@ class FirebaseImageUploader: ObservableObject {
                 }
                 
                 completion(url?.absoluteString)
-            }
-        }
-    }
-    
-    // MARK: - Update Product URLs in Firestore
-    private func updateProductURLsInFirestore(imageURLs: [String: String], completion: @escaping (Bool) -> Void) {
-        print("🟡 Actualizando URLs de productos en Firestore...")
-        
-        let productsRef = db.collection("products")
-        
-        productsRef.getDocuments { snapshot, error in
-            if let error = error {
-                print("❌ Error obteniendo productos: \(error.localizedDescription)")
-                completion(false)
-                return
-            }
-            
-            guard let documents = snapshot?.documents else {
-                print("⚠️ No hay productos en Firestore")
-                completion(false)
-                return
-            }
-            
-            let group = DispatchGroup()
-            var updateCount = 0
-            
-            for document in documents {
-                let data = document.data()
-                guard let imageName = data["imageName"] as? String else { continue }
-                
-                // Buscar URL correspondiente
-                if let imageURL = imageURLs[imageName] {
-                    group.enter()
-                    
-                    productsRef.document(document.documentID).updateData([
-                        "imageURL": imageURL
-                    ]) { error in
-                        if let error = error {
-                            print("❌ Error actualizando producto \(document.documentID): \(error.localizedDescription)")
-                        } else {
-                            updateCount += 1
-                            print("✅ Producto actualizado con URL: \(imageName)")
-                        }
-                        group.leave()
-                    }
-                }
-            }
-            
-            group.notify(queue: .main) {
-                print("🎉 \(updateCount) productos actualizados con URLs de Firebase")
-                completion(true)
             }
         }
     }

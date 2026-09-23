@@ -79,6 +79,11 @@ class ProductStore: ObservableObject {
                         (Self.productKey(name: $0.name, category: $0.category), $0)
                     }
                 )
+                let localByName = Dictionary(
+                    uniqueKeysWithValues: localProducts.map {
+                        ($0.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(), $0)
+                    }
+                )
 
                 let drafts = documentPayloads.compactMap { documentID, data in
                     Self.parseDraft(from: data, documentID: documentID)
@@ -86,11 +91,29 @@ class ProductStore: ObservableObject {
 
                 let firestoreProducts = drafts.map { draft in
                     let key = Self.productKey(name: draft.name, category: draft.category ?? "Otros")
-                    return Self.materializeProduct(from: draft, fallback: localByKey[key])
+                    let nameKey = draft.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                    let familyFallback = localProducts
+                        .filter { localProduct in
+                            let localName = localProduct.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                            return nameKey.hasPrefix(localName) || localName.hasPrefix(nameKey)
+                        }
+                        .max { $0.name.count < $1.name.count }
+                    return Self.materializeProduct(
+                        from: draft,
+                        fallback: localByKey[key] ?? localByName[nameKey] ?? familyFallback
+                    )
                 }
 
                 DispatchQueue.main.async {
-                    let uniqueProducts = Self.deduplicatedProducts(firestoreProducts)
+                    let firestoreKeys = Set(firestoreProducts.map {
+                        Self.productKey(name: $0.name, category: $0.category)
+                    })
+                    let missingLocalProducts = localProducts.filter {
+                        !firestoreKeys.contains(Self.productKey(name: $0.name, category: $0.category))
+                    }
+                    let uniqueProducts = Self.deduplicatedProducts(
+                        firestoreProducts + missingLocalProducts
+                    )
                     self.products = uniqueProducts
                     self.updateAccessories()
                     self.isLoading = false
@@ -139,13 +162,10 @@ class ProductStore: ObservableObject {
 
     nonisolated private static func materializeProduct(from draft: ProductDraft, fallback: Product?) -> Product {
         let base = fallback
-
-        let imageSource = draft.imageSource
-            ?? base?.finalImageURL
+        let category = normalizedCategory(draft.category ?? base?.category ?? "Otros")
+        let imageSource = base?.finalImageURL
             ?? base?.imageName
-            ?? ""
-
-        let category = draft.category ?? base?.category ?? "Otros"
+            ?? fallbackImageSource(name: draft.name, category: category)
 
         let stock = draft.stock
             ?? base?.stock
@@ -172,9 +192,7 @@ class ProductStore: ObservableObject {
                 storageOptions: mergedStorageOptions
             )
 
-        let mergedAdditionalImages = draft.additionalImages
-            ?? base?.additionalImages
-            ?? []
+        let mergedAdditionalImages = base?.additionalImages ?? []
 
         let rating = draft.rating
             ?? base?.rating
@@ -242,6 +260,57 @@ class ProductStore: ObservableObject {
             }
         }
         return nil
+    }
+
+    nonisolated private static func normalizedCategory(_ rawCategory: String) -> String {
+        let category = rawCategory.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalized = category.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+
+        if normalized.contains("iphone") { return "iPhone" }
+        if normalized.contains("ipad") { return "iPad" }
+        if normalized.contains("watch") { return "Apple Watch" }
+        if normalized.contains("airpod") { return "AirPods" }
+        if normalized.contains("mac") || normalized.contains("imac") { return "Mac" }
+        if normalized.contains("tv") || normalized.contains("homepod") || normalized.contains("casa") {
+            return "TV y Casa"
+        }
+        if normalized.contains("accesor") || normalized.contains("accessor") {
+            return "Accesorios"
+        }
+        return category.isEmpty ? "Otros" : category
+    }
+
+    nonisolated private static func fallbackImageSource(name: String, category: String) -> String {
+        let normalizedName = name.folding(
+            options: [.diacriticInsensitive, .caseInsensitive],
+            locale: .current
+        )
+
+        switch category {
+        case "iPhone": return "iphone1"
+        case "iPad": return "ipad"
+        case "Mac":
+            return normalizedName.contains("mini") || normalizedName.contains("studio")
+                ? "desktopcomputer" : "macbook"
+        case "Apple Watch": return "applewatch"
+        case "AirPods":
+            return normalizedName.contains("pro") ? "airpodspro" : "airpods"
+        case "TV y Casa":
+            return normalizedName.contains("homepod") ? "hifispeaker" : "sf:tv.fill"
+        case "Accesorios":
+            if normalizedName.contains("pencil") { return "applepencil" }
+            if normalizedName.contains("keyboard") { return "keyboard" }
+            if normalizedName.contains("mouse") { return "mouse" }
+            if normalizedName.contains("trackpad") { return "trackpad" }
+            if normalizedName.contains("airtag") { return "airtag" }
+            if normalizedName.contains("cable") { return "cable" }
+            if normalizedName.contains("adaptador") || normalizedName.contains("charger") {
+                return "adapter"
+            }
+            return "Applicon"
+        default:
+            return "Applicon"
+        }
     }
 
     nonisolated private static func firstDouble(in data: [String: Any], keys: [String]) -> Double? {

@@ -26,6 +26,20 @@ struct productDetailView: View {
         store.products.accessories(for: product)
     }
 
+    private var galleryImages: [String] {
+        let sources = ([product.finalImageURL] + product.additionalImages)
+            .filter { !$0.isEmpty }
+
+        guard !sources.isEmpty else {
+            return Array(repeating: "", count: 5)
+        }
+
+        return (0..<5).map { sources[$0 % sources.count] }
+    }
+
+    private let galleryRotations: [Double] = [0, -2, 2, -1, 1]
+    private let galleryScales: [CGFloat] = [1, 0.94, 0.97, 0.92, 0.96]
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -63,15 +77,20 @@ struct productDetailView: View {
                     .padding(.horizontal)
                     .padding(.top)
 
-                    // MARK: - Imagen del producto
-                    // Usa RemoteOrLocalImage + finalImageURL para soportar tanto
-                    // imágenes locales del catálogo como imágenes subidas a Firebase Storage.
-                    RemoteOrLocalImage(source: product.finalImageURL, contentMode: .fit)
-                        .frame(height: 300)
-                        .frame(maxWidth: .infinity)
-                        .background(Color(.systemGray5))
-                        .cornerRadius(12)
-                        .padding(.horizontal)
+                    // MARK: - Galeria del producto
+                    TabView {
+                        ForEach(Array(galleryImages.enumerated()), id: \.offset) { index, imageSource in
+                            RemoteOrLocalImage(source: imageSource, contentMode: .fit)
+                                .scaleEffect(galleryScales[index])
+                                .rotationEffect(.degrees(galleryRotations[index]))
+                                .frame(maxWidth: .infinity)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(12)
+                                .padding(.horizontal)
+                        }
+                    }
+                    .frame(height: 300)
+                    .tabViewStyle(.page(indexDisplayMode: .automatic))
 
                     // MARK: - Información del producto
                     VStack(alignment: .leading, spacing: 12) {
@@ -102,7 +121,11 @@ struct productDetailView: View {
                                 .foregroundColor(product.stockColor == "red" ? .red : (product.stockColor == "orange" ? .orange : .green))
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color(product.stockColor).opacity(0.1))
+                                .background(
+                                    (product.stockColor == "red" ? Color.red :
+                                        product.stockColor == "orange" ? Color.orange : Color.green)
+                                        .opacity(0.1)
+                                )
                                 .cornerRadius(6)
                             Spacer()
                         }
@@ -145,7 +168,6 @@ struct productDetailView: View {
                         Text(product.displayDescription)
                             .font(.body)
                             .foregroundColor(.secondary)
-                            .lineLimit(5)
                     }
                     .padding(.horizontal)
 

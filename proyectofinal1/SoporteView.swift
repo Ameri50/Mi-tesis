@@ -35,10 +35,22 @@ struct ErrorBanner: View {
 // MARK: - Burbuja de Mensaje
 struct MessageBubble: View {
     @EnvironmentObject var themeManager: ThemeManager
+    @EnvironmentObject var localizationManager: LocalizationManager
+    @EnvironmentObject var cartManager: CartManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
+    @ObservedObject private var store = ProductStore.shared
     let message: SupportBotMessage
 
     private var isUser: Bool { message.role == "user" }
+
+    private var mentionedProducts: [Product] {
+        guard !isUser else { return [] }
+        return store.products
+            .filter { message.text.localizedCaseInsensitiveContains($0.name) }
+            .sorted { $0.name.count > $1.name.count }
+            .prefix(3)
+            .map { $0 }
+    }
 
     var body: some View {
         HStack(alignment: .bottom) {
@@ -48,6 +60,24 @@ struct MessageBubble: View {
                 Text(message.text)
                     .font(.system(size: fontSize - 2, weight: .regular))
                     .foregroundColor(isUser ? .white : (themeManager.isDarkMode ? .white : .primary))
+
+                if !mentionedProducts.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(mentionedProducts) { product in
+                            NavigationLink {
+                                ProductDetailView(product: product)
+                                    .environmentObject(themeManager)
+                                    .environmentObject(localizationManager)
+                                    .environmentObject(cartManager)
+                            } label: {
+                                Label("Ver y comprar \(product.name)", systemImage: "bag.fill")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                    .padding(.top, 4)
+                }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
@@ -140,6 +170,7 @@ struct SupportCategoryCard: View {
 struct SoporteView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
+    @EnvironmentObject var cartManager: CartManager
     @AppStorage("appFontSize") private var fontSize: Double = 16
     @StateObject private var gemini = GeminiManager.shared
     @StateObject private var speechRecognizer = SpeechRecognizer()

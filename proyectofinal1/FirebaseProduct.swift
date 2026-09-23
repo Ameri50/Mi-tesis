@@ -83,7 +83,6 @@ class FirebaseProductSync: NSObject, ObservableObject {
             "name": product.name,
             "price": product.price,
             "category": product.category,
-            "imageName": product.imageName,
             "description": product.description
         ]
         

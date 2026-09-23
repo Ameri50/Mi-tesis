@@ -12,6 +12,7 @@ struct ProductDetailView: View {
     @State private var quantity: Int = 1
     @State private var isFavorite: Bool = false
     @State private var showChat: Bool = false
+    @State private var selectedGalleryIndex = 0
 
     let product: Product
     var onAddToCart: ((Int, ColorOption?, StorageOption?) -> Void)?
@@ -25,6 +26,25 @@ struct ProductDetailView: View {
     private var recommendedAccessories: [Product] {
         store.products.accessories(for: product)
     }
+
+    private var galleryImages: [String] {
+        let sources = ([product.finalImageURL] + product.additionalImages)
+            .filter { !$0.isEmpty }
+            .reduce(into: [String]()) { uniqueSources, source in
+                if !uniqueSources.contains(source) {
+                    uniqueSources.append(source)
+                }
+            }
+
+        guard !sources.isEmpty else {
+            return Array(repeating: "", count: 5)
+        }
+
+        return (0..<5).map { sources[$0 % sources.count] }
+    }
+
+    private let galleryRotations: [Double] = [0, -2, 2, -1, 1]
+    private let galleryScales: [CGFloat] = [1, 0.94, 0.97, 0.92, 0.96]
 
     var body: some View {
         NavigationStack {
@@ -63,15 +83,45 @@ struct ProductDetailView: View {
                     .padding(.horizontal)
                     .padding(.top)
 
-                    // MARK: - Imagen del producto
-                    // Usa RemoteOrLocalImage + finalImageURL para soportar tanto
-                    // imágenes locales del catálogo como imágenes subidas a Firebase Storage.
-                    RemoteOrLocalImage(source: product.finalImageURL, contentMode: .fit)
-                        .frame(height: 300)
-                        .frame(maxWidth: .infinity)
-                        .background(Color(.systemGray5))
-                        .cornerRadius(12)
+                    // MARK: - Galeria del producto
+                    TabView(selection: $selectedGalleryIndex) {
+                        ForEach(Array(galleryImages.enumerated()), id: \.offset) { index, imageSource in
+                            RemoteOrLocalImage(source: imageSource, contentMode: .fit)
+                                .scaleEffect(galleryScales[index])
+                                .rotationEffect(.degrees(galleryRotations[index]))
+                                .frame(maxWidth: .infinity)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(12)
+                                .padding(.horizontal)
+                                .tag(index)
+                        }
+                    }
+                    .frame(height: 300)
+                    .tabViewStyle(.page(indexDisplayMode: .never))
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(Array(galleryImages.enumerated()), id: \.offset) { index, imageSource in
+                                Button {
+                                    selectedGalleryIndex = index
+                                } label: {
+                                    RemoteOrLocalImage(source: imageSource, contentMode: .fit)
+                                        .frame(width: 64, height: 64)
+                                        .background(Color(.systemGray6))
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(
+                                                    selectedGalleryIndex == index ? Color.blue : Color.clear,
+                                                    lineWidth: 2
+                                                )
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
                         .padding(.horizontal)
+                    }
 
                     // MARK: - Información del producto
                     VStack(alignment: .leading, spacing: 12) {
@@ -102,7 +152,11 @@ struct ProductDetailView: View {
                                 .foregroundColor(product.stockColor == "red" ? .red : (product.stockColor == "orange" ? .orange : .green))
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
-                                .background(Color(product.stockColor).opacity(0.1))
+                                .background(
+                                    (product.stockColor == "red" ? Color.red :
+                                        product.stockColor == "orange" ? Color.orange : Color.green)
+                                        .opacity(0.1)
+                                )
                                 .cornerRadius(6)
                             Spacer()
                         }
@@ -175,6 +229,9 @@ struct ProductDetailView: View {
                                     }
                                     .onTapGesture {
                                         selectedColor = color
+                                        if let colorIndex = product.colorOptions.firstIndex(of: color) {
+                                            selectedGalleryIndex = min(colorIndex, galleryImages.count - 1)
+                                        }
                                     }
                                 }
                                 Spacer()

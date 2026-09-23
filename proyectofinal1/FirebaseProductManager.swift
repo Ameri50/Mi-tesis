@@ -22,8 +22,6 @@ class FirebaseProductManager {
                 "name": product.name,
                 "price": product.price,
                 "category": product.category,
-                "imageName": product.imageName,
-                "additionalImages": product.additionalImages,
                 "productDescription": product.productDescription,
                 "colorOptions": product.colorOptions.map { ["name": $0.name, "hexColor": $0.hexColor] },
                 "storageOptions": product.storageOptions.map { ["capacity": $0.capacity, "priceMultiplier": $0.priceMultiplier] },

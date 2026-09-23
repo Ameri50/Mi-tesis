@@ -81,6 +81,21 @@ class GeminiManager: ObservableObject {
     - Hardware optimizado para Apple Intelligence y Siri AI mediante el Neural Engine de última generación.
     """
 
+    private let educationCatalog = """
+    MacBook Neo|A18 Pro|13 pulgadas Liquid Retina|hasta 16 horas|desde $599 educativo
+    MacBook Air M5|desde $1,199 educativo
+    MacBook Pro M5|desde $1,899 educativo
+    iPad Air M4|desde $699 educativo
+    iPad Pro|desde $1,099 educativo
+    Apple Watch Series 12|desde $359 educativo
+    Mac mini|desde $799 educativo
+    Mac Studio|desde $2,299 educativo
+    Apple Watch Ultra 4|desde $719 educativo
+    iPad|desde $429 educativo
+    iPad mini|desde $549 educativo
+    iMac|desde $1,449 educativo
+    """
+
     // Catálogo VIVO de TODOS los productos de la app (se lee del ProductStore en cada consulta)
     private var productCatalog: String {
         let products = ProductStore.shared.products
@@ -129,6 +144,7 @@ class GeminiManager: ObservableObject {
         - Haces preguntas naturales si necesitas aclaraciones
         - Reconoces intenciones de compra ("quiero", "necesito", "me gustaría")
         - Sugieres categorías o productos de forma orgánica
+        - Cuando el usuario quiera comprar o pida una recomendación, menciona el nombre exacto del producto del catálogo para que la app pueda dirigirlo a su ficha de compra.
 
         REGLA DE ORO - RESPUESTAS REALES Y COMPLETAS:
         - Responde SIEMPRE con los datos concretos de los catálogos de abajo (modelos, pantallas, chips, cámaras, colores y precios).
@@ -146,6 +162,10 @@ class GeminiManager: ObservableObject {
 
         ESPECIFICACIONES COMUNES DE LA LÍNEA iPHONE:
         \(iphoneCommonSpecs)
+
+        CATÁLOGO DE PRECIOS EDUCATIVOS DE APPLE (us-edu):
+        \(educationCatalog)
+        Estos precios son orientativos y pueden requerir verificación de estudiante o educador.
 
         CATÁLOGO COMPLETO DE PRODUCTOS DE LA APP, AGRUPADOS POR CATEGORÍA
         (cada línea es: nombre|precio USD|stock. "agotado" significa sin existencias):

@@ -30,11 +30,13 @@ private enum C {
     static let titanio          = ColorOption(name: "Titanio",              hexColor: "#8E8E93")
     // Colores vivos iPhone / Watch / iPad
     static let rosa             = ColorOption(name: "Rosa",                 hexColor: "#F2A7BB")
+    static let rosaRubor        = ColorOption(name: "Rosa Rubor",           hexColor: "#E7B8B6")
     static let rosaClaro        = ColorOption(name: "Rosa Claro",           hexColor: "#F4C2C2")
     static let oroRosa          = ColorOption(name: "Oro Rosa",             hexColor: "#E8B4B8")
     static let rojo             = ColorOption(name: "Rojo",                 hexColor: "#FF3B30")
     static let productoRED      = ColorOption(name: "Product RED",          hexColor: "#BF0000")
     static let azul             = ColorOption(name: "Azul",                 hexColor: "#3478F6")
+    static let azulNeblina      = ColorOption(name: "Azul Neblina",          hexColor: "#AFC8D8")
     static let azulCielo        = ColorOption(name: "Azul Cielo",           hexColor: "#7EC8E3")
     static let azulMedianoche   = ColorOption(name: "Azul Medianoche",      hexColor: "#2C3E6B")
     static let teal             = ColorOption(name: "Teal",                 hexColor: "#3E7A7E")
@@ -44,8 +46,18 @@ private enum C {
     static let cian             = ColorOption(name: "Cian",                 hexColor: "#5AC8FA")
     static let amarillo         = ColorOption(name: "Amarillo",             hexColor: "#FFD60A")
     static let naranja          = ColorOption(name: "Naranja",              hexColor: "#FF9F0A")
+    static let amarilloCitrico  = ColorOption(name: "Amarillo Citrico",      hexColor: "#E7D447")
     static let morado           = ColorOption(name: "Morado",               hexColor: "#BF5AF2")
     static let moradoOscuro     = ColorOption(name: "Morado Oscuro",        hexColor: "#7B3FA0")
+    static let lavanda          = ColorOption(name: "Lavanda",              hexColor: "#C5B8E8")
+    static let salvia           = ColorOption(name: "Salvia",               hexColor: "#A9BBA7")
+    static let oroClaro         = ColorOption(name: "Oro Claro",            hexColor: "#E7C98C")
+    static let blancoNube       = ColorOption(name: "Blanco Nube",           hexColor: "#F7F7F2")
+    static let grisTitanio      = ColorOption(name: "Gris Titanio",          hexColor: "#777B82")
+    static let rojoOscuro       = ColorOption(name: "Rojo Oscuro",           hexColor: "#6F2027")
+    static let titanioOscuro    = ColorOption(name: "Titanio Oscuro",        hexColor: "#303238")
+    static let plataEstelar     = ColorOption(name: "Plata Estelar",         hexColor: "#E6E8EA")
+    static let indigo           = ColorOption(name: "Indigo",                hexColor: "#343B78")
     static let oro              = ColorOption(name: "Oro",                  hexColor: "#D4AF37")
     static let grafito          = ColorOption(name: "Grafito",              hexColor: "#5A5A5E")
     // iMac exclusivos
@@ -109,6 +121,43 @@ private func product(
     )
 }
 
+private enum AppleImage {
+    static let iPhone17 = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/iphone-17-finish-select-lavender-202509_AV2?wid=724&hei=540&fmt=jpeg&qlt=90"
+    static let iPhoneAir = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/iphone-air-finish-select-skyblue-202509_AV2?wid=724&hei=540&fmt=jpeg&qlt=90"
+    static let iPhone18Pro = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/iphone-18-pro-finish-select-burgundy-202609_AV2?wid=724&hei=540&fmt=jpeg&qlt=90"
+    static let iPhoneDuo = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/iphone-duo-finish-select-star-white-202609_AV2?wid=1448&hei=1080&fmt=jpeg&qlt=90"
+    static let macBookNeo = "https://www.apple.com/v/macbook-neo/b/images/overview/welcome/hero_static__c07b68h6ap2e_medium.jpg"
+    static let earPodsUSBC = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MTJY3?wid=890&hei=890&fmt=jpeg&qlt=95"
+    static let earPodsLightning = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MMTN2?wid=890&hei=890&fmt=jpeg&qlt=95"
+    static let earPods35mm = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MD827?wid=890&hei=890&fmt=jpeg&qlt=95"
+}
+
+private enum IShopImage {
+    static let iPhone15 = [
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-10935051_c217d008-b374-4d0d-adbf-16768c816296.jpg?v=1722624560&width=493",
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-10935052_b1988a0d-97ec-4666-a3aa-b348356ebc4f.jpg?v=1722624560&width=493",
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-10935053_6c57861b-205a-49c0-8819-e865a979a7b6.jpg?v=1722624560&width=493",
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-10935054_ac193d80-e79c-4428-bc8d-d81915be1054.jpg?v=1722624560&width=493",
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-10935055_a97da853-e331-443f-b573-c604c20461a4.jpg?v=1740443761&width=493"
+    ]
+
+    static let iPhone18Pro = [
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-21467896_m_jpeg_1_aa65ec0a-c473-459d-8590-773718ccbf02.jpg?v=1788982821&width=493",
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-21467897_m_jpeg_1_61c6f38a-a0f8-4952-bddb-4a3bac950ebb.jpg?v=1788982821&width=493",
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-21467898_m_jpeg_1_d2017d6b-7914-489e-9a29-dc4911bba780.jpg?v=1788982821&width=493",
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-21467899_m_jpeg_1_d5cf4dd2-bab2-4000-825e-3222626629b4.jpg?v=1788982821&width=493",
+        "https://pe.tiendasishop.com/cdn/shop/files/IMG-21467900_m_jpeg_1_ffd57755-8c41-4a8b-9ddf-e59bbfee9325.jpg?v=1788982821&width=493"
+    ]
+}
+
+private enum AppleAccessoryImage {
+    static let crossbodyStrap = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MK974?wid=1144&hei=1144&fmt=jpeg&qlt=90"
+    static let iPhone18ProMaxCase = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MKDV4?wid=1144&hei=1144&fmt=jpeg&qlt=90"
+    static let fineWovenWallet = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MK9H4?wid=1144&hei=1144&fmt=jpeg&qlt=90"
+    static let airTagKeyRing = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MKG14?wid=1144&hei=1144&fmt=jpeg&qlt=90"
+    static let iPhoneDuoCase = "https://store.storeimages.cdn-apple.com/1/as-images.apple.com/is/MKR94?wid=1144&hei=1144&fmt=jpeg&qlt=90"
+}
+
 // MARK: - ProductData
 enum ProductData {
 
@@ -133,6 +182,38 @@ enum ProductData {
     private static let iPhones: [SeedProduct] = [
 
         // ── 2026 ──────────────────────────────────────────────────────────────
+        // iPhone 18 — aluminio · 128/256/512GB
+        product(name: "iPhone 18", price: 3499,
+            category: "iPhone", imageName: "iphone1",
+            additionalImages: ["iphone2","iphone3","iphone1","iphone2"],
+            description: "Pantalla OLED de 6.3\" con Dynamic Island, chip A20, cámara Fusion de 48 MP, USB-C y conectividad Wi-Fi 7. Diseñado para Apple Intelligence.",
+            colors: [C.negro, C.blanco, C.azulCielo, C.rosa, C.verde],
+            storages: [S.g128, S.g256, S.g512]),
+
+        // iPhone 18 Pro Max — titanio · 256/512GB/1TB
+        product(name: "iPhone 18 Pro Max", price: 1299,
+            category: "iPhone", imageName: AppleImage.iPhone18Pro,
+            additionalImages: [AppleImage.iPhone18Pro, AppleImage.iPhone18Pro],
+            description: "Pantalla OLED de 6.9\" ProMotion 120 Hz, procesador A20 Pro, sistema de triple cámara de 48 MP con apertura variable y zoom periscópico avanzado. USB-C 3.2, Wi-Fi 7, Bluetooth 6.0 y hardware optimizado para Apple Intelligence y Siri AI mediante el Neural Engine.",
+            colors: [C.grisTitanio, C.plata, C.rojoOscuro],
+            storages: [S.g256, S.g512, S.t1]),
+
+        // iPhone 18 Pro — titanio · 256/512GB/1TB
+        product(name: "iPhone 18 Pro", price: 1199,
+            category: "iPhone", imageName: IShopImage.iPhone18Pro[0],
+            additionalImages: Array(IShopImage.iPhone18Pro.dropFirst()),
+            description: "Pantalla OLED de 6.3\" ProMotion 120 Hz, procesador A20 Pro, triple cámara de 48 MP con apertura variable de f/1.48 a f/4.0 y teleobjetivo. USB-C 3.2, Wi-Fi 7, Bluetooth 6.0 y hardware optimizado para Apple Intelligence y Siri AI mediante el Neural Engine.",
+            colors: [C.grisTitanio, C.plata, C.rojoOscuro],
+            storages: [S.g256, S.g512, S.t1]),
+
+        // iPhone Duo — plegable · 256/512GB/1TB
+        product(name: "iPhone Duo", price: 1999,
+            category: "iPhone", imageName: AppleImage.iPhoneDuo,
+            additionalImages: [AppleImage.iPhoneDuo, AppleImage.iPhoneDuo],
+            description: "Pantalla plegable interna de 7.6\" y externa de 5.4\", procesador A20 Pro, cámaras integradas de 48 MP con soporte para Apple Pencil. USB-C 3.2, Wi-Fi 7, Bluetooth 6.0 y hardware optimizado para Apple Intelligence y Siri AI mediante el Neural Engine.",
+            colors: [C.titanioOscuro, C.plataEstelar],
+            storages: [S.g256, S.g512, S.t1, S.t2]),
+
         // iPhone 17e — Negro, Blanco, Rosa · 128/256GB
         product(name: "iPhone 17e", price: 2199,
             category: "iPhone", imageName: "iphone2",
@@ -159,19 +240,19 @@ enum ProductData {
 
         // iPhone Air — aluminio ultraligero, NO titanio · 256/512GB
         // Precio corregido: 3899 → 4199 (debe superar al 16 Plus, su predecesor conceptual)
-        product(name: "iPhone Air", price: 4199,
-            category: "iPhone", imageName: "iphone3",
-            additionalImages: ["iphone1","iphone2","iphone3","iphone1"],
-            description: "El iPhone más delgado de la historia (5.6 mm). Pantalla OLED de 6.6\", chip A19, cámara 48 MP Fusion. Chasis de aluminio aeroespacial ultraligero.",
-            colors: [C.azulCielo, C.blanco, C.negro, C.rosa],
-            storages: [S.g256, S.g512]),
+        product(name: "iPhone 17 Air", price: 1099,
+            category: "iPhone", imageName: AppleImage.iPhoneAir,
+            additionalImages: [AppleImage.iPhoneAir, AppleImage.iPhoneAir],
+            description: "Pantalla Ultra-Slim OLED de 6.5\" ProMotion 120 Hz, procesador A19 Pro, cámara principal Fusion de 48 MP en un diseño ultradelgado. USB-C, Wi-Fi 7, Bluetooth 6.0 y hardware optimizado para Apple Intelligence y Siri AI mediante el Neural Engine.",
+            colors: [C.azulCielo, C.oroClaro, C.blancoNube, C.negroEspacial],
+            storages: [S.g256, S.g512, S.t1]),
 
         // iPhone 17 — 5 colores aluminio · 128/256/512GB
-        product(name: "iPhone 17", price: 3199,
-            category: "iPhone", imageName: "iphone1",
-            additionalImages: ["iphone2","iphone3","iphone1","iphone2"],
-            description: "Pantalla OLED de 6.3\" ProMotion 120 Hz con Always-On Display, chip A19, cámara dual 48 MP. El mejor valor de la gama actual.",
-            colors: [C.negro, C.blanco, C.ultramarino, C.rosa, C.verde],
+        product(name: "iPhone 17", price: 899,
+            category: "iPhone", imageName: AppleImage.iPhone17,
+            additionalImages: [AppleImage.iPhone17, AppleImage.iPhone17],
+            description: "Pantalla OLED de 6.3\" ProMotion 120 Hz, procesador A19, sistema Dual Fusion de 48 MP (principal y gran angular). USB-C, Wi-Fi 7, Bluetooth 6.0 y hardware optimizado para Apple Intelligence y Siri AI mediante el Neural Engine.",
+            colors: [C.lavanda, C.azulNeblina, C.salvia, C.blanco, C.negro],
             storages: [S.g128, S.g256, S.g512]),
 
         // ── 2024 ──────────────────────────────────────────────────────────────
@@ -244,8 +325,8 @@ enum ProductData {
 
         // iPhone 15 — aluminio · 128/256/512GB
         product(name: "iPhone 15", price: 2600,
-            category: "iPhone", imageName: "iphone1",
-            additionalImages: ["iphone2","iphone3","iphone1","iphone3"],
+            category: "iPhone", imageName: IShopImage.iPhone15[0],
+            additionalImages: Array(IShopImage.iPhone15.dropFirst()),
             description: "Pantalla Super Retina XDR OLED de 6.1\", Dynamic Island, cámara 48 MP y USB-C. Chip A16 Bionic.",
             colors: [C.negro, C.amarillo, C.verde, C.azul, C.rosa],
             storages: [S.g128, S.g256, S.g512]),
@@ -510,6 +591,14 @@ enum ProductData {
     // generación posterior cueste más que la anterior dentro de su mismo formato.
     // =========================================================================
     private static let macs: [SeedProduct] = [
+
+        // MacBook Neo 13" (2026) — A18 Pro · 256/512GB
+        product(name: "MacBook Neo 13\"", price: 599,
+            category: "Mac", imageName: AppleImage.macBookNeo,
+            additionalImages: [AppleImage.macBookNeo, AppleImage.macBookNeo],
+            description: "Precio educativo desde $599. MacBook Neo de 13\" con chip Apple A18 Pro, CPU de 6 nucleos, GPU de 5 nucleos, 8 GB de memoria unificada y SSD de 256 GB. Pantalla Liquid Retina compatible con 1,000 millones de colores, 3.6 millones de pixeles y 500 nits. Camara FaceTime HD 1080p, dos microfonos, bocinas laterales con Audio Espacial y Dolby Atmos, hasta 16 horas de bateria, Apple Intelligence y macOS 27. Incluye USB 3 USB-C, USB 2 USB-C y entrada de 3.5 mm.",
+            colors: [C.plata, C.rosaRubor, C.amarilloCitrico, C.indigo],
+            storages: [S.g256, S.g512]),
 
         // MacBook Pro M5 (2025)
         product(name: "MacBook Pro 16\" M5", price: 18755,
@@ -834,6 +923,30 @@ enum ProductData {
     // =========================================================================
     private static let airpods: [SeedProduct] = [
 
+        // EarPods USB-C — precio oficial Apple $19
+        product(name: "EarPods USB-C", price: 19,
+            category: "AirPods", imageName: AppleImage.earPodsUSBC,
+            additionalImages: [AppleImage.earPodsUSBC],
+            description: "Audifonos EarPods con conector USB-C, controles integrados y microfono para llamadas. Precio de referencia Apple: $19.",
+            colors: [C.blanco],
+            storages: []),
+
+        // EarPods Lightning — precio oficial Apple $19
+        product(name: "EarPods Lightning", price: 19,
+            category: "AirPods", imageName: AppleImage.earPodsLightning,
+            additionalImages: [AppleImage.earPodsLightning],
+            description: "Audifonos EarPods con conector Lightning, controles integrados y microfono para llamadas. Precio de referencia Apple: $19.",
+            colors: [C.blanco],
+            storages: []),
+
+        // EarPods 3.5 mm — precio oficial Apple $19
+        product(name: "EarPods 3.5 mm", price: 19,
+            category: "AirPods", imageName: AppleImage.earPods35mm,
+            additionalImages: [AppleImage.earPods35mm],
+            description: "Audifonos EarPods con conector de 3.5 mm, controles integrados y microfono para llamadas. Precio de referencia Apple: $19.",
+            colors: [C.blanco],
+            storages: []),
+
         // ⚠️ AirPods Pro 3 — especulativo
         product(name: "AirPods Pro 3", price: 1335,
             category: "AirPods", imageName: "airpodspro",
@@ -1001,6 +1114,41 @@ enum ProductData {
     // MARK: - Accesorios
     // =========================================================================
     private static let accesorios: [SeedProduct] = [
+
+        product(name: "Crossbody Strap - Burgundy", price: 59,
+            category: "Accesorios", imageName: AppleAccessoryImage.crossbodyStrap,
+            additionalImages: [AppleAccessoryImage.crossbodyStrap],
+            description: "Correa ajustable para llevar el iPhone con las manos libres. Compatible con fundas Apple seleccionadas para iPhone.",
+            colors: [C.rojoOscuro],
+            storages: []),
+
+        product(name: "Funda transparente iPhone 18 Pro Max MagSafe", price: 49,
+            category: "Accesorios", imageName: AppleAccessoryImage.iPhone18ProMaxCase,
+            additionalImages: [AppleAccessoryImage.iPhone18ProMaxCase],
+            description: "Funda transparente Apple para iPhone 18 Pro Max con MagSafe, proteccion contra rayones y compatibilidad con Camera Control.",
+            colors: [C.blanco],
+            storages: []),
+
+        product(name: "Billetera FineWoven para iPhone MagSafe", price: 59,
+            category: "Accesorios", imageName: AppleAccessoryImage.fineWovenWallet,
+            additionalImages: [AppleAccessoryImage.fineWovenWallet],
+            description: "Billetera FineWoven con MagSafe para hasta tres tarjetas, compatibilidad con Buscar y tejido de material reciclado.",
+            colors: [C.rojoOscuro],
+            storages: []),
+
+        product(name: "Llavero FineWoven para AirTag", price: 35,
+            category: "Accesorios", imageName: AppleAccessoryImage.airTagKeyRing,
+            additionalImages: [AppleAccessoryImage.airTagKeyRing],
+            description: "Llavero FineWoven para AirTag con anillo de acero inoxidable y ajuste seguro para el rastreador.",
+            colors: [C.azulNeblina],
+            storages: []),
+
+        product(name: "Funda para iPhone Duo - Sand", price: 79,
+            category: "Accesorios", imageName: AppleAccessoryImage.iPhoneDuoCase,
+            additionalImages: [AppleAccessoryImage.iPhoneDuoCase],
+            description: "Funda Apple de dos piezas para iPhone Duo, delgada y ligera, con imanes integrados y carga MagSafe.",
+            colors: [C.luzEstelar],
+            storages: []),
 
         // Magic Keyboard — Plata y Gris Espacial (no Oro Rosa en este modelo)
         product(name: "Magic Keyboard con Touch ID USB-C", price: 1067,

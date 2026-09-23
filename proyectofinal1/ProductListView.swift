@@ -16,10 +16,12 @@ struct ProductListView: View {
 
     var filteredProducts: [SeedProduct] {
         if searchText.isEmpty {
-            return store.products.filter { $0.category == category }
+            return store.products.filter {
+                $0.category.localizedCaseInsensitiveCompare(category) == .orderedSame
+            }
         } else {
             return store.products.filter {
-                $0.category == category &&
+                $0.category.localizedCaseInsensitiveCompare(category) == .orderedSame &&
                 $0.name.localizedCaseInsensitiveContains(searchText)
             }
         }
@@ -64,7 +66,7 @@ struct ProductRowView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            RemoteOrLocalImage(source: product.imageName, contentMode: .fit)
+            RemoteOrLocalImage(source: product.finalImageURL, contentMode: .fit)
                 .frame(width: 80, height: 80)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .background(
