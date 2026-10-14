@@ -259,6 +259,7 @@ final class LocalizationManager: ObservableObject {
 
             "login.termsAndConditions": "Aceptar terminos y condiciones",
             "login.signIn": "Iniciar Sesion",
+            "login.welcome": "Bienvenido",
             "login.continueAsGuest": "Continuar como Invitado",
             "login.termsPlaceholder": "Lorem ipsum dolor sit amet...",
             "login.close": "Cerrar",
@@ -687,6 +688,7 @@ final class LocalizationManager: ObservableObject {
 
             "login.termsAndConditions": "Accept terms and conditions",
             "login.signIn": "Sign In",
+            "login.welcome": "Welcome",
             "login.continueAsGuest": "Continue as Guest",
             "login.termsPlaceholder": "Lorem ipsum dolor sit amet...",
             "login.close": "Close",
