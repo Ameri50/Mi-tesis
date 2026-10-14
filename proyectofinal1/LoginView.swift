@@ -248,34 +248,6 @@ struct LoginView: View {
                     }
                     .frame(height: 52)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-
-                    // Divider
-                    HStack {
-                        Rectangle()
-                            .frame(height: 0.5)
-                            .foregroundColor(.secondary.opacity(0.4))
-                        Text("o")
-                            .font(.system(size: fontSize - 3))
-                            .foregroundColor(.secondary)
-                        Rectangle()
-                            .frame(height: 0.5)
-                            .foregroundColor(.secondary.opacity(0.4))
-                    }
-
-                    // Botón Invitado
-                    Button(action: guestLoginAction) {
-                        HStack(spacing: 10) {
-                            Image(systemName: "person.crop.circle.dashed")
-                                .font(.system(size: fontSize + 2))
-                            Text(localizationManager.translate("login.continueAsGuest"))
-                                .font(.system(size: fontSize, weight: .semibold))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color(.secondarySystemGroupedBackground))
-                        .foregroundColor(themeManager.isDarkMode ? .white : .black)
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
                 }
                 .padding(.horizontal, 24)
                 .opacity(appear ? 1 : 0)
@@ -436,10 +408,6 @@ struct LoginView: View {
 
     private func loginAction() {
         userManager.login(email: email, name: name)
-    }
-
-    private func guestLoginAction() {
-        userManager.login(email: "guest@email.com", name: localizationManager.translate("login.guest"))
     }
 }
 
