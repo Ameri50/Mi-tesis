@@ -13,9 +13,7 @@ struct LoginView: View {
     @State private var pinConfirm = ""
     @State private var enableBiometric = true
     @State private var showError = false
-    @State private var showTerms = false
     @State private var showPinPad = false
-    @State private var termsAccepted = false
     @State private var errorMessage = ""
     @State private var appear = false
     @State private var canUseBiometrics = false
@@ -177,22 +175,6 @@ struct LoginView: View {
                         }
                     }
 
-                    // Términos
-                    HStack {
-                        Button(action: { showTerms = true }) {
-                            Text(localizationManager.translate("login.termsAndConditions"))
-                                .underline()
-                                .font(.system(size: fontSize - 3))
-                                .foregroundColor(.blue)
-                        }
-                        Spacer()
-                        Image(systemName: termsAccepted ? "checkmark.circle.fill" : "circle")
-                            .font(.system(size: 22))
-                            .foregroundColor(termsAccepted ? .green : .secondary)
-                            .onTapGesture { termsAccepted.toggle() }
-                    }
-                    .padding(.horizontal, 4)
-
                     // Error
                     if showError {
                         Text(errorMessage)
@@ -302,48 +284,6 @@ struct LoginView: View {
                 Spacer().frame(height: 40)
             }
 
-            // MARK: - Terms Sheet
-            if showTerms {
-                Color.black.opacity(0.5)
-                    .ignoresSafeArea()
-                    .onTapGesture { showTerms = false }
-
-                VStack(spacing: 16) {
-                    RoundedRectangle(cornerRadius: 3)
-                        .frame(width: 40, height: 4)
-                        .foregroundColor(.secondary.opacity(0.4))
-
-                    Text(localizationManager.translate("login.termsAndConditions"))
-                        .font(.system(size: fontSize + 2, weight: .bold))
-                        .foregroundColor(themeManager.isDarkMode ? .white : .black)
-
-                    ScrollView {
-                        Text(localizationManager.translate("login.termsPlaceholder"))
-                            .font(.system(size: fontSize - 2))
-                            .foregroundColor(themeManager.isDarkMode ? .white : .black)
-                            .padding()
-                    }
-
-                    Button(localizationManager.translate("login.close")) {
-                        showTerms = false
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .font(.system(size: fontSize, weight: .bold))
-                }
-                .padding(24)
-                .background(Color(UIColor { _ in
-                    themeManager.isDarkMode ? UIColor(white: 0.15, alpha: 1) : .white
-                }))
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .padding(.horizontal, 16)
-                .shadow(color: .black.opacity(0.25), radius: 24, x: 0, y: 12)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
-
             // MARK: - PIN Pad
             if showPinPad {
                 Color.black.opacity(0.55)
@@ -417,7 +357,7 @@ struct LoginView: View {
 
     /// Validacion del formulario segun el modo activo.
     private var isFormValid: Bool {
-        guard termsAccepted, !email.isEmpty, !name.isEmpty else { return false }
+        guard !email.isEmpty, !name.isEmpty else { return false }
         if authMode == .createAccount {
             guard isValidEmail else { return false }
             let pinTouched = !pin.isEmpty || !pinConfirm.isEmpty
