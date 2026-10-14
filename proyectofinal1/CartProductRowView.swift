@@ -8,7 +8,7 @@ struct CartProductRowView: View {
     var body: some View {
         HStack(spacing: 16) {
             // Imagen del producto
-            RemoteOrLocalImage(source: cartItem.product.imageName, contentMode: .fill)
+            RemoteOrLocalImage(source: cartItem.product.finalImageURL, contentMode: .fill)
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
             

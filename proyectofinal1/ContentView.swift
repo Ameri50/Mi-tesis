@@ -6,11 +6,19 @@ struct ContentView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var localizationManager: LocalizationManager
     @EnvironmentObject var fontSizeManager: AppFontSizeManager
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var tabSelection = 0
     @State private var showCart = false
     @State private var showSettings = false
     @State private var showWelcome = false
+    @State private var isAppLocked = false
+
+    /// El bloqueo solo aplica con sesion activa y un metodo de desbloqueo guardado.
+    private var appLockAvailable: Bool {
+        userManager.isAuthenticated &&
+        (userManager.canUnlockWithBiometrics || userManager.canUnlockWithPin)
+    }
 
     var body: some View {
         ZStack {
@@ -134,6 +142,45 @@ struct ContentView: View {
         }
         .environment(\.locale, Locale(identifier: localizationManager.currentLanguage))
         .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
+        .overlay {
+            // MARK: - Bloqueo de app: al abrir y al volver de segundo plano
+            if isAppLocked && appLockAvailable {
+                AppLockScreen(isLocked: $isAppLocked)
+                    .environmentObject(userManager)
+                    .environmentObject(themeManager)
+                    .environmentObject(localizationManager)
+                    .zIndex(999)
+                    .transition(.opacity)
+            }
+        }
+        .onAppear {
+            if appLockAvailable {
+                isAppLocked = true
+            }
+        }
+        .onChange(of: userManager.isAuthenticated) { _, newValue in
+            // Firebase restaura la sesion de forma asincrona: onAppear ya corrio
+            // con isAuthenticated == false. Este cambio false→true es el momento
+            // real para bloquear al abrir la app. Si el usuario acaba de entrar
+            // con login manual, el flag se consume y no se bloquea.
+            guard newValue else { return }
+            let viaLogin = userManager.didAuthenticateViaLogin
+            userManager.didAuthenticateViaLogin = false
+            if !viaLogin && appLockAvailable {
+                isAppLocked = true
+            }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .background && appLockAvailable {
+                isAppLocked = true
+            }
+        }
+        .sheet(item: $userManager.pendingQuickAccess) { pending in
+            QuickAccessSetupView(pending: pending)
+                .environmentObject(userManager)
+                .environmentObject(themeManager)
+                .environmentObject(localizationManager)
+        }
     }
 }
 

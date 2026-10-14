@@ -163,7 +163,8 @@ class ProductStore: ObservableObject {
     nonisolated private static func materializeProduct(from draft: ProductDraft, fallback: Product?) -> Product {
         let base = fallback
         let category = normalizedCategory(draft.category ?? base?.category ?? "Otros")
-        let imageSource = base?.finalImageURL
+        let imageSource = draft.imageSource
+            ?? base?.finalImageURL
             ?? base?.imageName
             ?? fallbackImageSource(name: draft.name, category: category)
 
@@ -192,7 +193,7 @@ class ProductStore: ObservableObject {
                 storageOptions: mergedStorageOptions
             )
 
-        let mergedAdditionalImages = base?.additionalImages ?? []
+        let mergedAdditionalImages = draft.additionalImages ?? base?.additionalImages ?? []
 
         let rating = draft.rating
             ?? base?.rating

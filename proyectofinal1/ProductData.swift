@@ -789,7 +789,7 @@ enum ProductData {
         // Precio corregido: 2139 → 2350 (debe superar a Series 10)
         product(name: "Apple Watch Series 11", price: 2350,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "[Especulativo 2025] Sucesor del Series 10. Detección de apnea del sueño mejorada, sensores de salud avanzados y chip S11.",
             colors: [C.medianoche, C.luzEstelar, C.rosa, C.plata],
             storages: []),
@@ -797,7 +797,7 @@ enum ProductData {
         // Precio corregido: 4283 → 4600 (debe superar a Ultra 2)
         product(name: "Apple Watch Ultra 3", price: 4600,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "[Especulativo 2025] Sucesor del Ultra 2. Titanio, resistencia extrema certificada, batería de 3+ días y nuevos sensores de salud.",
             colors: [C.titNatural],
             storages: []),
@@ -805,7 +805,7 @@ enum ProductData {
         // Precio corregido: 1335 → 1450 (debe superar a SE 2)
         product(name: "Apple Watch SE 3", price: 1450,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "[Especulativo 2025] Sucesor del SE 2. Fitness esencial con GPS, Crash Detection y chip S9 actualizado.",
             colors: [C.medianoche, C.luzEstelar, C.plata],
             storages: []),
@@ -814,7 +814,7 @@ enum ProductData {
         // Precio sin cambio: 2139, ya queda > Series 9 corregido (1950) y < Series 11 corregido
         product(name: "Apple Watch Series 10", price: 2139,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "La pantalla más grande y delgada del Apple Watch. Detección de apnea del sueño. Carga ultrarrápida. Chip S10.",
             colors: [C.plata, C.negro, C.oroRosa],
             storages: []),
@@ -823,7 +823,7 @@ enum ProductData {
         // Precio sin cambio: 4283, ya queda < Ultra 3 corregido
         product(name: "Apple Watch Ultra 2", price: 4283,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "Caja de titanio aeroespacial. Hasta 60 h de batería. Resistencia extrema MIL-STD-810H. Display Always-On 2000 nits. Chip S9.",
             colors: [C.titNatural],
             storages: []),
@@ -831,8 +831,8 @@ enum ProductData {
         // Series 9 (sep 2023)
         // Precio corregido: 2139 → 1950 (debe superar a Series 8 corregido y quedar < Series 10)
         product(name: "Apple Watch Series 9", price: 1950,
-            category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            category: "Apple Watch", imageName: "reloj",
+            additionalImages: ["applewatch"],
             description: "Doble Toque para controlar con una mano. Chip S9, pantalla hasta 2000 nits. Temperatura corporal y ECG.",
             colors: [C.medianoche, C.luzEstelar, C.rosa, C.rojo, C.plata],
             storages: []),
@@ -840,8 +840,8 @@ enum ProductData {
         // SE 2 (sep 2022)
         // Precio sin cambio: 1335, ya queda > SE1 corregido y < SE3 corregido
         product(name: "Apple Watch SE 2", price: 1335,
-            category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            category: "Apple Watch", imageName: "reloj",
+            additionalImages: ["applewatch"],
             description: "Fitness esencial con GPS, Crash Detection y detección de caídas. Chip S8. La opción más económica del Watch actual.",
             colors: [C.medianoche, C.luzEstelar, C.plata],
             storages: []),
@@ -850,7 +850,7 @@ enum ProductData {
         // Precio corregido: 2139 → 1800 (debe superar a Series 7 corregido y quedar < Series 9)
         product(name: "Apple Watch Series 8", price: 1800,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "Sensor de temperatura corporal y Crash Detection. ECG y oxígeno en sangre. Chip S8.",
             colors: [C.medianoche, C.luzEstelar, C.rojo, C.plata],
             storages: []),
@@ -858,8 +858,8 @@ enum ProductData {
         // Series 7 (oct 2021)
         // Precio corregido: 1871 → 1650 (debe superar a Series 6 corregido y quedar < Series 8)
         product(name: "Apple Watch Series 7", price: 1650,
-            category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            category: "Apple Watch", imageName: "reloj",
+            additionalImages: ["applewatch"],
             description: "Pantalla más grande con bordes curvos. ECG, oxígeno en sangre y carga rápida. Chip S7.",
             colors: [C.medianoche, C.luzEstelar, C.verde, C.azul, C.rojo],
             storages: []),
@@ -868,7 +868,7 @@ enum ProductData {
         // Precio corregido: 1335 → 1200 (no podía igualar a SE2, su sucesor)
         product(name: "Apple Watch SE 1", price: 1200,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "El Apple Watch SE original. GPS y detección de caídas. Chip S5. Buena opción de entrada económica.",
             colors: [C.grisEspacial, C.plata, C.oro],
             storages: []),
@@ -876,16 +876,16 @@ enum ProductData {
         // Series 6 (sep 2020)
         // Precio corregido: 1871 → 1500 (no podía igualar a Series 7, su sucesor)
         product(name: "Apple Watch Series 6", price: 1500,
-            category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            category: "Apple Watch", imageName: "reloj",
+            additionalImages: ["applewatch"],
             description: "Primer Apple Watch con sensor de oxígeno en sangre (SpO2). Always-On Display de segunda generación. Chip S6.",
             colors: [C.azul, C.rojo, C.negro, C.plata, C.oro],
             storages: []),
 
         // Ediciones especiales
         product(name: "Apple Watch Hermès Series 9", price: 4819,
-            category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            category: "Apple Watch", imageName: "reloj",
+            additionalImages: ["applewatch"],
             description: "Edición de lujo en colaboración con Hermès. Caja de acero inoxidable con correas de cuero artesanal francés exclusivas.",
             colors: [C.plata],
             storages: []),
@@ -893,7 +893,7 @@ enum ProductData {
         // Precio corregido: 2139 → 2040 (debe quedar entre Series 9 y Series 10)
         product(name: "Apple Watch Nike Series 9", price: 2040,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "Edición deportiva Nike con correa Nike Sport Band y watchfaces exclusivos Nike. Chip S9.",
             colors: [C.negro, C.plata],
             storages: []),
@@ -901,14 +901,14 @@ enum ProductData {
         // Precio corregido: 2139 → 1875 (debe quedar entre Series 8 y Series 9)
         product(name: "Apple Watch Nike Series 8", price: 1875,
             category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            additionalImages: ["reloj"],
             description: "Edición deportiva Nike con correa exclusiva y watchfaces Nike. Crash Detection. Chip S8.",
             colors: [C.negro, C.plata],
             storages: []),
 
         product(name: "Apple Watch Hermès Series 8", price: 4283,
-            category: "Apple Watch", imageName: "applewatch",
-            additionalImages: ["applewatch","applewatch","applewatch","applewatch"],
+            category: "Apple Watch", imageName: "reloj",
+            additionalImages: ["applewatch"],
             description: "Edición Hermès con Series 8. Acero inoxidable y correas de cuero artesanal francés.",
             colors: [C.plata],
             storages: []),
@@ -1061,49 +1061,49 @@ enum ProductData {
 
         // HomePod 2ª Gen — Blanco y Medianoche
         product(name: "HomePod 2ª Gen", price: 1603,
-            category: "TV y Casa", imageName: "sf:tv.fill",
+            category: "TV y Casa", imageName: "hifispeaker",
             additionalImages: [],
             description: "Altavoz inteligente de alta fidelidad con sonido envolvente Dolby Atmos. Chip S7. Sensor de temperatura y humedad. Hub de HomeKit.",
             colors: [ColorOption(name: "Blanco", hexColor: "#F5F5F0"), ColorOption(name: "Medianoche", hexColor: "#222930")],
             storages: []),
 
         product(name: "HomePod mini Blanco", price: 531,
-            category: "TV y Casa", imageName: "sf:tv.fill",
+            category: "TV y Casa", imageName: "hifispeaker",
             additionalImages: [],
             description: "Altavoz inteligente compacto con chip S5. Intercom, automatizaciones del hogar y audio 360°. Hub de HomeKit.",
             colors: [ColorOption(name: "Blanco", hexColor: "#F5F5F0")],
             storages: []),
 
         product(name: "HomePod mini Medianoche", price: 531,
-            category: "TV y Casa", imageName: "sf:tv.fill",
+            category: "TV y Casa", imageName: "hifispeaker",
             additionalImages: [],
             description: "HomePod mini en color Medianoche. Centro del hogar inteligente con chip S5 y audio de 360°.",
             colors: [ColorOption(name: "Medianoche", hexColor: "#222930")],
             storages: []),
 
         product(name: "HomePod mini Naranja", price: 531,
-            category: "TV y Casa", imageName: "sf:tv.fill",
+            category: "TV y Casa", imageName: "hifispeaker",
             additionalImages: [],
             description: "HomePod mini en color Naranja. Diseño colorido para el hogar inteligente con chip S5.",
             colors: [ColorOption(name: "Naranja", hexColor: "#FF9F0A")],
             storages: []),
 
         product(name: "HomePod mini Amarillo", price: 531,
-            category: "TV y Casa", imageName: "sf:tv.fill",
+            category: "TV y Casa", imageName: "hifispeaker",
             additionalImages: [],
             description: "HomePod mini en color Amarillo. Centro del hogar inteligente con chip S5.",
             colors: [ColorOption(name: "Amarillo", hexColor: "#FFD60A")],
             storages: []),
 
         product(name: "HomePod mini Azul", price: 531,
-            category: "TV y Casa", imageName: "sf:tv.fill",
+            category: "TV y Casa", imageName: "hifispeaker",
             additionalImages: [],
             description: "HomePod mini en color Azul. Centro del hogar inteligente con chip S5.",
             colors: [ColorOption(name: "Azul", hexColor: "#5AC8FA")],
             storages: []),
 
         product(name: "HomePod mini Rojo", price: 531,
-            category: "TV y Casa", imageName: "sf:tv.fill",
+            category: "TV y Casa", imageName: "hifispeaker",
             additionalImages: [],
             description: "HomePod mini edición Product RED. Una parte de la venta apoya al Fondo Global contra el SIDA.",
             colors: [ColorOption(name: "Rojo", hexColor: "#BF0000")],
@@ -1184,15 +1184,15 @@ enum ProductData {
         // Apple Pencil Pro (mayo 2024) — solo iPad Pro M4, Air M2, mini 7
         product(name: "Apple Pencil Pro", price: 691,
             category: "Accesorios", imageName: "applepencil",
-            additionalImages: ["applepencil","applepencil","applepencil","applepencil"],
+            additionalImages: ["applepencil 1"],
             description: "El Apple Pencil más avanzado. Squeeze, rotación y Find My. Compatible con iPad Pro M4 (11\"/13\"), iPad Air M2 (11\"/13\") e iPad mini 7.",
             colors: [C.blanco],
             storages: []),
 
         // Apple Pencil 2ª Gen — iPad Pro 2018-2022, Air 4ª/5ª Gen, mini 6
         product(name: "Apple Pencil 2ª Gen", price: 691,
-            category: "Accesorios", imageName: "applepencil",
-            additionalImages: ["applepencil","applepencil","applepencil","applepencil"],
+            category: "Accesorios", imageName: "applepencil 1",
+            additionalImages: ["applepencil"],
             description: "Carga y emparejamiento magnético. Doble toque para cambiar herramientas. Compatible con iPad Pro (2018-2022), Air 4ª y 5ª Gen, mini 6.",
             colors: [C.blanco],
             storages: []),
@@ -1200,15 +1200,15 @@ enum ProductData {
         // Apple Pencil USB-C — iPad 10ª gen, mini 6, Air M2, Pro M4
         product(name: "Apple Pencil USB-C", price: 423,
             category: "Accesorios", imageName: "applepencil",
-            additionalImages: ["applepencil","applepencil","applepencil","applepencil"],
+            additionalImages: ["applepencil 1"],
             description: "Carga deslizando la tapa USB-C. La opción más económica. Compatible con iPad 10ª gen, mini 6, Air M2 e iPad Pro M4.",
             colors: [C.blanco],
             storages: []),
 
         // Apple Pencil 1ª Gen — iPad 9ª gen y anteriores, mini 5ª gen, Air 3ª gen
         product(name: "Apple Pencil 1ª Gen", price: 531,
-            category: "Accesorios", imageName: "applepencil",
-            additionalImages: ["applepencil","applepencil","applepencil","applepencil"],
+            category: "Accesorios", imageName: "applepencil 1",
+            additionalImages: ["applepencil"],
             description: "Apple Pencil original con conector Lightning. Compatible con iPad 9ª gen y anteriores, mini 5ª gen y Air 3ª gen.",
             colors: [C.blanco],
             storages: []),
@@ -1245,14 +1245,14 @@ enum ProductData {
         // AirTag
         product(name: "AirTag", price: 155,
             category: "Accesorios", imageName: "airtag",
-            additionalImages: ["airtag","airtag","airtag","airtag"],
+            additionalImages: ["AirTag 4 Pack"],
             description: "Localizador Bluetooth con Precisión espacial Ultra Wideband. Batería CR2032 reemplazable. Resistente al agua IPX7.",
             colors: [ColorOption(name: "Blanco/Acero", hexColor: "#F0F0F0")],
             storages: []),
 
         product(name: "AirTag 4 Pack", price: 531,
-            category: "Accesorios", imageName: "airtag",
-            additionalImages: ["airtag","airtag","airtag","airtag"],
+            category: "Accesorios", imageName: "AirTag 4 Pack",
+            additionalImages: ["airtag"],
             description: "Pack de 4 localizadores AirTag. Protege llaves, billetera, mochila y maleta a la vez.",
             colors: [ColorOption(name: "Blanco/Acero", hexColor: "#F0F0F0")],
             storages: []),

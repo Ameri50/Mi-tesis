@@ -1,8 +1,11 @@
 import SwiftUI
 import Combine
+import FirebaseCore
 import FirebaseFirestore
 import FirebaseStorage
 import FirebaseAuth
+import GoogleSignIn
+import LocalAuthentication
 import UIKit
 import CryptoKit
 
@@ -11,6 +14,14 @@ class UserManager: ObservableObject {
     @Published var currentUser: AppUser?
     @Published var isLoading: Bool = false
     @Published var authError: String? = nil
+    /// Tras un login con Google: pide crear PIN / activar Face ID para el
+    /// desbloqueo rapido de la app. La vista raiz presenta el sheet con este dato.
+    @Published var pendingQuickAccess: PendingQuickAccess? = nil
+    /// Se activa tras un login iniciado por el usuario (correo, PIN, biometria,
+    /// crear cuenta o Google). ContentView lo consume para NO bloquear la app
+    /// justo despues de entrar; si la sesion se restaura sola al abrir la app,
+    /// el flag queda en false y la pantalla de bloqueo aparece.
+    @Published var didAuthenticateViaLogin = false
 
     // Emails que tienen acceso admin — edita esta lista
     private let adminEmails: Set<String> = [
@@ -62,7 +73,7 @@ class UserManager: ObservableObject {
     }
 
     // MARK: - Login
-    func login(email: String, name: String) {
+    func login(email: String, name: String, password: String? = nil) {
         guard !email.isEmpty, !name.isEmpty else { return }
 
         // Usuario invitado — sin Firebase Auth
@@ -97,9 +108,10 @@ class UserManager: ObservableObject {
             self?.authError = nil
         }
 
-        let password = generatePassword(for: email)
+        didAuthenticateViaLogin = true
+        let resolvedPassword = password ?? generatePassword(for: email)
 
-        Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
+        Auth.auth().signIn(withEmail: email, password: resolvedPassword) { [weak self] result, error in
             guard let self = self else { return }
 
             if let user = result?.user {
@@ -107,6 +119,7 @@ class UserManager: ObservableObject {
                 print("✅ Login exitoso: \(user.email ?? "") | UID: \(user.uid)")
                 self.updateDisplayName(user: user, name: name)
                 self.saveLocalSession(email: email, name: name)
+                BiometricAuthManager.saveCredentials(.init(email: email, name: name, password: resolvedPassword))
                 self.syncUserSessionToWeb(
                     uid: user.uid,
                     email: email,
@@ -118,7 +131,7 @@ class UserManager: ObservableObject {
 
             } else {
                 // Usuario no existe → crear cuenta nueva
-                Auth.auth().createUser(withEmail: email, password: password) { result, error in
+                Auth.auth().createUser(withEmail: email, password: resolvedPassword) { result, error in
                     DispatchQueue.main.async { self.isLoading = false }
 
                     if let error = error {
@@ -136,6 +149,7 @@ class UserManager: ObservableObject {
                         print("🎉 Cuenta creada: \(user.email ?? "") | UID: \(user.uid)")
                         self.updateDisplayName(user: user, name: name)
                         self.saveLocalSession(email: email, name: name)
+                        BiometricAuthManager.saveCredentials(.init(email: email, name: name, password: resolvedPassword))
                         self.syncUserSessionToWeb(
                             uid: user.uid,
                             email: email,
@@ -149,8 +163,229 @@ class UserManager: ObservableObject {
         }
     }
 
+    // MARK: - Face ID / Touch ID
+    /// Login rapido desde la pantalla de login: solo cuentas de correo, porque
+    /// requiere re-autenticar en Firebase con contraseña.
+    var canLoginWithBiometrics: Bool {
+        guard BiometricAuthManager.isAvailable,
+              let creds = BiometricAuthManager.loadCredentials() else { return false }
+        return creds.provider == "password"
+    }
+
+    /// Desbloqueo de la app con sesion ya activa: valido para cualquier provider,
+    /// incluidas cuentas Google (la sesion de Firebase persiste; el chequeo es local).
+    var canUnlockWithBiometrics: Bool {
+        BiometricAuthManager.isAvailable && BiometricAuthManager.loadCredentials() != nil
+    }
+
+    var biometricDisplayName: String? {
+        BiometricAuthManager.biometricType.displayName
+    }
+
+    /// Autentica con Face ID/Touch ID y, si tiene exito, inicia sesion con las
+    /// credenciales guardadas en Keychain. `completion` recibe un mensaje de error
+    /// legible en MainActor, o nil si todo salio bien / el usuario cancelo.
+    func loginWithBiometrics(reason: String, completion: @escaping @MainActor (String?) -> Void) {
+        guard let credentials = BiometricAuthManager.loadCredentials() else {
+            Task { @MainActor in completion("login.biometricNoCredentials") }
+            return
+        }
+
+        BiometricAuthManager.authenticate(reason: reason) { result in
+            switch result {
+            case .success:
+                print("🔓 Biometria exitosa, iniciando sesion para \(credentials.email)")
+                self.login(email: credentials.email, name: credentials.name, password: credentials.password)
+                Task { @MainActor in completion(nil) }
+            case .failure(let error):
+                Task { @MainActor in
+                    if let laError = error as? LAError,
+                       laError.code == .userCancel || laError.code == .systemCancel || laError.code == .userFallback {
+                        completion(nil) // Cancelado: no mostrar error
+                    } else {
+                        completion("login.biometricFailed")
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - Crear cuenta
+    /// Crea una cuenta nueva. Si el correo ya esta registrado devuelve la clave
+    /// "login.accountExists" para que la vista muestre el mensaje correspondiente.
+    /// - pin: PIN de 4 digitos opcional para entrar rapido (se guarda en Keychain).
+    /// - enableBiometric: si es true, guarda credenciales para Face ID / Touch ID.
+    func createAccount(email: String, name: String,
+                       pin: String? = nil,
+                       enableBiometric: Bool = true,
+                       completion: @escaping @MainActor (String?) -> Void) {
+        guard !email.isEmpty, !name.isEmpty else {
+            Task { @MainActor in completion("login.fillAllFields") }
+            return
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.isLoading = true
+            self?.authError = nil
+        }
+
+        didAuthenticateViaLogin = true
+        let password = generatePassword(for: email)
+
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
+            guard let self = self else { return }
+            DispatchQueue.main.async { self.isLoading = false }
+
+            if let error = error as NSError? {
+                print("❌ Error creando cuenta: \(error.code) — \(error.localizedDescription)")
+                let key = (error.domain == AuthErrorDomain &&
+                           error.code == AuthErrorCode.emailAlreadyInUse.rawValue)
+                    ? "login.accountExists"
+                    : "login.createAccountFailed"
+                Task { @MainActor in completion(key) }
+                return
+            }
+
+            guard let user = result?.user else {
+                Task { @MainActor in completion("login.createAccountFailed") }
+                return
+            }
+
+            print("🎉 Cuenta creada: \(user.email ?? "") | UID: \(user.uid)")
+            self.updateDisplayName(user: user, name: name)
+            self.saveLocalSession(email: email, name: name)
+            if let pin = pin, !pin.isEmpty {
+                BiometricAuthManager.savePin(pin, email: email, name: name)
+            }
+            if enableBiometric {
+                BiometricAuthManager.saveCredentials(.init(email: email, name: name, password: password))
+            }
+            Task { @MainActor in completion(nil) }
+        }
+    }
+
+    // MARK: - PIN de desbloqueo
+    /// PIN para entrar desde la pantalla de login: solo cuentas de correo
+    /// (re-autentica en Firebase con la contraseña generada).
+    var canLoginWithPin: Bool {
+        BiometricAuthManager.loadPin()?.provider == "password"
+    }
+
+    /// PIN para desbloquear la app con sesion activa: valido tambien para Google.
+    var canUnlockWithPin: Bool {
+        BiometricAuthManager.loadPin() != nil
+    }
+
+    /// Validacion sincrona: ¿el PIN coincide con el guardado?
+    func validatePin(_ pin: String) -> Bool {
+        BiometricAuthManager.loadPin()?.pin == pin
+    }
+
+    /// Entra con el PIN guardado tras verificarlo. La contraseña de Firebase se
+    /// regenera de forma determinista a partir del correo guardado con el PIN.
+    func loginWithPin(_ pin: String, completion: @escaping @MainActor (String?) -> Void) {
+        guard let entry = BiometricAuthManager.loadPin() else {
+            Task { @MainActor in completion("login.biometricNoCredentials") }
+            return
+        }
+        guard entry.pin == pin else {
+            Task { @MainActor in completion("login.pinWrong") }
+            return
+        }
+        login(email: entry.email, name: entry.name)
+        Task { @MainActor in completion(nil) }
+    }
+
+    // MARK: - Google Sign-In
+    /// Inicia sesion (o crea la cuenta si no existe) con la cuenta de Google.
+    /// No guarda credenciales biometricas: la contraseña de cuentas Google no es
+    /// conocida por la app, asi que Face ID queda solo para cuentas de correo.
+    func loginWithGoogle(presenting viewController: UIViewController,
+                         completion: @escaping @MainActor (String?) -> Void) {
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            Task { @MainActor in completion("login.googleNotConfigured") }
+            return
+        }
+
+        didAuthenticateViaLogin = true
+        DispatchQueue.main.async { [weak self] in
+            self?.isLoading = true
+            self?.authError = nil
+        }
+
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+
+        GIDSignIn.sharedInstance.signIn(withPresenting: viewController) { [weak self] result, error in
+            guard let self = self else { return }
+
+            if let error = error {
+                print("❌ Google Sign-In: \(error.localizedDescription)")
+                DispatchQueue.main.async { self.isLoading = false }
+                let canceled = (error as NSError).code == GIDSignInError.canceled.rawValue
+                Task { @MainActor in completion(canceled ? nil : "login.googleFailed") }
+                return
+            }
+
+            guard let user = result?.user, let idToken = user.idToken else {
+                DispatchQueue.main.async { self.isLoading = false }
+                Task { @MainActor in completion("login.googleFailed") }
+                return
+            }
+
+            let credential = GoogleAuthProvider.credential(
+                withIDToken: idToken.tokenString,
+                accessToken: user.accessToken.tokenString
+            )
+
+            Auth.auth().signIn(with: credential) { authResult, error in
+                DispatchQueue.main.async { self.isLoading = false }
+
+                guard error == nil, let firebaseUser = authResult?.user else {
+                    print("❌ Firebase Google auth: \(error?.localizedDescription ?? "sin usuario")")
+                    Task { @MainActor in completion("login.googleFailed") }
+                    return
+                }
+
+                let email = firebaseUser.email ?? user.profile?.email ?? ""
+                let name = firebaseUser.displayName ?? user.profile?.name ?? email
+                print("✅ Login con Google: \(email)")
+                self.saveLocalSession(email: email, name: name)
+
+                // Si la cuenta aun no tiene acceso rapido guardado, pedirlo.
+                // Pequena espera: la vista acaba de cambiar de login a la app y
+                // presentar el sheet en medio de ese cambio hace que SwiftUI lo ignore.
+                let hasPin = BiometricAuthManager.loadPin()?.email == email
+                let hasCreds = BiometricAuthManager.loadCredentials()?.email == email
+                if !hasPin && !hasCreds {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.pendingQuickAccess = PendingQuickAccess(email: email, name: name)
+                    }
+                }
+
+                Task { @MainActor in completion(nil) }
+            }
+        }
+    }
+
+    // MARK: - Acceso rapido (PIN / Face ID tras login con Google)
+    /// Guarda el PIN y/o las credenciales biometricas de una cuenta Google.
+    /// El desbloqueo es local: la sesion de Firebase persiste entre aperturas.
+    func saveQuickAccess(email: String, name: String, pin: String?, enableBiometric: Bool) {
+        if let pin = pin, !pin.isEmpty {
+            BiometricAuthManager.savePin(pin, email: email, name: name, provider: "google")
+        }
+        if enableBiometric {
+            BiometricAuthManager.saveCredentials(
+                .init(email: email, name: name, password: "", provider: "google")
+            )
+        }
+        pendingQuickAccess = nil
+    }
+
     // MARK: - Logout
     func logout() {
+        BiometricAuthManager.deleteCredentials()
+        BiometricAuthManager.deletePin()
         let uidToSync = storedFirebaseUID.isEmpty ? Auth.auth().currentUser?.uid : storedFirebaseUID
         if let uidToSync {
             syncUserLogoutToWeb(uid: uidToSync)
@@ -446,4 +681,14 @@ struct AppUser: Identifiable, Codable {
         return (UserDefaults.standard.string(forKey: "selectedLanguage") ?? "es") == "en" ? "Guest" : "Invitado"
     }
     var isValidEmail: Bool  { email.contains("@") && email.contains(".") }
+}
+
+// MARK: - PendingQuickAccess
+/// Datos de la cuenta Google que acaba de entrar y aun no tiene PIN ni
+/// credenciales biometricas guardadas. La vista raiz presenta el sheet de
+/// configuracion de acceso rapido mientras este valor sea no nil.
+struct PendingQuickAccess: Identifiable {
+    let id = UUID()
+    let email: String
+    let name: String
 }

@@ -27,6 +27,8 @@
 		CAA8B2542E92DCD7006D5D2B /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CAA8B2532E92DCD7006D5D2B /* FirebaseFirestore */; };
 		CAA8B2562E92DCD7006D5D2B /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = CAA8B2552E92DCD7006D5D2B /* FirebaseStorage */; };
 		F541486530070F58002D3065 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = F541486430070F58002D3065 /* FirebaseFunctions */; };
+		F5C51267307F33AD0080E2FD /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CBE1D0022FD00000000000A1 /* GoogleSignIn */; };
+		F5C51268307F33AD0080E2FD /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CBE1D0032FD00000000000A1 /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +96,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5C51268307F33AD0080E2FD /* GoogleSignInSwift in Frameworks */,
+				F5C51267307F33AD0080E2FD /* GoogleSignIn in Frameworks */,
 				F541486530070F58002D3065 /* FirebaseFunctions in Frameworks */,
 				CA99F2B12E5BD79200FEC859 /* SwiftOpenAI in Frameworks */,
 				CAA8B24E2E92DBF0006D5D2B /* FirebaseAnalyticsIdentitySupport in Frameworks */,
@@ -213,6 +217,8 @@
 				CA4D0FC72EC04DFA007F8EDA /* Storage */,
 				CA4D0FC92EC04DFA007F8EDA /* Supabase */,
 				F541486430070F58002D3065 /* FirebaseFunctions */,
+				CBE1D0022FD00000000000A1 /* GoogleSignIn */,
+				CBE1D0032FD00000000000A1 /* GoogleSignInSwift */,
 			);
 			productName = proyectofinal1;
 			productReference = CA54E7A42E567AF7000AF0FC /* proyectofinal1.app */;
@@ -303,6 +309,7 @@
 				CA99F2AF2E5BD3B200FEC859 /* XCRemoteSwiftPackageReference "SwiftOpenAI" */,
 				CAA8B2462E92DB0C006D5D2B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				CA4D0FBE2EC04DFA007F8EDA /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				CBE1D0012FD00000000000A1 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CA54E7A52E567AF7000AF0FC /* Products */;
@@ -561,7 +568,10 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = proyectofinal1/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TechSupport;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = ok;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SUPPORT necesita el micrófono para escuchar tus preguntas en el modo voz del asistente.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "La app necesita acceso a tus fotos para establecer tu foto de perfil";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "SUPPORT necesita el reconocimiento de voz para que puedas hablar con el asistente en modo voz.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -593,7 +603,10 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = proyectofinal1/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TechSupport;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = ok;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "SUPPORT necesita el micrófono para escuchar tus preguntas en el modo voz del asistente.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "La app necesita acceso a tus fotos para establecer tu foto de perfil";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "SUPPORT necesita el reconocimiento de voz para que puedas hablar con el asistente en modo voz.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -752,6 +765,14 @@
 				minimumVersion = 12.3.0;
 			};
 		};
+		CBE1D0012FD00000000000A1 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -839,6 +860,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CAA8B2462E92DB0C006D5D2B /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseStorage;
+		};
+		CBE1D0022FD00000000000A1 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBE1D0012FD00000000000A1 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		CBE1D0032FD00000000000A1 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CBE1D0012FD00000000000A1 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 		F541486430070F58002D3065 /* FirebaseFunctions */ = {
 			isa = XCSwiftPackageProductDependency;

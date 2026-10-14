@@ -28,19 +28,10 @@ struct ProductDetailView: View {
     }
 
     private var galleryImages: [String] {
-        let sources = ([product.finalImageURL] + product.additionalImages)
+        var seen = Set<String>()
+        return ([product.finalImageURL] + product.additionalImages)
             .filter { !$0.isEmpty }
-            .reduce(into: [String]()) { uniqueSources, source in
-                if !uniqueSources.contains(source) {
-                    uniqueSources.append(source)
-                }
-            }
-
-        guard !sources.isEmpty else {
-            return Array(repeating: "", count: 5)
-        }
-
-        return (0..<5).map { sources[$0 % sources.count] }
+            .filter { seen.insert($0).inserted }
     }
 
     private let galleryRotations: [Double] = [0, -2, 2, -1, 1]
@@ -87,8 +78,8 @@ struct ProductDetailView: View {
                     TabView(selection: $selectedGalleryIndex) {
                         ForEach(Array(galleryImages.enumerated()), id: \.offset) { index, imageSource in
                             RemoteOrLocalImage(source: imageSource, contentMode: .fit)
-                                .scaleEffect(galleryScales[index])
-                                .rotationEffect(.degrees(galleryRotations[index]))
+                                .scaleEffect(galleryScales[index % galleryScales.count])
+                                .rotationEffect(.degrees(galleryRotations[index % galleryRotations.count]))
                                 .frame(maxWidth: .infinity)
                                 .background(Color(.systemGray5))
                                 .cornerRadius(12)

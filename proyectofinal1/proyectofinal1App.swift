@@ -1,6 +1,7 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseAppCheck
+import GoogleSignIn
 
 // MARK: - FontSizeManager
 @MainActor
@@ -61,6 +62,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         print("✅ Firebase configurado correctamente")
         return true
     }
+
 }
 
 // MARK: - Main App
@@ -113,6 +115,9 @@ struct proyectofinal1App: App {
                         .environment(\.liquidGlassEnabled, themeManager.isLiquidGlassEnabled)
                         .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
                 }
+            }
+            .onOpenURL { url in
+                _ = GIDSignIn.sharedInstance.handle(url)
             }
         }
     }

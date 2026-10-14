@@ -204,7 +204,7 @@ struct HomeProductCardView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 14) {
             SafeImage(
-                imageName: product.imageName,
+                imageName: product.finalImageURL,
                 size: 75,
                 backgroundColor: .clear
             )

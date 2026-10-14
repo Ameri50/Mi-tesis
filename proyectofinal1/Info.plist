@@ -5,11 +5,17 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict/>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.553513944411-5m06iniu4ov65hao88ivdlpb8j9tth9u</string>
+			</array>
+		</dict>
 	</array>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>SUPPORT necesita el reconocimiento de voz para que puedas hablar con el asistente en modo voz.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>SUPPORT necesita el micrófono para escuchar tus preguntas en el modo voz del asistente.</string>
+	<key>INIntentsSupported</key>
+	<array>
+		<string>Intent</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>NSAppTransportSecurity</key>
